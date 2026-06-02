@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+pipeline.json
+radar_finds.json
+icp_summary.json
+scored_companies.json
+sequences.json
+hubspot_import.csv
+tiga_import.csv
+pipeline_export.csv
