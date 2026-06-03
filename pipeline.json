@@ -5666,5 +5666,20 @@
     "priority": "cold",
     "status": "researched",
     "source": "prospect_xlsx_reimport"
+  },
+  {
+    "company": "Agiliti, Inc.",
+    "what_they_do": "Essential service provider to U.S. healthcare industry offering solutions for efficient, safe, and sustainable healthcare delivery system support.",
+    "category": "Other",
+    "score": 72,
+    "tier": "B",
+    "fit_reason": "Direct healthcare/medical equipment focus aligns with 30 Medical/Life Sciences buyers; serves field service and capital equipment teams.",
+    "pitch_angle": "Reach 30+ medical/life sciences directors managing equipment service; demonstrate logistics efficiency to service leaders.",
+    "signal": "Currently sponsoring Field Service MD 2025; active in healthcare service space targeting same buyer segment.",
+    "source_url": "https://fieldservicemd.wbresearch.com/sponsors/2025",
+    "status": "researched",
+    "found_date": "2026-06-03",
+    "search_query": "company attending Field Service USA 2025 sponsor exhibitor",
+    "reviewed": true
   }
 ]
