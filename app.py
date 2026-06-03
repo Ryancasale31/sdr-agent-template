@@ -11,6 +11,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 import anthropic
 from tavily import TavilyClient
+import outlook_integration as outlook
 
 load_dotenv()
 
@@ -215,11 +216,23 @@ with st.sidebar:
         st.caption("📡 Radar: no new finds")
 
     st.divider()
+    # Outlook status
+    if outlook.is_configured():
+        if outlook.is_authenticated():
+            profile = outlook.get_profile()
+            name = profile.get("displayName", "") if profile else ""
+            st.success(f"📧 Outlook: {name or 'Connected'}")
+        else:
+            st.warning("📧 Outlook: needs auth")
+    else:
+        st.caption("📧 Outlook: awaiting Azure setup")
+
+    st.divider()
     st.caption("Status key")
     st.markdown("🔵 Researched · 🟡 Contact Found · ✅ Approved · 📤 Sent")
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["🔍 Research Company", "📋 My Pipeline", "✉️ Outreach Queue", "📡 Radar", "📥 Import"])
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🔍 Research Company", "📋 My Pipeline", "✉️ Outreach Queue", "📡 Radar", "📥 Import", "📬 Outlook"])
 
 
 # ════════════════════════════════════════════════════════════════════════════
@@ -716,3 +729,117 @@ The agent will figure out the rest.
                 st.success(f"✅ Imported {added} companies into your pipeline!")
                 if not score_them:
                     st.info("Go to 📋 Pipeline to research and score each company.")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# TAB 6 — OUTLOOK
+# ════════════════════════════════════════════════════════════════════════════
+with tab6:
+    st.header("📬 Outlook Integration")
+
+    if not outlook.is_configured():
+        st.info(
+            "**Waiting on Azure App Registration.**\n\n"
+            "Once Gabe provides the credentials, add them to your `.env` file on Streamlit Cloud "
+            "(Settings → Secrets) and this tab activates automatically.\n\n"
+            "```\nAZURE_CLIENT_ID=...\nAZURE_CLIENT_SECRET=...\nAZURE_TENANT_ID=...\n```"
+        )
+        st.divider()
+        st.subheader("What this will do once connected")
+        st.markdown(
+            "- **Reply detection** — flags when a prospect replies to your outreach\n"
+            "- **Sent log** — shows which touches have been sent per company\n"
+            "- **Send from here** — send approved sequences directly without going to Outlook\n"
+            "- **Hot leads** — surfaces replies at the top so nothing slips through"
+        )
+        st.stop()
+
+    if not outlook.is_authenticated():
+        st.warning("Outlook is configured but needs one-time authorization.")
+        auth_url = outlook.get_auth_url()
+        st.markdown(f"[**Click here to authorize Outlook access →**]({auth_url})")
+        st.caption("You'll be redirected back to the app. Paste the `code=` value from the URL below if it doesn't auto-complete.")
+        code = st.text_input("Authorization code (from redirect URL)")
+        if code and st.button("Complete Authorization", type="primary"):
+            try:
+                outlook.exchange_code_for_token(code)
+                st.success("✅ Connected!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Authorization failed: {e}")
+        st.stop()
+
+    profile = outlook.get_profile()
+    st.success(f"Connected as **{profile.get('displayName', '')}** ({profile.get('mail', '')})")
+    st.divider()
+
+    pipeline = load_pipeline()
+    prospect_emails = [c.get("contact_email", "") for c in pipeline if c.get("contact_email")]
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader(f"📥 Replies from Prospects")
+        with st.spinner("Checking inbox..."):
+            replies = outlook.get_recent_replies(prospect_emails)
+        if replies:
+            for msg in replies:
+                sender = msg["from"]["emailAddress"]["address"]
+                # Find matching company
+                match = next((c for c in pipeline if c.get("contact_email","").lower() == sender.lower()), None)
+                company_name = match["company"] if match else sender
+                st.markdown(f"**{company_name}** · {msg['receivedDateTime'][:10]}")
+                st.caption(f"Re: {msg['subject']}")
+                st.caption(msg["bodyPreview"][:150])
+                if match and st.button("Mark as Replied", key=f"reply_{msg['id'][:8]}"):
+                    match["status"] = "replied"
+                    pipeline = upsert_company(pipeline, match)
+                    save_pipeline(pipeline)
+                    st.success("Status updated!")
+                    st.rerun()
+                st.divider()
+        else:
+            st.info("No replies from prospects in recent inbox.")
+
+    with col2:
+        st.subheader("📤 Sent to Prospects")
+        with st.spinner("Checking sent items..."):
+            sent = outlook.get_sent_to_prospects(prospect_emails)
+        if sent:
+            for msg in sent:
+                to_addr = msg["toRecipients"][0]["emailAddress"]["address"] if msg.get("toRecipients") else ""
+                match = next((c for c in pipeline if c.get("contact_email","").lower() == to_addr.lower()), None)
+                company_name = match["company"] if match else to_addr
+                st.markdown(f"**{company_name}**")
+                st.caption(f"{msg['subject']} · {msg['sentDateTime'][:10]}")
+                st.divider()
+        else:
+            st.info("No sent emails to prospects found.")
+
+    st.divider()
+    st.subheader("✉️ Send an Email")
+    contacts_with_email = [c for c in pipeline if c.get("contact_email") and c.get("emails")]
+    if not contacts_with_email:
+        st.info("No contacts with both an email address and generated sequences yet.")
+    else:
+        options = {f"{c['company']} — {c.get('contact_name', c['contact_email'])}": c for c in contacts_with_email}
+        selected_label = st.selectbox("Select contact", list(options.keys()))
+        selected_company = options[selected_label]
+
+        touch_num = st.selectbox("Which touch", ["Touch 1 (Day 1)", "Touch 2 (Day 4)", "Touch 3 (Day 9)"])
+        touch_idx = int(touch_num[6]) - 1
+        email_data = selected_company["emails"][touch_idx]
+
+        subject = st.text_input("Subject", value=email_data["subject"])
+        body = st.text_area("Body", value=email_data["body"], height=220)
+
+        if st.button("📤 Send", type="primary"):
+            success = outlook.send_email(selected_company["contact_email"], subject, body)
+            if success:
+                selected_company["status"] = "sent"
+                pipeline = upsert_company(pipeline, selected_company)
+                save_pipeline(pipeline)
+                st.success(f"✅ Sent to {selected_company['contact_email']}")
+                st.rerun()
+            else:
+                st.error("Send failed — check your Outlook connection.")
