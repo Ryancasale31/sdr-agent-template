@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 import anthropic
 from tavily import TavilyClient
 import outlook_integration as outlook
+import storage
 
 load_dotenv()
 
@@ -29,10 +30,7 @@ PIPELINE_FILE = "pipeline.json"
 
 # ── Load ICP ──────────────────────────────────────────────────────────────────
 def load_icp():
-    if not Path(ICP_FILE).exists():
-        return None
-    with open(ICP_FILE) as f:
-        return json.load(f)
+    return storage.load_icp()
 
 # ── Pipeline helpers ──────────────────────────────────────────────────────────
 def load_json(path, default):
@@ -43,14 +41,10 @@ def load_json(path, default):
         return json.load(f)
 
 def load_pipeline():
-    if not Path(PIPELINE_FILE).exists():
-        return []
-    with open(PIPELINE_FILE) as f:
-        return json.load(f)
+    return storage.load_pipeline()
 
 def save_pipeline(pipeline):
-    with open(PIPELINE_FILE, "w") as f:
-        json.dump(pipeline, f, indent=2)
+    storage.save_pipeline(pipeline)
 
 def get_company(pipeline, name):
     return next((c for c in pipeline if c["company"].lower() == name.lower()), None)
@@ -214,6 +208,33 @@ with st.sidebar:
         st.error(f"📡 {len(unreviewed)} new radar finds waiting!")
     else:
         st.caption("📡 Radar: no new finds")
+
+    st.divider()
+    # Storage status
+    if storage.gsheets_configured():
+        st.success("💾 Saving to Google Sheets")
+    else:
+        st.warning("💾 Local storage only\n(data resets on reboot)")
+
+    # Rebuild ICP from an uploaded attendee CSV (persists to storage)
+    with st.expander("⚙️ Rebuild ICP"):
+        st.caption("Upload your attendee registration CSV to regenerate the buyer profile.")
+        icp_csv = st.file_uploader("Attendee CSV", type="csv", key="icp_csv")
+        if icp_csv and st.button("Rebuild ICP from CSV"):
+            import tempfile, os
+            from icp_profile import build_icp
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode="wb") as tmp:
+                tmp.write(icp_csv.read())
+                tmp_path = tmp.name
+            try:
+                new_icp = build_icp(tmp_path)
+                storage.save_icp(new_icp)
+                st.success(f"ICP rebuilt — {new_icp['buyer_count']} buyers.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Failed: {e}")
+            finally:
+                os.unlink(tmp_path)
 
     st.divider()
     # Outlook status
