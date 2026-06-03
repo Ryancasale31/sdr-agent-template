@@ -384,6 +384,179 @@ def render_activity_log(company: dict, key_prefix: str):
         save_pipeline(pipeline_local)
         st.rerun()
 
+# ── Account page helpers ──────────────────────────────────────────────────────
+def open_account(company_name: str):
+    """Navigate to a company's account detail page."""
+    st.session_state["view"] = "account"
+    st.session_state["selected_company"] = company_name
+    st.rerun()
+
+def get_contacts(company: dict) -> list:
+    """Return contacts list, migrating legacy single-contact fields in-memory."""
+    contacts = company.get("contacts")
+    if contacts is None:
+        contacts = []
+        if company.get("contact_name") or company.get("contact_email"):
+            contacts.append({
+                "name": company.get("contact_name", ""),
+                "title": company.get("contact_title", ""),
+                "email": company.get("contact_email", ""),
+                "phone": "",
+                "notes": "",
+                "activity_log": [],
+            })
+    return contacts
+
+CONTACT_ACT_ICONS = {
+    "email_sent": "📤", "reply_received": "💬", "call": "📞",
+    "meeting": "📅", "note": "📝", "task": "✅",
+}
+
+def log_contact_activity(contact: dict, atype: str, **kw):
+    contact.setdefault("activity_log", [])
+    contact["activity_log"].append({"type": atype, "date": date.today().isoformat(), "source": "manual", **kw})
+
+def render_account_page(company_name: str):
+    pipeline = load_pipeline()
+    company = get_company(pipeline, company_name)
+
+    if st.button("← Back to pipeline"):
+        st.session_state["view"] = None
+        st.session_state.pop("selected_company", None)
+        st.rerun()
+
+    if not company:
+        st.error(f"Account '{company_name}' not found.")
+        return
+
+    score = company.get("score", 0)
+    score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
+    st.title(f"{score_color} {company['company']}")
+
+    m = st.columns(4)
+    m[0].metric("Score", f"{score}/100")
+    m[1].metric("Tier", company.get("tier", "?"))
+    m[2].metric("Priority", PRIORITY_LABELS.get(company.get("priority", ""), "—"))
+    m[3].metric("Stage", STATUS_LABELS.get(company.get("status", ""), "—").split(" ", 1)[-1])
+
+    # Editable priority + stage
+    e1, e2, e3 = st.columns([2, 2, 1])
+    cur_pri = company.get("priority", "cold")
+    cur_pri = cur_pri if cur_pri in ("hot", "medium", "cold") else "cold"
+    new_pri = e1.selectbox("Priority", ["hot", "medium", "cold"], index=["hot", "medium", "cold"].index(cur_pri), key="acc_pri")
+    cur_status = company.get("status", "researched")
+    new_status = e2.selectbox("Sales stage", STATUSES, index=STATUSES.index(cur_status) if cur_status in STATUSES else 0, key="acc_stage")
+    e3.write("")
+    e3.write("")
+    if e3.button("💾 Save"):
+        old = company.get("status", "")
+        company["priority"] = new_pri
+        company["status"] = new_status
+        if old != new_status:
+            company = log_activity(company, "status_change", note=f"{old} → {new_status}")
+        pipeline = upsert_company(pipeline, company)
+        save_pipeline(pipeline)
+        st.success("Saved")
+        st.rerun()
+
+    if company.get("what_they_do"):
+        st.write(f"**What they do:** {company['what_they_do']}")
+    if company.get("pitch_angle") or company.get("outreach_note"):
+        st.info(f"**Pitch angle:** {company.get('pitch_angle', company.get('outreach_note', ''))}")
+    if company.get("vs_sponsor"):
+        st.warning(f"**Competitors already sponsoring:** {company['vs_sponsor']}")
+
+    # ── Contacts ──
+    st.divider()
+    st.subheader("👥 Contacts")
+    contacts = get_contacts(company)
+
+    if not contacts:
+        st.caption("No contacts yet. Add one below.")
+
+    for ci, contact in enumerate(contacts):
+        label = contact.get("name") or "(unnamed contact)"
+        if contact.get("title"):
+            label += f" — {contact['title']}"
+        with st.expander(label, expanded=len(contacts) == 1):
+            cc1, cc2 = st.columns(2)
+            name = cc1.text_input("Name", contact.get("name", ""), key=f"ct_name_{ci}")
+            title = cc2.text_input("Title", contact.get("title", ""), key=f"ct_title_{ci}")
+            email = cc1.text_input("Email", contact.get("email", ""), key=f"ct_email_{ci}")
+            phone = cc2.text_input("Phone", contact.get("phone", ""), key=f"ct_phone_{ci}")
+            notes = st.text_area("Notes about this contact", contact.get("notes", ""), key=f"ct_notes_{ci}", height=90)
+
+            b1, b2 = st.columns([1, 1])
+            if b1.button("💾 Save contact", key=f"ct_save_{ci}"):
+                contact.update({"name": name, "title": title, "email": email, "phone": phone, "notes": notes})
+                company["contacts"] = contacts
+                pipeline = upsert_company(pipeline, company)
+                save_pipeline(pipeline)
+                st.success("Contact saved")
+                st.rerun()
+            if b2.button("🗑️ Remove", key=f"ct_del_{ci}"):
+                contacts.pop(ci)
+                company["contacts"] = contacts
+                pipeline = upsert_company(pipeline, company)
+                save_pipeline(pipeline)
+                st.rerun()
+
+            # Per-contact history
+            st.markdown("**History**")
+            clog = sorted(contact.get("activity_log", []), key=lambda x: x.get("date", ""), reverse=True)
+            if clog:
+                for entry in clog:
+                    icon = CONTACT_ACT_ICONS.get(entry["type"], "•")
+                    detail = entry.get("note") or entry.get("subject") or entry.get("preview", "")
+                    src = " 🔗" if entry.get("source") == "outlook" else ""
+                    st.caption(f"{icon} {entry['type'].replace('_', ' ').title()}{src} · {entry.get('date', '')} {('— ' + detail) if detail else ''}")
+            else:
+                st.caption("No history yet.")
+
+            # Log activity for this contact (manual; Azure will auto-add later)
+            a = st.columns(4)
+            for col, (atype, lbl) in zip(a, [("email_sent", "📤 Email"), ("reply_received", "💬 Reply"), ("call", "📞 Call"), ("meeting", "📅 Meeting")]):
+                if col.button(lbl, key=f"ct_act_{ci}_{atype}"):
+                    log_contact_activity(contact, atype)
+                    company["contacts"] = contacts
+                    pipeline = upsert_company(pipeline, company)
+                    save_pipeline(pipeline)
+                    st.rerun()
+            tnote = st.text_input("Log a note/task for this contact", key=f"ct_actnote_{ci}", placeholder="e.g. Sent follow-up, scheduling call next week")
+            if st.button("➕ Add note", key=f"ct_addnote_{ci}") and tnote:
+                log_contact_activity(contact, "note", note=tnote)
+                company["contacts"] = contacts
+                pipeline = upsert_company(pipeline, company)
+                save_pipeline(pipeline)
+                st.rerun()
+
+    # Add a new contact
+    with st.expander("➕ Add a contact"):
+        n1, n2 = st.columns(2)
+        nn = n1.text_input("Name", key="newc_name")
+        nt = n2.text_input("Title", key="newc_title")
+        ne = n1.text_input("Email", key="newc_email")
+        nph = n2.text_input("Phone", key="newc_phone")
+        if st.button("Add contact", type="primary") and (nn or ne):
+            contacts.append({"name": nn, "title": nt, "email": ne, "phone": nph, "notes": "", "activity_log": []})
+            company["contacts"] = contacts
+            pipeline = upsert_company(pipeline, company)
+            save_pipeline(pipeline)
+            st.success("Contact added")
+            st.rerun()
+
+    # ── Account-level tasks & activity ──
+    st.divider()
+    st.subheader("📋 Account Activity & Tasks")
+    st.caption("Log touches and tasks manually now. Once Azure is connected, sent/received emails will auto-log here.")
+    render_activity_log(company, key_prefix="acc")
+
+
+# ── Routing: account detail view replaces the tabs when an account is open ──
+if st.session_state.get("view") == "account" and st.session_state.get("selected_company"):
+    render_account_page(st.session_state["selected_company"])
+    st.stop()
+
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "🔍 Research", "📋 Pipeline", "✉️ Outreach Queue",
@@ -515,6 +688,8 @@ with tab2:
                 header += f" {days_str}"
 
             with st.expander(header):
+                if st.button("👤 Open account page", key=f"open_acct_{idx}"):
+                    open_account(company["company"])
                 col1, col2 = st.columns(2)
                 with col1:
                     st.write(f"**What they do:** {company.get('what_they_do','—')}")
@@ -973,15 +1148,15 @@ with tab6:
             with col:
                 st.markdown(f"### {plabel} ({len(companies)})")
                 ranked = sorted(companies, key=lambda x: -x.get("score",0))
-                for c in ranked[:12]:
+                for ri, c in enumerate(ranked[:12]):
                     score = c.get("score",0)
                     score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
                     status_label = STATUS_LABELS.get(c.get("status",""), c.get("status",""))
                     days = days_since_last_activity(c)
                     days_str = f" · {days}d" if days is not None else ""
-                    st.markdown(f"{score_color} **{c['company']}**")
+                    if st.button(f"{score_color} {c['company']}", key=f"fn_pri_{pkey}_{ri}"):
+                        open_account(c["company"])
                     st.caption(f"{status_label}{days_str}")
-                    st.divider()
                 if len(ranked) > 12:
                     st.caption(f"+ {len(ranked) - 12} more")
 
@@ -996,10 +1171,10 @@ with tab6:
             with col:
                 st.markdown(f"**{STATUS_LABELS[s]}**")
                 st.caption(f"{len(companies)} companies")
-                for c in sorted(companies, key=lambda x: -x.get("score",0))[:8]:
-                    priority = c.get("priority","")
-                    badge = PRIORITY_LABELS.get(priority,"")
-                    st.markdown(f"**{c['company']}** {badge}")
+                for si, c in enumerate(sorted(companies, key=lambda x: -x.get("score",0))[:8]):
+                    badge = PRIORITY_LABELS.get(c.get("priority",""), "")
+                    if st.button(f"{c['company']} {badge}", key=f"fn_stg_{s}_{si}"):
+                        open_account(c["company"])
 
         st.divider()
 
