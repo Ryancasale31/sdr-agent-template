@@ -19,10 +19,69 @@ load_dotenv()
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="FSE SDR Agent",
-    page_icon="⚡",
+    page_icon="🌊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# ── WBR brand theme ───────────────────────────────────────────────────────────
+WBR_NAVY = "#0E2747"
+WBR_BLUE = "#1E5BA8"
+WBR_ORANGE = "#F39200"
+
+def inject_theme():
+    st.markdown(f"""
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+
+    html, body, [class*="css"] {{ font-family: 'Inter', sans-serif; }}
+
+    /* Sidebar: WBR navy gradient with light text */
+    section[data-testid="stSidebar"] > div {{
+        background: linear-gradient(180deg, {WBR_NAVY} 0%, #163B6E 60%, {WBR_BLUE} 130%);
+    }}
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] [data-testid="stMetricValue"],
+    section[data-testid="stSidebar"] [data-testid="stMetricLabel"] {{
+        color: #EAF1FB !important;
+    }}
+    /* keep dropdown/inputs readable (dark text on their own white box) */
+    section[data-testid="stSidebar"] [data-baseweb="select"] *,
+    section[data-testid="stSidebar"] input {{ color: #0E2747 !important; }}
+
+    /* WBR wordmark in the sidebar */
+    .wbr-logo {{ font-weight: 800; font-size: 2.1rem; letter-spacing: 1px; color: #fff; line-height: 1; }}
+    .wbr-logo .dot {{ color: {WBR_ORANGE}; }}
+    .wbr-sub {{ font-size: .68rem; letter-spacing: 2px; color: #9FB8DA; text-transform: uppercase; margin-top: 2px; }}
+
+    /* Hero banner on the main area */
+    .hero {{
+        border-radius: 14px; padding: 26px 30px; margin-bottom: 14px; color: #fff;
+        background: linear-gradient(110deg, {WBR_NAVY} 0%, {WBR_BLUE} 70%), url('app/static/hero.jpg');
+        background-size: cover; background-position: center; background-blend-mode: multiply;
+        box-shadow: 0 6px 20px rgba(14,39,71,.18);
+    }}
+    .hero h1 {{ margin: 0; font-size: 1.7rem; font-weight: 800; }}
+    .hero p {{ margin: 4px 0 0; color: #CFE0F5; font-size: .95rem; }}
+    .hero .pill {{ display:inline-block; background:{WBR_ORANGE}; color:#fff; font-weight:700;
+        font-size:.72rem; padding:3px 10px; border-radius:20px; margin-top:10px; }}
+
+    /* Primary buttons in WBR orange */
+    .stButton > button[kind="primary"] {{ background:{WBR_ORANGE}; border-color:{WBR_ORANGE}; }}
+    .stButton > button[kind="primary"]:hover {{ background:#d97f00; border-color:#d97f00; }}
+
+    /* Tabs accent */
+    .stTabs [data-baseweb="tab-highlight"] {{ background-color: {WBR_ORANGE}; }}
+    .stTabs [aria-selected="true"] {{ color: {WBR_NAVY} !important; font-weight: 700; }}
+    </style>
+    """, unsafe_allow_html=True)
+
+inject_theme()
 
 # ── Data files ────────────────────────────────────────────────────────────────
 ICP_FILE = "icp_summary.json"
@@ -186,8 +245,16 @@ icp = load_icp()
 pipeline = load_pipeline()
 
 with st.sidebar:
-    st.image("https://img.icons8.com/emoji/96/lightning-emoji.png", width=48)
-    st.title("FSE SDR Agent")
+    _logo = Path(__file__).parent / "assets" / "wbr_logo.png"
+    if _logo.exists():
+        st.image(str(_logo), use_container_width=True)
+    else:
+        st.markdown(
+            '<div class="wbr-logo">WBR<span class="dot">.</span></div>'
+            '<div class="wbr-sub">Worldwide Business Research</div>',
+            unsafe_allow_html=True,
+        )
+    st.markdown("### FSE SDR Agent")
     st.caption("Field Service East · Orlando · Aug 10-12")
     st.divider()
 
@@ -556,6 +623,16 @@ def render_account_page(company_name: str):
 if st.session_state.get("view") == "account" and st.session_state.get("selected_company"):
     render_account_page(st.session_state["selected_company"])
     st.stop()
+
+# ── Hero banner ───────────────────────────────────────────────────────────────
+st.markdown(
+    '<div class="hero">'
+    '<h1>Field Service East — Sponsorship Pipeline</h1>'
+    '<p>Research · score · sequence · track — for the field service leaders in the room.</p>'
+    '<span class="pill">Orlando · Aug 10–12, 2026</span>'
+    '</div>',
+    unsafe_allow_html=True,
+)
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
