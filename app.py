@@ -995,6 +995,20 @@ with tab4:
     else:
         st.subheader(f"Review New Finds ({len(unreviewed)})")
 
+        if st.button(f"➕ Add all {len(unreviewed)} to Pipeline", type="primary", key="radar_add_all"):
+            pipeline = load_pipeline()
+            for rc in radar_finds:
+                if not rc.get("reviewed"):
+                    rc["reviewed"] = True
+                    entry = {k: v for k, v in rc.items() if k not in ("reviewed", "dismissed")}
+                    entry["status"] = "researched"
+                    pipeline = upsert_company(pipeline, entry)
+            save_pipeline(pipeline)
+            with open(RADAR_FILE, "w") as f:
+                json.dump(radar_finds, f, indent=2)
+            st.success(f"✅ Added {len(unreviewed)} companies to your pipeline!")
+            st.rerun()
+
         for ridx, company in enumerate(unreviewed):
             score = company.get("score", 0)
             tier = company.get("tier", "?")
