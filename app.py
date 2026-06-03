@@ -211,10 +211,18 @@ with st.sidebar:
 
     st.divider()
     # Storage status
-    if storage.gsheets_configured():
+    if storage.github_configured():
+        st.success("💾 Saving to GitHub (persistent)")
+        if st.button("🔄 Refresh data"):
+            storage.refresh_cache()
+            st.rerun()
+    elif storage.gsheets_configured():
         st.success("💾 Saving to Google Sheets")
+        if st.button("🔄 Refresh data"):
+            storage.refresh_cache()
+            st.rerun()
     else:
-        st.warning("💾 Local storage only\n(data resets on reboot)")
+        st.warning("💾 Local storage only\n(edits reset on reboot)")
 
     # Rebuild ICP from an uploaded attendee CSV (persists to storage)
     with st.expander("⚙️ Rebuild ICP"):
