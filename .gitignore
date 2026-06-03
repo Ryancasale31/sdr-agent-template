@@ -1,10 +1,15 @@
 .env
+.env.*
+*.env
 __pycache__/
 *.pyc
-pipeline.json
+_reimport.py
 radar_finds.json
-icp_summary.json
 scored_companies.json
+# pipeline.json and icp_summary.json are committed as the deployed app's
+# baseline data (Streamlit Cloud wipes runtime files on reboot). Repo is
+# public and this is public business data — do NOT add contact PII here.
+# sequences.json / hubspot_import.csv / tiga_import.csv stay ignored (contacts).
 sequences.json
 hubspot_import.csv
 tiga_import.csv
