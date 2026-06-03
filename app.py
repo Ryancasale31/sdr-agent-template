@@ -228,17 +228,144 @@ with st.sidebar:
         st.caption("📧 Outlook: awaiting Azure setup")
 
     st.divider()
-    st.caption("Status key")
-    st.markdown("🔵 Researched · 🟡 Contact Found · ✅ Approved · 📤 Sent")
+    # Hot leads badge
+    hot = [c for c in pipeline if c.get("priority") == "hot" and c.get("status") not in ("closed_won","closed_lost")]
+    replied = [c for c in pipeline if c.get("status") == "replied"]
+    if replied:
+        st.error(f"🔥 {len(replied)} replied — follow up!")
+    if hot:
+        st.warning(f"⚡ {len(hot)} hot prospects")
+
+    st.divider()
+    st.caption("Sales stages")
+    st.markdown("🔵 Researched · 📞 Contacted · 💬 Replied · 📅 Meeting · 📄 Contract · ✅ Won · ❌ Lost")
+
+# ── Helpers: activity log & CRM ───────────────────────────────────────────────
+from datetime import date, datetime
+
+STATUSES = [
+    "researched", "contacted", "replied",
+    "meeting_booked", "contract_out", "closed_won", "closed_lost",
+]
+STATUS_LABELS = {
+    "researched":    "🔵 Researched",
+    "contacted":     "📞 Contacted",
+    "replied":       "💬 Replied",
+    "meeting_booked":"📅 Meeting Booked",
+    "contract_out":  "📄 Contract Out",
+    "closed_won":    "✅ Closed Won",
+    "closed_lost":   "❌ Closed Lost",
+    # legacy values
+    "contact_found": "📞 Contacted",
+    "approved":      "📞 Contacted",
+    "sent":          "📞 Contacted",
+    "skipped":       "🔵 Researched",
+}
+PRIORITY_LABELS = {"hot": "🔥 Hot", "medium": "⚡ Medium", "cold": "🧊 Cold"}
+
+def log_activity(company: dict, activity_type: str, **kwargs) -> dict:
+    """Append an activity entry to company['activity_log']."""
+    if "activity_log" not in company:
+        company["activity_log"] = []
+    entry = {
+        "type": activity_type,
+        "date": date.today().isoformat(),
+        "source": "manual",
+        **kwargs,
+    }
+    company["activity_log"].append(entry)
+    return company
+
+def days_since_last_activity(company: dict) -> int | None:
+    log = company.get("activity_log", [])
+    if not log:
+        return None
+    last = max(log, key=lambda x: x.get("date",""))
+    try:
+        delta = date.today() - date.fromisoformat(last["date"])
+        return delta.days
+    except Exception:
+        return None
+
+def render_activity_log(company: dict, key_prefix: str):
+    """Render timeline + manual log controls for a company."""
+    log = sorted(company.get("activity_log", []), key=lambda x: x.get("date",""), reverse=True)
+
+    icons = {
+        "email_sent":       "📤",
+        "reply_received":   "💬",
+        "call":             "📞",
+        "note":             "📝",
+        "meeting_booked":   "📅",
+        "contract_sent":    "📄",
+        "status_change":    "🔄",
+    }
+
+    if log:
+        st.markdown("**Activity Log**")
+        for entry in log:
+            icon = icons.get(entry["type"], "•")
+            date_str = entry.get("date","")
+            src = "🔗" if entry.get("source") == "outlook" else ""
+            label = entry["type"].replace("_"," ").title()
+            detail = entry.get("subject") or entry.get("note") or entry.get("preview","")
+            st.markdown(f"{icon} **{label}** {src} · {date_str}")
+            if detail:
+                st.caption(f"  {detail[:120]}")
+    else:
+        st.caption("No activity logged yet.")
+
+    st.markdown("**Log Activity**")
+    log_cols = st.columns(4)
+    if log_cols[0].button("📤 Email Sent", key=f"{key_prefix}_log_sent"):
+        touch_opt = st.session_state.get(f"{key_prefix}_touch", 1)
+        company = log_activity(company, "email_sent", touch=touch_opt, subject=f"Touch {touch_opt}")
+        pipeline_local = load_pipeline()
+        pipeline_local = upsert_company(pipeline_local, company)
+        if company.get("status") in ("researched",):
+            company["status"] = "contacted"
+        save_pipeline(pipeline_local)
+        st.rerun()
+    if log_cols[1].button("💬 Reply In", key=f"{key_prefix}_log_reply"):
+        company = log_activity(company, "reply_received")
+        company["status"] = "replied"
+        pipeline_local = load_pipeline()
+        pipeline_local = upsert_company(pipeline_local, company)
+        save_pipeline(pipeline_local)
+        st.rerun()
+    if log_cols[2].button("📅 Mtg Booked", key=f"{key_prefix}_log_mtg"):
+        company = log_activity(company, "meeting_booked")
+        company["status"] = "meeting_booked"
+        pipeline_local = load_pipeline()
+        pipeline_local = upsert_company(pipeline_local, company)
+        save_pipeline(pipeline_local)
+        st.rerun()
+    if log_cols[3].button("📞 Call", key=f"{key_prefix}_log_call"):
+        company = log_activity(company, "call")
+        pipeline_local = load_pipeline()
+        pipeline_local = upsert_company(pipeline_local, company)
+        save_pipeline(pipeline_local)
+        st.rerun()
+
+    note_text = st.text_input("Add a note", key=f"{key_prefix}_note_input", placeholder="e.g. Left voicemail, asked about budget...")
+    if st.button("📝 Save Note", key=f"{key_prefix}_save_note") and note_text:
+        company = log_activity(company, "note", note=note_text)
+        pipeline_local = load_pipeline()
+        pipeline_local = upsert_company(pipeline_local, company)
+        save_pipeline(pipeline_local)
+        st.rerun()
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["🔍 Research Company", "📋 My Pipeline", "✉️ Outreach Queue", "📡 Radar", "📥 Import", "📬 Outlook"])
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+    "🔍 Research", "📋 Pipeline", "✉️ Outreach Queue",
+    "📡 Radar", "📥 Import", "🏆 Funnel", "📬 Outlook",
+])
 
 
 # ════════════════════════════════════════════════════════════════════════════
 # TAB 1 — RESEARCH
 # ════════════════════════════════════════════════════════════════════════════
-with tab1:
+with tab1:  # Research
     st.header("Research a Company")
     st.caption("Enter any company name — the agent will research them online, score their fit, and explain why they should sponsor.")
 
@@ -308,31 +435,46 @@ with tab2:
         st.info("No companies yet — research one in the 🔍 tab to get started.")
     else:
         # Filters
-        col_f1, col_f2, col_f3 = st.columns(3)
-        status_filter = col_f1.selectbox("Filter by status", ["All", "researched", "contact_found", "approved", "sent", "skipped"])
-        tier_filter = col_f2.selectbox("Filter by tier", ["All", "1", "2", "3"])
+        col_f1, col_f2, col_f3, col_f4 = st.columns(4)
+        status_filter = col_f1.selectbox("Sales stage", ["All"] + STATUSES)
+        priority_filter = col_f2.selectbox("Priority", ["All", "hot", "medium", "cold"])
+        tier_filter = col_f3.selectbox("AI tier", ["All", "A", "B", "C"])
         categories = sorted(set(c.get("category","") for c in pipeline if c.get("category")))
-        cat_filter = col_f3.selectbox("Filter by category", ["All"] + categories)
+        cat_filter = col_f4.selectbox("Category", ["All"] + categories)
 
         filtered = pipeline
         if status_filter != "All":
             filtered = [c for c in filtered if c.get("status") == status_filter]
+        if priority_filter != "All":
+            filtered = [c for c in filtered if c.get("priority") == priority_filter]
         if tier_filter != "All":
             filtered = [c for c in filtered if str(c.get("tier","")) == tier_filter]
         if cat_filter != "All":
             filtered = [c for c in filtered if c.get("category","") == cat_filter]
 
         st.caption(f"Showing {len(filtered)} of {len(pipeline)} companies")
-        filtered_sorted = sorted(filtered, key=lambda x: x.get("score", 0), reverse=True)
+        # Sort: hot first, then by score
+        priority_order = {"hot": 0, "medium": 1, "cold": 2, None: 3, "": 3}
+        filtered_sorted = sorted(filtered, key=lambda x: (priority_order.get(x.get("priority"), 3), -x.get("score", 0)))
 
         for idx, company in enumerate(filtered_sorted):
             score = company.get("score", 0)
             tier = company.get("tier", "?")
             status = company.get("status", "researched")
-            status_icon = {"researched": "🔵", "contact_found": "🟡", "approved": "✅", "sent": "📤"}.get(status, "🔵")
+            priority = company.get("priority", "")
             score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
+            status_label = STATUS_LABELS.get(status, status.replace("_"," ").title())
+            priority_label = PRIORITY_LABELS.get(priority, "")
+            days = days_since_last_activity(company)
+            days_str = f"· {days}d ago" if days is not None else ""
 
-            with st.expander(f"{score_color} **{company['company']}** — {score}/100 · Tier {tier} · {status_icon} {status.replace('_',' ').title()} · {company.get('category','')}"):
+            header = f"{score_color} **{company['company']}** — {score}/100 · {status_label}"
+            if priority_label:
+                header += f" · {priority_label}"
+            if days_str:
+                header += f" {days_str}"
+
+            with st.expander(header):
                 col1, col2 = st.columns(2)
                 with col1:
                     st.write(f"**What they do:** {company.get('what_they_do','—')}")
@@ -346,14 +488,36 @@ with tab2:
                         st.info(f"**Pitch angle:** {company.get('pitch_angle', company.get('outreach_note','—'))}")
                     if company.get("vs_sponsor"):
                         st.warning(f"**Competitors already sponsoring:** {company.get('vs_sponsor')}")
-                    if company.get("outreach_note") and company.get("pitch_angle"):
-                        st.caption(f"📋 Note: {company.get('outreach_note')}")
                     if company.get("risk"):
                         st.error(f"**Watch out for:** {company.get('risk')}")
 
                 st.divider()
+                # Priority + stage controls
+                ctrl1, ctrl2, ctrl3 = st.columns(3)
+                new_priority = ctrl1.selectbox(
+                    "Priority", ["hot","medium","cold"],
+                    index=["hot","medium","cold"].index(company.get("priority","cold")) if company.get("priority") in ["hot","medium","cold"] else 2,
+                    key=f"pri_{idx}",
+                )
+                new_status = ctrl2.selectbox(
+                    "Sales stage", STATUSES,
+                    index=STATUSES.index(status) if status in STATUSES else 0,
+                    key=f"stage_{idx}",
+                )
+                if ctrl3.button("💾 Save Stage", key=f"savestage_{idx}"):
+                    old_status = company.get("status","")
+                    company["priority"] = new_priority
+                    company["status"] = new_status
+                    if old_status != new_status:
+                        company = log_activity(company, "status_change", note=f"{old_status} → {new_status}")
+                    pipeline = upsert_company(pipeline, company)
+                    save_pipeline(pipeline)
+                    st.success("Saved!")
+                    st.rerun()
+
+                st.divider()
                 # Contact info
-                st.write("**Contact Details** (from Seamless/Tiga)")
+                st.write("**Contact Details**")
                 c1, c2, c3 = st.columns(3)
                 contact_name = c1.text_input("Contact name", value=company.get("contact_name",""), key=f"cn_{idx}")
                 contact_title = c2.text_input("Title", value=company.get("contact_title",""), key=f"ct_{idx}")
@@ -364,7 +528,8 @@ with tab2:
                     company["contact_name"] = contact_name
                     company["contact_title"] = contact_title
                     company["contact_email"] = contact_email
-                    company["status"] = "contact_found"
+                    if company.get("status") == "researched":
+                        company["status"] = "contacted"
                     pipeline = upsert_company(pipeline, company)
                     save_pipeline(pipeline)
                     st.success("Contact saved!")
@@ -377,7 +542,8 @@ with tab2:
                         with st.spinner("Writing personalized emails..."):
                             emails = generate_emails(company, contact_name, contact_title, icp)
                             company["emails"] = emails
-                            company["status"] = "contact_found"
+                            if company.get("status") == "researched":
+                                company["status"] = "contacted"
                             pipeline = upsert_company(pipeline, company)
                             save_pipeline(pipeline)
                             st.success("Emails generated — review them in ✉️ Outreach Queue")
@@ -387,6 +553,9 @@ with tab2:
                     pipeline = [c for c in pipeline if c["company"] != company["company"]]
                     save_pipeline(pipeline)
                     st.rerun()
+
+                st.divider()
+                render_activity_log(company, key_prefix=f"pl_{idx}")
 
         st.divider()
         if st.button("📥 Export Pipeline to CSV"):
@@ -732,9 +901,98 @@ The agent will figure out the rest.
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 6 — OUTLOOK
+# TAB 6 — FUNNEL
 # ════════════════════════════════════════════════════════════════════════════
 with tab6:
+    st.header("🏆 Sales Funnel")
+    st.caption("Pipeline by sales stage and priority. Your CRM view.")
+
+    pipeline = load_pipeline()
+
+    if not pipeline:
+        st.info("No companies yet — start in 🔍 Research.")
+    else:
+        # ── Summary metrics ──
+        m_cols = st.columns(7)
+        for i, s in enumerate(STATUSES):
+            count = sum(1 for c in pipeline if c.get("status") == s)
+            m_cols[i].metric(STATUS_LABELS[s].split(" ",1)[1], count)
+
+        st.divider()
+
+        # ── Priority breakdown ──
+        st.subheader("By Priority")
+        p_cols = st.columns(3)
+        for col, (pkey, plabel) in zip(p_cols, PRIORITY_LABELS.items()):
+            companies = [c for c in pipeline if c.get("priority") == pkey and c.get("status") not in ("closed_won","closed_lost")]
+            with col:
+                st.markdown(f"### {plabel} ({len(companies)})")
+                for c in sorted(companies, key=lambda x: -x.get("score",0)):
+                    score = c.get("score",0)
+                    score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
+                    status_label = STATUS_LABELS.get(c.get("status",""), c.get("status",""))
+                    days = days_since_last_activity(c)
+                    days_str = f" · {days}d" if days is not None else ""
+                    st.markdown(f"{score_color} **{c['company']}**")
+                    st.caption(f"{status_label}{days_str}")
+                    st.divider()
+
+        st.divider()
+
+        # ── Stage columns ──
+        st.subheader("By Sales Stage")
+        active_statuses = [s for s in STATUSES if s not in ("closed_won","closed_lost")]
+        stage_cols = st.columns(len(active_statuses))
+        for col, s in zip(stage_cols, active_statuses):
+            companies = [c for c in pipeline if c.get("status") == s or (s == "researched" and c.get("status") not in STATUSES)]
+            with col:
+                st.markdown(f"**{STATUS_LABELS[s]}**")
+                st.caption(f"{len(companies)} companies")
+                for c in sorted(companies, key=lambda x: -x.get("score",0))[:8]:
+                    priority = c.get("priority","")
+                    badge = PRIORITY_LABELS.get(priority,"")
+                    st.markdown(f"**{c['company']}** {badge}")
+
+        st.divider()
+
+        # ── Closed ──
+        won = [c for c in pipeline if c.get("status") == "closed_won"]
+        lost = [c for c in pipeline if c.get("status") == "closed_lost"]
+        w_col, l_col = st.columns(2)
+        with w_col:
+            st.markdown(f"### ✅ Closed Won ({len(won)})")
+            for c in won:
+                st.markdown(f"**{c['company']}**")
+        with l_col:
+            st.markdown(f"### ❌ Closed Lost ({len(lost)})")
+            for c in lost:
+                st.markdown(f"**{c['company']}**")
+
+        st.divider()
+
+        # ── Activity feed ──
+        st.subheader("Recent Activity")
+        all_activities = []
+        for c in pipeline:
+            for entry in c.get("activity_log", []):
+                all_activities.append({**entry, "_company": c["company"]})
+        all_activities.sort(key=lambda x: x.get("date",""), reverse=True)
+
+        if all_activities:
+            for entry in all_activities[:20]:
+                icons = {"email_sent":"📤","reply_received":"💬","call":"📞","note":"📝","meeting_booked":"📅","contract_sent":"📄","status_change":"🔄"}
+                icon = icons.get(entry["type"],"•")
+                detail = entry.get("subject") or entry.get("note") or entry.get("preview","")
+                st.markdown(f"{icon} **{entry['_company']}** · {entry['type'].replace('_',' ').title()} · {entry.get('date','')}")
+                if detail:
+                    st.caption(f"  {detail[:100]}")
+        else:
+            st.info("No activity logged yet. Use the Pipeline tab to log sends, replies, and notes.")
+
+# ════════════════════════════════════════════════════════════════════════════
+# TAB 7 — OUTLOOK
+# ════════════════════════════════════════════════════════════════════════════
+with tab7:
     st.header("📬 Outlook Integration")
 
     if not outlook.is_configured():
@@ -785,17 +1043,20 @@ with tab6:
         if replies:
             for msg in replies:
                 sender = msg["from"]["emailAddress"]["address"]
-                # Find matching company
                 match = next((c for c in pipeline if c.get("contact_email","").lower() == sender.lower()), None)
                 company_name = match["company"] if match else sender
                 st.markdown(f"**{company_name}** · {msg['receivedDateTime'][:10]}")
                 st.caption(f"Re: {msg['subject']}")
                 st.caption(msg["bodyPreview"][:150])
-                if match and st.button("Mark as Replied", key=f"reply_{msg['id'][:8]}"):
+                if match and st.button("Log Reply + Update Stage", key=f"reply_{msg['id'][:8]}"):
+                    match = log_activity(match, "reply_received",
+                                        subject=msg["subject"],
+                                        preview=msg["bodyPreview"][:150],
+                                        source="outlook")
                     match["status"] = "replied"
                     pipeline = upsert_company(pipeline, match)
                     save_pipeline(pipeline)
-                    st.success("Status updated!")
+                    st.success("Logged and stage updated to Replied!")
                     st.rerun()
                 st.divider()
         else:
@@ -836,7 +1097,12 @@ with tab6:
         if st.button("📤 Send", type="primary"):
             success = outlook.send_email(selected_company["contact_email"], subject, body)
             if success:
-                selected_company["status"] = "sent"
+                selected_company = log_activity(selected_company, "email_sent",
+                                                touch=touch_idx + 1,
+                                                subject=subject,
+                                                source="outlook")
+                if selected_company.get("status") == "researched":
+                    selected_company["status"] = "contacted"
                 pipeline = upsert_company(pipeline, selected_company)
                 save_pipeline(pipeline)
                 st.success(f"✅ Sent to {selected_company['contact_email']}")
