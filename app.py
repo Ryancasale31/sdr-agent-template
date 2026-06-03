@@ -481,12 +481,23 @@ with tab2:
         if cat_filter != "All":
             filtered = [c for c in filtered if c.get("category","") == cat_filter]
 
-        st.caption(f"Showing {len(filtered)} of {len(pipeline)} companies")
+        # Search by company name (fast way to find one among hundreds)
+        search = st.text_input("🔎 Search company", key="pl_search", placeholder="Type a company name...")
+        if search:
+            filtered = [c for c in filtered if search.lower() in c.get("company", "").lower()]
+
         # Sort: hot first, then by score
         priority_order = {"hot": 0, "medium": 1, "cold": 2, None: 3, "": 3}
         filtered_sorted = sorted(filtered, key=lambda x: (priority_order.get(x.get("priority"), 3), -x.get("score", 0)))
 
-        for idx, company in enumerate(filtered_sorted):
+        # Cap how many cards render at once — rendering 400+ expanders is very slow.
+        PAGE = 25
+        total_filtered = len(filtered_sorted)
+        show_n = st.session_state.get("pl_show_n", PAGE)
+        st.caption(f"Showing {min(show_n, total_filtered)} of {total_filtered} (filtered from {len(pipeline)} total). Use search/filters to narrow.")
+        page = filtered_sorted[:show_n]
+
+        for idx, company in enumerate(page):
             score = company.get("score", 0)
             tier = company.get("tier", "?")
             status = company.get("status", "researched")
@@ -585,6 +596,11 @@ with tab2:
 
                 st.divider()
                 render_activity_log(company, key_prefix=f"pl_{idx}")
+
+        if show_n < total_filtered:
+            if st.button(f"⬇️ Show {min(PAGE, total_filtered - show_n)} more"):
+                st.session_state["pl_show_n"] = show_n + PAGE
+                st.rerun()
 
         st.divider()
         if st.button("📥 Export Pipeline to CSV"):
@@ -956,7 +972,8 @@ with tab6:
             companies = [c for c in pipeline if c.get("priority") == pkey and c.get("status") not in ("closed_won","closed_lost")]
             with col:
                 st.markdown(f"### {plabel} ({len(companies)})")
-                for c in sorted(companies, key=lambda x: -x.get("score",0)):
+                ranked = sorted(companies, key=lambda x: -x.get("score",0))
+                for c in ranked[:12]:
                     score = c.get("score",0)
                     score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
                     status_label = STATUS_LABELS.get(c.get("status",""), c.get("status",""))
@@ -965,6 +982,8 @@ with tab6:
                     st.markdown(f"{score_color} **{c['company']}**")
                     st.caption(f"{status_label}{days_str}")
                     st.divider()
+                if len(ranked) > 12:
+                    st.caption(f"+ {len(ranked) - 12} more")
 
         st.divider()
 
