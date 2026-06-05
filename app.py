@@ -16,23 +16,6 @@ import storage
 
 load_dotenv()
 
-# ── Password gate ─────────────────────────────────────────────────────────────
-def check_password():
-    correct = st.secrets.get("APP_PASSWORD") or os.getenv("APP_PASSWORD", "")
-    if not correct:
-        st.error("APP_PASSWORD not configured in Streamlit Secrets.")
-        st.stop()
-    pwd = st.text_input("Password", type="password", placeholder="Enter password to continue")
-    if pwd != correct:
-        if pwd:
-            st.error("Incorrect password.")
-        st.stop()
-
-if not st.session_state.get("authenticated"):
-    check_password()
-    st.session_state["authenticated"] = True
-    st.rerun()
-
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="FSE SDR Agent",
