@@ -18,7 +18,7 @@ load_dotenv()
 
 # ── Password gate ─────────────────────────────────────────────────────────────
 def check_password():
-    correct = st.secrets.get("APP_PASSWORD", os.getenv("APP_PASSWORD", ""))
+    correct = st.secrets.get("APP_PASSWORD") or os.getenv("APP_PASSWORD", "")
     if not correct:
         st.error("APP_PASSWORD not configured in Streamlit Secrets.")
         st.stop()
