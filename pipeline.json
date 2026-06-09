@@ -5681,5 +5681,20 @@
     "found_date": "2026-06-03",
     "search_query": "company attending Field Service USA 2025 sponsor exhibitor",
     "reviewed": true
+  },
+  {
+    "company": "Medical Equipment Repair Associates (MERA)",
+    "what_they_do": "Leading independent service organization supporting medical and laboratory equipment manufacturers and distributors across the United States and Canada.",
+    "category": "Service Operations / Training",
+    "score": 65,
+    "tier": "B",
+    "fit_reason": "B2B service partner for med/life sciences equipment manufacturers (30 buyers in audience); credibility with Oxford Instruments, Zimmer Biomet, Siemens Healthineers buyer base.",
+    "pitch_angle": "Co-sponsorship or vendor partnership angle: 'Expert insights on medical equipment service excellence' - positions them as thought leaders for medical service directors.",
+    "signal": "Listed as sponsor on Field Service MD 2025; direct alignment with medical/life sciences equipment service vertical",
+    "source_url": "https://fieldservicemd.wbresearch.com/sponsors/2025",
+    "status": "researched",
+    "found_date": "2026-06-09",
+    "search_query": "company attending Field Service USA 2025 sponsor exhibitor",
+    "reviewed": true
   }
 ]
