@@ -2336,7 +2336,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Charlie",
+        "title": "Chief Marketing Officer",
+        "email": "charlie@trimble.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/namannagpal63",
+        "source": "tiga"
+      },
+      {
+        "name": "Heather Adkins",
+        "title": "Chief Marketing Officer",
+        "email": "heather_adkins@trimble.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/heather-adkins",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Motive (KeepTruckin)",
