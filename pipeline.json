@@ -1846,7 +1846,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Chelsey Gomez",
+        "title": "Vice President Marketing - AMS",
+        "email": "chelsey.gomez@teamviewer.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/chelsey-gomez-41a338a3",
+        "source": "tiga"
+      },
+      {
+        "name": "Faith Wheller",
+        "title": "Vice President Marketing",
+        "email": "faith.wheller@teamviewer.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/faithwheller",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "RealWear",
