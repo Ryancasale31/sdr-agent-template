@@ -3744,7 +3744,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Allie Vance",
+        "title": "Strategy, Planning & Operations Senior Manager to PwC US Chief Marketing & Communications Officer",
+        "email": "allie.vance@pwc.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/allietvance",
+        "source": "tiga"
+      },
+      {
+        "name": "Christine Hess",
+        "title": "Marketing Director, Premier Events",
+        "email": "christine.hess@pwc.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/christinehessnyc",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Capgemini Salesforce",
