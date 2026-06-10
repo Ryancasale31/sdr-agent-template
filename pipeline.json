@@ -49,7 +49,25 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Andy Yen",
+        "title": "Global Partner Marketing Director",
+        "email": "andy.yen@servicenow.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/andyyen06",
+        "source": "tiga"
+      },
+      {
+        "name": "Bill Hansey",
+        "title": "Product Marketing Director",
+        "email": "bill.hansey@servicenow.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/billhansey",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Oracle Field Service",
