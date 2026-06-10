@@ -1290,7 +1290,17 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Elizabeth Tobey",
+        "title": "SVP Marketing at TechSee | AI | Digital Transformation | Emerging Tech",
+        "email": "elizabeth.tobey@techsee.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/elizabethtobey",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Help Lightning",
