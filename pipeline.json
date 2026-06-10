@@ -569,7 +569,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Manu Sivanandam",
+        "title": "Chief Marketing Officer",
+        "email": "manu.sivanandam@housecallpro.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/manu-sivanandam-1452a41b",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "FieldEdge",
