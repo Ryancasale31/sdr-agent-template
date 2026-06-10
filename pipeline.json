@@ -2878,7 +2878,25 @@
     "score": 50,
     "priority": "cold",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Annie Cheung",
+        "title": "VP Marketing",
+        "email": "annie.cheung@ibm.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/annie-cheung-8403402",
+        "source": "tiga"
+      },
+      {
+        "name": "Chris Pace",
+        "title": "Office of Chief Marketing Officer & Digital Sales",
+        "email": "chris.pace@ibm.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/chris-pace-6345aa179",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Telit Cinterion",
