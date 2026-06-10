@@ -398,7 +398,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Beth Nicol",
+        "title": "Head of Marketing and Communications Hub",
+        "email": "beth.nicol@ericsson.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/beth-nicol-417a44a",
+        "source": "tiga"
+      },
+      {
+        "name": "Burcu Diem",
+        "title": "Head of Marketing, Communications and Sustainability, Ericsson Antenna System",
+        "email": "burcu.turel@ericsson.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/burcu-turel-diem-9690695",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Resco",
