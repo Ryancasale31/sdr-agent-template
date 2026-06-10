@@ -1450,7 +1450,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Christopher Irwin-Dudek",
+        "title": "Vice President Marketing Communications, AR/PR",
+        "email": "christopher.irwin-dudek@nice.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/chrisirwin-dudek",
+        "source": "tiga"
+      },
+      {
+        "name": "Danyelle Dell'Olio",
+        "title": "Director of Marketing Automation",
+        "email": "danyelle.dell-olio@nice.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/danyelledellolio",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Kustomer",
