@@ -3136,7 +3136,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Stuart Harris",
+        "title": "Senior Vice President, Chief Marketing and Strategy Officer",
+        "email": "stuart.harris@aspentech.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/stuart-harris-3ab255116",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Bentley AssetWise",
