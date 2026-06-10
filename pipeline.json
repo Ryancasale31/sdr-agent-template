@@ -1592,7 +1592,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Trish Brandon",
+        "title": "Channel Marketing Director",
+        "email": "trish.brandon@yellow.ai",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/patricia-jenckes-brandon",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Ada",
