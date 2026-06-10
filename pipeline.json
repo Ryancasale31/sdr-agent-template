@@ -3021,7 +3021,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Cate Lochead",
+        "title": "CMO",
+        "email": "cate.lochead@bentley.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/clochead",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Petasense",
