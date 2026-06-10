@@ -3202,7 +3202,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Kristi Flores",
+        "title": "Chief Marketing Officer & SVP Partner Program",
+        "email": "kristi.flores@accruent.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kristiflores",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "ServiceChannel",
