@@ -1080,7 +1080,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Varda Bachrach",
+        "title": "Director of Marketing",
+        "email": "varda.bachrach@chargeafter.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/varda-bachrach",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "PartsLogic",
