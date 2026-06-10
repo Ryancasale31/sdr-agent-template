@@ -2769,7 +2769,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Kathy Button Bell",
+        "title": "Chief Marketing Officer",
+        "email": "kathy.bell@emerson.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kathybuttonbell",
+        "source": "tiga"
+      },
+      {
+        "name": "Lorrie Librizzi",
+        "title": "Chief Marketing Officer, Commercial and Residential Solutions",
+        "email": "lorrie.librizzi@emerson.com",
+        "phone": "",
+        "linkedin": "",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Bosch IoT Suite",
