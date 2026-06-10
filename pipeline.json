@@ -4212,7 +4212,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "John Shurety",
+        "title": "RVP Sales EMEA",
+        "email": "john.shurety@eptura.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/johnshuretycondeco",
+        "source": "tiga"
+      },
+      {
+        "name": "Justin Tyrrell",
+        "title": "RVP Sales EMEA",
+        "email": "justin.tyrrell@eptura.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/justintyrrell",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "ServiceChannel",
