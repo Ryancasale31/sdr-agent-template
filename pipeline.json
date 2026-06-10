@@ -3682,7 +3682,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Abi Rowlands",
+        "title": "Marketing Director: Businesses, Sales Excellence and Alliances, C-Suite Role-based Engagement",
+        "email": "abir@deloitte.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/abi-rowlands",
+        "source": "tiga"
+      },
+      {
+        "name": "Adnaan P",
+        "title": "Head of Marketing",
+        "email": "pa@deloitte.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/adnaan-p-05908b20a",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Accenture Salesforce",
