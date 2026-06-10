@@ -4613,7 +4613,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Brian Zander",
+        "title": "Vice President Marketing",
+        "email": "brian.zander@bloomfire.com",
+        "phone": "440.376.6012",
+        "linkedin": "https://www.linkedin.com/in/brian-zander",
+        "source": "tiga"
+      },
+      {
+        "name": "Daniel Stradtman",
+        "title": "Chief Marketing Officer",
+        "email": "dan.stradtman@bloomfire.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/danstradtman",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Guru",
