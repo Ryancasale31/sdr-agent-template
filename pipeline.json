@@ -3713,7 +3713,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Alejandro Martínez Rivera",
+        "title": "Marketing Director",
+        "email": "alejandro.rivera@accenture.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alejandro-mart%c3%adnez-rivera-a7b606356",
+        "source": "tiga"
+      },
+      {
+        "name": "Alexandra Macauda",
+        "title": "Director of Marketing And Development",
+        "email": "alexandra.macauda@accenture.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alexmacauda",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "PwC Salesforce",
