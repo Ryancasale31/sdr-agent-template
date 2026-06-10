@@ -1344,7 +1344,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Andrew Federici",
+        "title": "Chief Marketing Officer",
+        "email": "andrew.federici@sightcall.com",
+        "phone": "+1 650-481-8931",
+        "linkedin": "https://www.linkedin.com/in/ajfederici",
+        "source": "tiga"
+      },
+      {
+        "name": "Jake Kanipe",
+        "title": "VP Sales, West",
+        "email": "jake.kanipe@sightcall.com",
+        "phone": "+1 650-481-8931",
+        "linkedin": "https://www.linkedin.com/in/jake-kanipe-76a84676",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Coveo",
