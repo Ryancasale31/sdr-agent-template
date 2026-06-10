@@ -3420,7 +3420,25 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Agnese Guerrera",
+        "title": "Head of Marketing and Sales",
+        "email": "agnese.guerrera@hitachienergy.com",
+        "phone": "+1 919-856-3333",
+        "linkedin": "https://www.linkedin.com/in/agnese-guerrera",
+        "source": "tiga"
+      },
+      {
+        "name": "Andre Gargi",
+        "title": "Global Head of Marketing & Sales, Business Unit High Voltage Products",
+        "email": "andre.gargi@hitachienergy.com",
+        "phone": "+41 58 588 60 41",
+        "linkedin": "https://www.linkedin.com/in/andre-gargi-11483381",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Avanade",
