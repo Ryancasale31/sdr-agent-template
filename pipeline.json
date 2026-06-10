@@ -2364,7 +2364,25 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Emily Leedy",
+        "title": "Director of Marketing",
+        "email": "emily.leedy@verizon.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/emilysouleleedy",
+        "source": "tiga"
+      },
+      {
+        "name": "Hector Garcia",
+        "title": "Associate Director Marketing | Verizon Business",
+        "email": "hector.moore@verizon.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/hectorgh",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Geotab",
