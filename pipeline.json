@@ -209,7 +209,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Justine Arscott",
+        "title": "Marketing Director, North America",
+        "email": "justine.arscott@praxedo.com",
+        "phone": "+1 833-772-9336",
+        "linkedin": "https://www.linkedin.com/in/justinearscott",
+        "source": "tiga"
+      },
+      {
+        "name": "Kieran Le Peron",
+        "title": "Group Chief Marketing Officer",
+        "email": "kieran.leperon@praxedo.com",
+        "phone": "+33 6 58 73 61 07",
+        "linkedin": "https://www.linkedin.com/in/kieran-le-peron-marketing",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Comarch FSM",
