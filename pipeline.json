@@ -271,7 +271,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Lori Juby",
+        "title": "Vice President Marketing, Americas Region",
+        "email": "lori.juby@hexagon.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/lori-juby-1b28873",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Zinier",
