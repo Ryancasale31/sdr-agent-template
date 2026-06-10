@@ -3651,7 +3651,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Ashley Miller",
+        "title": "Marketing Director",
+        "email": "ashley.miller@slalom.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/ashleycampionmiller",
+        "source": "tiga"
+      },
+      {
+        "name": "Ashley Pace",
+        "title": "Marketing Director",
+        "email": "ashley.pace@slalom.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/ashley-pace",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Deloitte Digital",
