@@ -1538,7 +1538,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Russell Banzon",
+        "title": "Chief Marketing Officer",
+        "email": "russell.banzon@cresta.ai",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/russellbanzon",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Forethought",
