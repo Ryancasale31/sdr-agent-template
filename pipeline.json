@@ -948,7 +948,17 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Kevin Young",
+        "title": "Chief Marketing Officer and EVP Growth",
+        "email": "kyoung@toolsgroup.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kevinyoung1230",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Servigistics (PTC)",
