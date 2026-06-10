@@ -917,7 +917,25 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Claudine Bianchi",
+        "title": "Chief Marketing Officer",
+        "email": "claudine.bianchi@syncron.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/claudinebianchi",
+        "source": "tiga"
+      },
+      {
+        "name": "Mark Dabe",
+        "title": "SVP Sales",
+        "email": "mark.dabe@syncron.com",
+        "phone": "+1 855-298-7245",
+        "linkedin": "https://www.linkedin.com/in/markdabe",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "ToolsGroup",
