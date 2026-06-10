@@ -2575,7 +2575,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Albrecht Goecke",
+        "title": "Head of Marketing & Sales Consulting",
+        "email": "albrecht.goecke@siemens.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/albrecht-goecke-48a6102",
+        "source": "tiga"
+      },
+      {
+        "name": "Alexander Grimm",
+        "title": "Global Head of Marketing - Process Automation Systems",
+        "email": "alexander.grimm@siemens.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alexander-samuel-grimm",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "GE Digital (Predix)",
