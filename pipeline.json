@@ -1116,7 +1116,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Edgar Benschop",
+        "title": "Chief Marketing Officer",
+        "email": "edgar.benschop@ortec.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/edgarbenschop",
+        "source": "tiga"
+      },
+      {
+        "name": "Patrick Daubinger",
+        "title": "Sales and Marketing Director",
+        "email": "patrick.daubinger@cortec-neuro.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/patrick-daubinger-0400b215",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "ChannelOnline",
