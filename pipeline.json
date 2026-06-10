@@ -2804,7 +2804,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Chris Green",
+        "title": "Senior Marketing Director, UK & Ireland",
+        "email": "chris.green@schneider-electric.com",
+        "phone": "",
+        "linkedin": "",
+        "source": "tiga"
+      },
+      {
+        "name": "Gizem Cetin",
+        "title": "Field Services Marketing Director",
+        "email": "gizem.cetin@schneider-electric.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/gizem-cetin-72a0363b",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Rockwell FactoryTalk",
