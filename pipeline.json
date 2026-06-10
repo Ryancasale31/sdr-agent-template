@@ -2681,7 +2681,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Alexandra Fochler",
+        "title": "Senior Director of Marketing",
+        "email": "alex.fochler@green-cabbage.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alexandra-fochler-581023152",
+        "source": "tiga"
+      },
+      {
+        "name": "Arnaud Lagarde",
+        "title": "VP Sales EMEA",
+        "email": "al@abbyy.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/axlagarde",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Schneider EcoStruxure",
