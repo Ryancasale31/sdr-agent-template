@@ -1561,7 +1561,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Carissa Cater",
+        "title": "Director of Marketing Science",
+        "email": "carissa.cater@forethought.com.au",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/carissa-cater-phd-3a175631",
+        "source": "tiga"
+      },
+      {
+        "name": "Elaine Wong",
+        "title": "Head of Marketing Science",
+        "email": "elaine.wong@forethought.com.au",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/elaine-wong-06517",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Yellow.ai",
