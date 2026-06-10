@@ -1406,7 +1406,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Alex Moura",
+        "title": "VP Sales Latam",
+        "email": "alex.moura@rategain.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alexcmmoura",
+        "source": "tiga"
+      },
+      {
+        "name": "Anand SubramaniameGain",
+        "title": "SVP Marketing",
+        "email": "anands@egain.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/anand-subramaniam-egain-767275122",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Verint",
