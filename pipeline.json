@@ -240,7 +240,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Amy Kadlec",
+        "title": "Director of Marketing, U.S.",
+        "email": "amy.kadlec@goavant.net",
+        "phone": "",
+        "linkedin": "",
+        "source": "tiga"
+      },
+      {
+        "name": "Gabriela Nadczuk",
+        "title": "Marketing Director",
+        "email": "gabriela.nadczuk@comarch.pl",
+        "phone": "+48 12 646 11 00",
+        "linkedin": "https://www.linkedin.com/in/gabrielanadczuk",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Hexagon Mobile FSM",
