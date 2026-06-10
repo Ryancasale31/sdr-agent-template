@@ -124,7 +124,25 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Aaron Lee",
+        "title": "Global Product Marketing Director - Automotive, Mobility, and Transportation",
+        "email": "aaron.lee@microsoft.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/aaronleeprofile",
+        "source": "tiga"
+      },
+      {
+        "name": "Aileen Hannah",
+        "title": "AI Integrated Marketing Director",
+        "email": "hannaha@microsoft.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/aileen-hannah-54581221",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "ServicePower",
