@@ -155,7 +155,17 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Joe Abusamra",
+        "title": "Product Marketing Director",
+        "email": "j.abusamra@servicepower.com",
+        "phone": "+1 703-447-4068",
+        "linkedin": "https://www.linkedin.com/in/joeabusamra",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "OverIT (Geocall)",
