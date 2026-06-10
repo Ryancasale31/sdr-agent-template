@@ -4776,7 +4776,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Kelly Dahlke",
+        "title": "Director of Marketing",
+        "email": "kelly@bdpros.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kdahlke",
+        "source": "tiga"
+      },
+      {
+        "name": "Paul Hope",
+        "title": "CMO / VP Marketing | B2B Tech | Pipeline & Revenue Growth | SaaS & IT Services | GTM Transformation | Marketing → Commercial Impact",
+        "email": "phope@pros.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/paulhope",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Vendavo",
