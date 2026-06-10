@@ -2619,7 +2619,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Antonia Kasparek",
+        "title": "VP Marketing Operations",
+        "email": "antonia.kasparek@aveva.com",
+        "phone": "+34 919 05 92 00",
+        "linkedin": "https://www.linkedin.com/in/antoniakasparek",
+        "source": "tiga"
+      },
+      {
+        "name": "Desirae Thomas",
+        "title": "Global Channel Marketing Director",
+        "email": "desirae.thomas@aveva.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/desiraethomas",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Honeywell Forge",
