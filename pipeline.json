@@ -1419,7 +1419,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Anna Convery",
+        "title": "Chief Marketing Officer",
+        "email": "anna.convery@verint.com",
+        "phone": "",
+        "linkedin": "",
+        "source": "tiga"
+      },
+      {
+        "name": "Avanti Joglekar",
+        "title": "Director of Marketing Campaigns | Driving Revenue and Growth",
+        "email": "avanti.joglekar@verint.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/avantijoglekar",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "NICE",
