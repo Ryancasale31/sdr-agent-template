@@ -4644,7 +4644,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Alan Nielsen",
+        "title": "VP Marketing and Sales",
+        "email": "alan.nielsen@gurussolutions.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alannielsen1",
+        "source": "tiga"
+      },
+      {
+        "name": "Christine Richardson",
+        "title": "Marketing Director",
+        "email": "crichardson@getguru.com",
+        "phone": "717.368.3354",
+        "linkedin": "https://www.linkedin.com/in/oh-hi-christine",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "KMS Lighthouse",
