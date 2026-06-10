@@ -4538,7 +4538,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Marianna Kantor",
+        "title": "CMO",
+        "email": "mkantor@esri.com",
+        "phone": "+1 909-793-2853",
+        "linkedin": "https://www.linkedin.com/in/marianna-kantor",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Trimble Unity",
