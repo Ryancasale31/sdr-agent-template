@@ -3775,7 +3775,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Audrey Carpentier",
+        "title": "VP Sales Leader Life Sciences France",
+        "email": "audrey.carpentier@capgemini.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/audrey-carpentier-05399b1b",
+        "source": "tiga"
+      },
+      {
+        "name": "Beatrice Speisser",
+        "title": "Chief Marketing and Communications Officer - Member of the Group Executive Committee",
+        "email": "beatrice.speisser@capgemini.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/beatrice-speisser-0918195",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Cognizant Salesforce",
