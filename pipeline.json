@@ -1628,7 +1628,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Paloma Ochi",
+        "title": "VP Marketing",
+        "email": "paloma@decagon.ai",
+        "phone": "+1 206-409-1802",
+        "linkedin": "https://www.linkedin.com/in/palomaochi",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Sierra (Bret Taylor)",
