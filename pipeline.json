@@ -2835,7 +2835,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Brian Hovey",
+        "title": "Vice President, Global Marketing and Chief Marketing Officer",
+        "email": "brian.hovey@rockwellautomation.com",
+        "phone": "8.00 12.00 10",
+        "linkedin": "https://www.linkedin.com/in/bhovey",
+        "source": "tiga"
+      },
+      {
+        "name": "Javier Camacho",
+        "title": "Marketing Director, Americas",
+        "email": "javier.camacho@rockwellautomation.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/camachojavier",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Hitachi Lumada",
