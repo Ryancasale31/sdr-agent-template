@@ -1856,7 +1856,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Abhishek Iyer",
+        "title": "Senior Director of Marketing",
+        "email": "abhi@descope.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/abhishekiyer5225",
+        "source": "tiga"
+      },
+      {
+        "name": "Christina Cubeta",
+        "title": "Chief Marketing Officer",
+        "email": "ccubeta@scope3.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/christinacubeta",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Streem (Frontdoor)",
