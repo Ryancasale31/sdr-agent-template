@@ -2134,7 +2134,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Yusuf Ali",
+        "title": "Fractional CMO",
+        "email": "yusuf@onfleet.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/realyusufali",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "WorkWave Route Manager",
