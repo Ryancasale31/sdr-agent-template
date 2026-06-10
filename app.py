@@ -460,18 +460,16 @@ def open_account(company_name: str):
 
 def get_contacts(company: dict) -> list:
     """Return contacts list, migrating legacy single-contact fields in-memory."""
-    contacts = company.get("contacts")
-    if contacts is None:
-        contacts = []
-        if company.get("contact_name") or company.get("contact_email"):
-            contacts.append({
-                "name": company.get("contact_name", ""),
-                "title": company.get("contact_title", ""),
-                "email": company.get("contact_email", ""),
-                "phone": "",
-                "notes": "",
-                "activity_log": [],
-            })
+    contacts = company.get("contacts") or []
+    if not contacts and (company.get("contact_name") or company.get("contact_email")):
+        contacts = [{
+            "name": company.get("contact_name", ""),
+            "title": company.get("contact_title", ""),
+            "email": company.get("contact_email", ""),
+            "phone": "",
+            "notes": "",
+            "activity_log": [],
+        }]
     return contacts
 
 CONTACT_ACT_ICONS = {
@@ -1255,16 +1253,52 @@ with tab6:
 
         # ── Stage columns ──
         st.subheader("By Sales Stage")
+        st.markdown("""
+        <style>
+        .hs-card {
+            background: var(--secondary-background-color);
+            border: 1px solid rgba(128,128,128,0.25);
+            border-radius: 6px;
+            padding: 10px 12px 6px 12px;
+            margin-bottom: 6px;
+        }
+        .hs-card-name { font-weight: 600; font-size: 0.88em; margin-bottom: 2px; }
+        .hs-card-contact { font-size: 0.78em; color: rgba(160,160,160,0.95); margin-bottom: 2px; }
+        .hs-card-meta { font-size: 0.72em; color: rgba(128,128,128,0.8); }
+        </style>
+        """, unsafe_allow_html=True)
+
         active_statuses = [s for s in STATUSES if s not in ("closed_won","closed_lost")]
         stage_cols = st.columns(len(active_statuses))
         for col, s in zip(stage_cols, active_statuses):
             companies = [c for c in pipeline if c.get("status") == s or (s == "researched" and c.get("status") not in STATUSES)]
             with col:
-                st.markdown(f"**{STATUS_LABELS[s]}**")
-                st.caption(f"{len(companies)} companies")
+                st.caption(f"{STATUS_LABELS[s]} · {len(companies)}")
                 for si, c in enumerate(sorted(companies, key=lambda x: -x.get("score",0))[:8]):
                     badge = PRIORITY_LABELS.get(c.get("priority",""), "")
-                    if st.button(f"{c['company']} {badge}", key=f"fn_stg_{s}_{si}"):
+                    contacts = get_contacts(c)
+                    score = c.get("score", 0)
+                    score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
+
+                    contact_html = ""
+                    for ct in contacts[:2]:
+                        name = ct.get("name", "").strip()
+                        title = ct.get("title", "").strip()
+                        email = ct.get("email", "").strip()
+                        line = name or email or ""
+                        if title:
+                            line += f" · {title}"
+                        if line:
+                            contact_html += f'<div class="hs-card-contact">👤 {line}</div>'
+
+                    st.markdown(f"""
+                    <div class="hs-card">
+                        <div class="hs-card-name">{c['company']} {badge}</div>
+                        {contact_html if contact_html else '<div class="hs-card-contact" style="opacity:0.4">No contact yet</div>'}
+                        <div class="hs-card-meta">{score_color} {score}/100</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    if st.button("Open →", key=f"fn_stg_{s}_{si}", use_container_width=True):
                         open_account(c["company"])
 
         st.divider()
