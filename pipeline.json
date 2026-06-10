@@ -3088,7 +3088,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Alain Raflé",
+        "title": "Vice President Sales",
+        "email": "alain.rafle@infor.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alain-rafl%c3%a9",
+        "source": "tiga"
+      },
+      {
+        "name": "Allen Cohen",
+        "title": "VP Sales",
+        "email": "allen.cohen@infor.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/allen-cohen-5782789",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Oracle EAM",
