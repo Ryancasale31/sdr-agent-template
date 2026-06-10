@@ -997,7 +997,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Aj Brustein",
+        "title": "VP, Head of Marketing",
+        "email": "aj@ajbrustein.com",
+        "phone": "",
+        "linkedin": "",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Mize (Syncron)",
