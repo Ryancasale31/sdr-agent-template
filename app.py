@@ -763,6 +763,17 @@ with tab2:
                 header += f" {days_str}"
 
             with st.expander(header):
+                contacts = get_contacts(company)
+                if contacts:
+                    for ct in contacts[:2]:
+                        name = ct.get("name","").strip()
+                        title = ct.get("title","").strip()
+                        email = ct.get("email","").strip()
+                        parts = " · ".join(filter(None, [name, title, email]))
+                        if parts:
+                            st.caption(f"👤 {parts}")
+                else:
+                    st.caption("👤 No contact yet")
                 if st.button("👤 Open account page", key=f"open_acct_{idx}"):
                     open_account(company["company"])
                 col1, col2 = st.columns(2)
