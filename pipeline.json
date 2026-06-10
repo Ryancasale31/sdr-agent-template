@@ -1877,7 +1877,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Ben Wiltshire",
+        "title": "Global Head of Marketing",
+        "email": "ben.wiltshire@realwear.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/ben-wiltshire-28bab966",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Vuforia (PTC)",
