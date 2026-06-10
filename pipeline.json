@@ -2341,7 +2341,17 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Paz Macdonald",
+        "title": "Vice President Marketing (EMEA)",
+        "email": "paz.macdonald@samsara.com",
+        "phone": "+49 30 1663911809",
+        "linkedin": "https://www.linkedin.com/in/pazmacdonald",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Verizon Connect",
