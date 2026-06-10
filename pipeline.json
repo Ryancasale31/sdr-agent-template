@@ -4388,7 +4388,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Mariia Miroshnykova",
+        "title": "Events and Marketing Director",
+        "email": "mariia.miroshnykova@netcracker.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/mariia-miroshnykova-a31b1b127",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Optiva",
