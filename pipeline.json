@@ -1313,7 +1313,25 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Hardeep Chawla",
+        "title": "Chief Marketing Officer",
+        "email": "hchawla@digitalwebhelp.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/hardeep-chawla",
+        "source": "tiga"
+      },
+      {
+        "name": "Karol Ihring",
+        "title": "CMO",
+        "email": "karol.ihring@airhelp.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/karol-ihring-07888b21",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "SightCall",
