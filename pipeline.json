@@ -3464,7 +3464,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Adina Silvestro",
+        "title": "Head of Marketing, Cloud/ Workplace/ Security | Social Impact - Asia Pacific, Middle East & Africa",
+        "email": "asilvestro@dxc.com",
+        "phone": "+61 413 609 149",
+        "linkedin": "https://www.linkedin.com/in/adinasilvestro",
+        "source": "tiga"
+      },
+      {
+        "name": "Alex Van Gorden",
+        "title": "VP Sales and Marketing",
+        "email": "alex@dxc.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alexandersadeghipour",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Quisitive",
