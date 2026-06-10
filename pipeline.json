@@ -1049,7 +1049,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Brad Sivert",
+        "title": "CMO - Head Of Marketing & Growth",
+        "email": "brad.sivert@tavant.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/bradsivert",
+        "source": "tiga"
+      },
+      {
+        "name": "Simran Tayal",
+        "title": "Head of Marketing",
+        "email": "simran.tayal@tavant.com",
+        "phone": "+91 120 403 0300",
+        "linkedin": "https://www.linkedin.com/in/simrantayal",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "After Inc.",
