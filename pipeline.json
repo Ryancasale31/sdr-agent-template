@@ -2313,7 +2313,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Carrie Heath",
+        "title": "Associate Vice President Marketing",
+        "email": "carrieheath@geotab.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/carrie-heath-46ab2225",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Trimble Field Service",
