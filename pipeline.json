@@ -93,7 +93,25 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Aaron Graber",
+        "title": "Vice President Marketing & Solutions, SAP Business Technology Platform Ecosystem",
+        "email": "aaron.graber@sap.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/agraber",
+        "source": "tiga"
+      },
+      {
+        "name": "Ada Agrait",
+        "title": "Global Chief Marketing Officer and Member of the Extended Board",
+        "email": "ada.agrait@sap.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/adaagrait",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Microsoft Dynamics 365 Field Service",
