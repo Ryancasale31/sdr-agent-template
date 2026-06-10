@@ -178,7 +178,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Andrea Bardini",
+        "title": "Chief Marketing Officer",
+        "email": "andrea.bardini@overit.ai",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/andreabardini",
+        "source": "tiga"
+      },
+      {
+        "name": "Sean Fitzpatrick",
+        "title": "Chief Marketing Officer",
+        "email": "sean.fitzpatrick@overit.com",
+        "phone": "+1 207-504-0541",
+        "linkedin": "https://www.linkedin.com/in/seantfitzpatrick",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Praxedo",
