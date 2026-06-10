@@ -10,7 +10,33 @@
     "score": 85,
     "priority": "hot",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Brittany Bluestein",
+        "title": "Head of Marketing, Nexus Black",
+        "email": "brittany.bluestein@ifs.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/brittany-bluestein-2377a359",
+        "source": "tiga"
+      },
+      {
+        "name": "Caroline Russo",
+        "title": "Vice President Marketing, Europe & LatAm",
+        "email": "caroline.russo@ifs.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/caroline-d-russo",
+        "source": "tiga"
+      },
+      {
+        "name": "Emily Hackman",
+        "title": "Solution Marketing Director, Engineering & Construction Industry",
+        "email": "emily.hackman@ifs.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/emilyswartz",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "ServiceNow Field Service Mgmt",
