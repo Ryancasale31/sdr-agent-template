@@ -2650,7 +2650,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Alan Lang",
+        "title": "Director of Marketing Operations and Events",
+        "email": "alan.lang@honeywell.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alanmlang",
+        "source": "tiga"
+      },
+      {
+        "name": "Carol O'Kelley",
+        "title": "Chief Marketing Officer, Honeywell Connected Enterprise",
+        "email": "ckelley@honeywell.com",
+        "phone": "+1 877-841-2840",
+        "linkedin": "https://www.linkedin.com/in/carolokelley",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "ABB Ability",
