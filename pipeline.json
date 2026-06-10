@@ -4357,7 +4357,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Gil Rosen",
+        "title": "CMO",
+        "email": "gil.rosen@amdocs.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/gilrosen",
+        "source": "tiga"
+      },
+      {
+        "name": "Ian Zeifman",
+        "title": "Head of Marketing, US Operators Division",
+        "email": "ian.zeifman@amdocs.com",
+        "phone": "+44 20 8727 2500",
+        "linkedin": "https://www.linkedin.com/in/ianzeifman",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Netcracker",
