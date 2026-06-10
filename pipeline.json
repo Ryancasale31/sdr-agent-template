@@ -1375,7 +1375,25 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Gary",
+        "title": "Marketing Director | Enterprise ABM & Regional Marketing Leader",
+        "email": "ggonsalvez@coveo.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/gary-gonsalvez",
+        "source": "tiga"
+      },
+      {
+        "name": "Jason Love",
+        "title": "Director of Marketing Operations",
+        "email": "jlove@coveo.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/jason-love-1329a8",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "eGain",
