@@ -3345,7 +3345,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Edurne Jorda",
+        "title": "CMO & GM of Marketplaces",
+        "email": "ejorda@servicechannel.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/edurnejorda",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Predikto",
