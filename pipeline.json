@@ -533,7 +533,17 @@
     "score": 70,
     "priority": "medium",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "contacts": [
+      {
+        "name": "Bryan Olshock",
+        "title": "Chief Marketing Officer",
+        "email": "bolshock@servicetitan.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/bryanolshock",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Jobber",
