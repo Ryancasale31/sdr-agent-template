@@ -2434,7 +2434,14 @@
         "email": "heather_adkins@trimble.com",
         "phone": "",
         "linkedin": "https://www.linkedin.com/in/heather-adkins",
-        "source": "tiga"
+        "source": "tiga",
+        "activity_log": [
+          {
+            "type": "email_sent",
+            "date": "2026-06-11",
+            "source": "manual"
+          }
+        ]
       }
     ]
   },
