@@ -6823,5 +6823,20 @@
     "found_date": "2026-06-09",
     "search_query": "company attending Field Service USA 2025 sponsor exhibitor",
     "reviewed": true
+  },
+  {
+    "company": "Cryotos CMMS",
+    "what_they_do": "Cloud-based Computerized Maintenance Management System (CMMS) that integrates with field service operations for preventive maintenance and asset tracking.",
+    "category": "FSM Platform / Maintenance Management",
+    "score": 68,
+    "tier": "B",
+    "fit_reason": "Listed as IFS FSM alternative. CMMS integration is critical for manufacturing (41 buyers) and industrial equipment buyers. Complements rather than replaces primary FSM.",
+    "pitch_angle": "Sponsor as 'maintenance-first' approach to field service; appeal to manufacturing and industrial equipment directors managing preventive maintenance.",
+    "signal": "Technology Counter top 10 alternatives list; strong fit for manufacturing vertical",
+    "source_url": "https://technologycounter.com/products/ifs-fsm/alternatives",
+    "status": "researched",
+    "found_date": "2026-06-11",
+    "search_query": "competitors ServiceMax IFS field service management software",
+    "reviewed": true
   }
 ]
