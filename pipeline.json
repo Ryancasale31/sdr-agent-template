@@ -67,6 +67,15 @@
         "linkedin": "https://www.linkedin.com/in/billhansey",
         "source": "tiga"
       }
+    ],
+    "activity_log": [
+      {
+        "type": "email_sent",
+        "date": "2026-06-11",
+        "source": "manual",
+        "touch": 1,
+        "subject": "Touch 1"
+      }
     ]
   },
   {
