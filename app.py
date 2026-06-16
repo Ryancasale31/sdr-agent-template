@@ -1554,88 +1554,87 @@ with tab7:
             else:
                 st.error("Send failed — check your Outlook connection.")
 
+
+
 # ════════════════════════════════════════════════════════════════════════════════
 # TAB 8 — CONTACTS
 # ════════════════════════════════════════════════════════════════════════════════
 with tab8:
-    st.header("\U0001f465 All Contacts")
-    st.caption("Every contact across all pipeline accounts, in one place.")
+    try:
+        import pandas as pd
+        import traceback
 
-    col_sync, _ = st.columns([1, 4])
-    with col_sync:
-        if st.button("\U0001f504 Refresh"):
+        st.header("👥 All Contacts")
+        st.caption("Every contact across all pipeline accounts, in one place.")
+
+        if st.button("🔄 Refresh"):
             storage.refresh_cache()
             st.rerun()
 
-    try:
         pipeline_data = load_pipeline()
+        st.write(f"DEBUG: loaded {len(pipeline_data)} companies")
+
+        all_rows = []
+        for company in pipeline_data:
+            for contact in get_contacts(company):
+                all_rows.append({
+                    "Company": company.get("company", ""),
+                    "Tier":    company.get("tier", ""),
+                    "Score":   company.get("score", ""),
+                    "Status":  company.get("status", ""),
+                    "Name":    contact.get("name", ""),
+                    "Title":   contact.get("title", ""),
+                    "Email":   contact.get("email", ""),
+                    "Phone":   contact.get("phone", ""),
+                    "LinkedIn": contact.get("linkedin", ""),
+                    "Notes":   contact.get("notes", ""),
+                    "Source":  contact.get("source", ""),
+                })
+
+        st.write(f"DEBUG: found {len(all_rows)} contacts")
+
+        if not all_rows:
+            st.info("No contacts yet. Add contacts via the Pipeline tab or run tiga_contacts.py.")
+        else:
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Total Contacts", len(all_rows))
+            m2.metric("Companies with Contacts", len({r["Company"] for r in all_rows}))
+            m3.metric("Contacts with Email", sum(1 for r in all_rows if r["Email"]))
+
+            st.divider()
+
+            fc1, fc2, fc3 = st.columns(3)
+            with fc1:
+                filter_company = st.text_input("Filter by company", placeholder="Type to search...")
+            with fc2:
+                all_tiers = sorted({str(r["Tier"]) for r in all_rows if r["Tier"] != ""})
+                filter_tier = st.selectbox("Tier", ["All"] + all_tiers)
+            with fc3:
+                filter_email_only = st.checkbox("Email only", value=False)
+
+            filtered = all_rows
+            if filter_company:
+                filtered = [r for r in filtered if filter_company.lower() in r["Company"].lower()]
+            if filter_tier != "All":
+                filtered = [r for r in filtered if str(r["Tier"]) == filter_tier]
+            if filter_email_only:
+                filtered = [r for r in filtered if r["Email"]]
+
+            st.caption(f"Showing {len(filtered)} of {len(all_rows)} contacts")
+
+            display_cols = ["Company", "Tier", "Score", "Name", "Title", "Email", "Phone", "Status"]
+            df = pd.DataFrame(filtered)[display_cols]
+            st.dataframe(df, use_container_width=True, hide_index=True)
+
+            st.divider()
+            st.download_button(
+                label="⬇️ Download CSV",
+                data=pd.DataFrame(filtered).to_csv(index=False),
+                file_name="fse_contacts.csv",
+                mime="text/csv",
+                type="primary",
+            )
+
     except Exception as e:
-        st.error(f"Error loading pipeline: {e}")
-        st.stop()
-
-    # Gather all contacts from every company
-    all_rows = []
-    for company in pipeline_data:
-        company_name = company.get("company", "")
-        tier = company.get("tier", "")
-        score = company.get("score", "")
-        status = company.get("status", "")
-        contacts = get_contacts(company)
-        for contact in contacts:
-            all_rows.append({
-                "Company": company_name,
-                "Tier": tier,
-                "Score": score,
-                "Status": status,
-                "Name": contact.get("name", ""),
-                "Title": contact.get("title", ""),
-                "Email": contact.get("email", ""),
-                "Phone": contact.get("phone", ""),
-                "LinkedIn": contact.get("linkedin", ""),
-                "Notes": contact.get("notes", ""),
-                "Source": contact.get("source", ""),
-            })
-
-    if not all_rows:
-        st.info("No contacts yet. Add contacts to companies in the Pipeline tab, or run `tiga_contacts.py` to discover them automatically.")
-    else:
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Total Contacts", len(all_rows))
-        m2.metric("Companies with Contacts", len({r["Company"] for r in all_rows}))
-        m3.metric("Contacts with Email", sum(1 for r in all_rows if r["Email"]))
-
-        st.divider()
-
-        fc1, fc2, fc3 = st.columns(3)
-        with fc1:
-            filter_company = st.text_input("Filter by company", placeholder="Type to search...")
-        with fc2:
-            all_tiers = sorted({str(r["Tier"]) for r in all_rows if r["Tier"] != ""})
-            filter_tier = st.selectbox("Tier", ["All"] + all_tiers)
-        with fc3:
-            filter_email_only = st.checkbox("Email only", value=False)
-
-        filtered = all_rows
-        if filter_company:
-            filtered = [r for r in filtered if filter_company.lower() in r["Company"].lower()]
-        if filter_tier != "All":
-            filtered = [r for r in filtered if str(r["Tier"]) == filter_tier]
-        if filter_email_only:
-            filtered = [r for r in filtered if r["Email"]]
-
-        st.caption(f"Showing {len(filtered)} of {len(all_rows)} contacts")
-
-        import pandas as pd
-        display_cols = ["Company", "Tier", "Score", "Name", "Title", "Email", "Phone", "Status"]
-        df = pd.DataFrame(filtered)[display_cols]
-        st.dataframe(df, use_container_width=True, hide_index=True)
-
-        st.divider()
-        csv_data = pd.DataFrame(filtered).to_csv(index=False)
-        st.download_button(
-            label="\u2b07\ufe0f Download CSV",
-            data=csv_data,
-            file_name="fse_contacts.csv",
-            mime="text/csv",
-            type="primary",
-        )
+        st.error(f"Contacts tab error: {e}")
+        st.code(traceback.format_exc())
