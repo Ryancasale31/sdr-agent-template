@@ -154,13 +154,14 @@ def run_radar():
             total_searched += 1
 
             # Ask Claude to extract companies from results
+            # Pass a sample to the AI for context; Python fuzzy check handles full dedup
             prompt = SCORE_PROMPT.format(
                 search_results=web_text[:3000],
-                existing_companies=", ".join(sorted(all_known)),
+                existing_companies=", ".join(sorted(all_known)[:80]),
             )
 
             message = client.messages.create(
-                model="claude-haiku-4-5",
+                model="claude-sonnet-4-6",
                 max_tokens=1000,
                 messages=[{"role": "user", "content": prompt}],
             )
