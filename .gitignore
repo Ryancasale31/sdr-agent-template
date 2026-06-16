@@ -4,7 +4,7 @@
 __pycache__/
 *.pyc
 _reimport.py
-radar_finds.json
+# radar_finds.json
 scored_companies.json
 # pipeline.json and icp_summary.json are committed as the deployed app's
 # baseline data (Streamlit Cloud wipes runtime files on reboot). Repo is

@@ -1,0 +1,47 @@
+[
+  {
+    "company": "Agiliti",
+    "what_they_do": "Essential service provider to the U.S. healthcare industry offering equipment management, repair, and maintenance solutions to support efficient and sustainable healthcare delivery.",
+    "category": "Other",
+    "score": 62,
+    "tier": "B",
+    "fit_reason": "Directly serves medical/life sciences field service leaders \u2014 a top vertical at Field Service East (30 registered buyers from Medical/Life Sciences). Agiliti operates in the equipment service and support space relevant to companies like Siemens Healthineers and Zimmer Biomet in attendance.",
+    "pitch_angle": "With 30 Medical/Life Sciences buyers registered including Siemens Healthineers and Zimmer Biomet, position Agiliti in front of peer service leaders who are actively evaluating partners for equipment lifecycle and field support solutions.",
+    "signal": "Sponsoring Field Service Medical 2025 \u2014 a direct peer event targeting the same medical device service executive audience",
+    "source_url": "https://fieldservicemd.wbresearch.com/sponsors/2025",
+    "status": "radar_find",
+    "found_date": "2026-06-16",
+    "search_query": "company exhibiting Field Service Medical 2025 conference",
+    "reviewed": false
+  },
+  {
+    "company": "Westernacher Consulting",
+    "what_they_do": "SAP consulting firm specializing in service parts planning (eSPP) and digital supply chain solutions, helping manufacturers and service organizations optimize parts availability using SAP S/4HANA.",
+    "category": "Parts Planning",
+    "score": 62,
+    "tier": "B",
+    "fit_reason": "Field service directors at industrial/manufacturing and medical device companies (Oxford Instruments, Zimmer Biomet, Siemens Healthineers) are directly responsible for parts availability and service supply chains \u2014 SAP-based SPP is a known pain point at this level.",
+    "pitch_angle": "Position Westernacher as the SAP-native answer to the parts planning conversation already happening on the show floor \u2014 differentiate from Baxter Planning (already sponsoring) by emphasizing S/4HANA modernization and the eSPP DSC edition for attendees mid-ERP-transformation.",
+    "signal": "Active webinar content on SAP S/4HANA eSPP published August 2025, indicating current go-to-market investment in service parts planning market.",
+    "source_url": "https://www.youtube.com/watch?v=8Aj_R-fekFk",
+    "status": "radar_find",
+    "found_date": "2026-06-16",
+    "search_query": "service parts planning software company 2025",
+    "reviewed": false
+  },
+  {
+    "company": "ketteQ",
+    "what_they_do": "AI-powered supply chain and service parts planning platform using their patent-pending PolymatiQ\u2122 solver to deliver end-to-end forecasting, order planning, and dynamic inventory management across distribution centers, field locations, and mobile stocking units.",
+    "category": "Parts Planning",
+    "score": 78,
+    "tier": "A",
+    "fit_reason": "Direct fit for VP/Director of Field Service and VP Service attendees from industrial/manufacturing (41 buyers) and medical/life sciences (30 buyers) who manage distributed parts inventories across technician trucks, depots, and field stocking locations \u2014 exactly the use case ketteQ markets.",
+    "pitch_angle": "With Baxter Planning already sponsoring, ketteQ can position as the AI-native challenger \u2014 emphasize PolymatiQ's real-time adaptability for mobile stocking (truck/car stock) which resonates with field service ops leaders managing technician van inventory, a top pain point at this event.",
+    "signal": "Product page explicitly targets field service parts delivery scenarios including mobile stocking locations (aero, truck, car stock) \u2014 direct language match to field service operations audience.",
+    "source_url": "https://www.ketteq.com/supply-chain-planning/service-parts-planning",
+    "status": "radar_find",
+    "found_date": "2026-06-16",
+    "search_query": "service parts planning software company 2025",
+    "reviewed": false
+  }
+]
