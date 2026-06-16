@@ -1567,7 +1567,11 @@ with tab8:
             storage.refresh_cache()
             st.rerun()
 
-    pipeline_data = load_pipeline()
+    try:
+        pipeline_data = load_pipeline()
+    except Exception as e:
+        st.error(f"Error loading pipeline: {e}")
+        st.stop()
 
     # Gather all contacts from every company
     all_rows = []
