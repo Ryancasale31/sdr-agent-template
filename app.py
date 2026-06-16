@@ -1561,14 +1561,11 @@ with tab8:
     st.header("\U0001f465 All Contacts")
     st.caption("Every contact across all pipeline accounts, in one place.")
 
-    # Allow syncing live data from GitHub when running locally
-    gh_token = os.environ.get("GITHUB_TOKEN") or ""
-    if gh_token:
-        col_sync, _ = st.columns([1, 4])
-        with col_sync:
-            if st.button("\U0001f504 Sync from GitHub"):
-                storage.refresh_cache()
-                st.rerun()
+    col_sync, _ = st.columns([1, 4])
+    with col_sync:
+        if st.button("\U0001f504 Refresh"):
+            storage.refresh_cache()
+            st.rerun()
 
     pipeline_data = load_pipeline()
 
