@@ -99,6 +99,25 @@ def get_existing_companies(pipeline):
     return set(c["company"].lower() for c in pipeline)
 
 
+def is_duplicate(name: str, known: set) -> bool:
+    """Exact match plus fuzzy: catch 'IFS AB' when 'IFS' is known, etc."""
+    n = name.lower().strip()
+    if n in known:
+        return True
+    # Check if any known name is contained in this name or vice versa (word-level)
+    n_words = set(n.split())
+    for k in known:
+        k_words = set(k.split())
+        # Significant word overlap (ignoring tiny words)
+        sig = {w for w in n_words | k_words if len(w) > 3}
+        if not sig:
+            continue
+        overlap = {w for w in n_words if len(w) > 3} & {w for w in k_words if len(w) > 3}
+        if overlap and len(overlap) / min(len({w for w in n_words if len(w) > 3} or {" "}), len({w for w in k_words if len(w) > 3} or {" "})) >= 0.6:
+            return True
+    return False
+
+
 def run_radar():
     print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M')}] FSE Radar starting...")
 
@@ -137,7 +156,7 @@ def run_radar():
             # Ask Claude to extract companies from results
             prompt = SCORE_PROMPT.format(
                 search_results=web_text[:3000],
-                existing_companies=", ".join(sorted(all_known)[:50]),
+                existing_companies=", ".join(sorted(all_known)),
             )
 
             message = client.messages.create(
@@ -158,7 +177,7 @@ def run_radar():
                 name = company.get("company", "")
                 if not name:
                     continue
-                if name.lower() in all_known:
+                if is_duplicate(name, all_known):
                     continue
                 if company.get("score", 0) < 60:
                     continue
