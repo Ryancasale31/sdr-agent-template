@@ -1454,9 +1454,8 @@ with tab7:
             "- **Send from here** — send approved sequences directly without going to Outlook\n"
             "- **Hot leads** — surfaces replies at the top so nothing slips through"
         )
-        st.stop()
 
-    if not outlook.is_authenticated():
+    elif not outlook.is_authenticated():
         st.warning("Outlook is configured but needs one-time authorization.")
         auth_url = outlook.get_auth_url()
         st.markdown(f"[**Click here to authorize Outlook access →**]({auth_url})")
@@ -1469,88 +1468,88 @@ with tab7:
                 st.rerun()
             except Exception as e:
                 st.error(f"Authorization failed: {e}")
-        st.stop()
 
-    profile = outlook.get_profile()
-    st.success(f"Connected as **{profile.get('displayName', '')}** ({profile.get('mail', '')})")
-    st.divider()
-
-    pipeline = load_pipeline()
-    prospect_emails = [c.get("contact_email", "") for c in pipeline if c.get("contact_email")]
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.subheader(f"📥 Replies from Prospects")
-        with st.spinner("Checking inbox..."):
-            replies = outlook.get_recent_replies(prospect_emails)
-        if replies:
-            for msg in replies:
-                sender = msg["from"]["emailAddress"]["address"]
-                match = next((c for c in pipeline if c.get("contact_email","").lower() == sender.lower()), None)
-                company_name = match["company"] if match else sender
-                st.markdown(f"**{company_name}** · {msg['receivedDateTime'][:10]}")
-                st.caption(f"Re: {msg['subject']}")
-                st.caption(msg["bodyPreview"][:150])
-                if match and st.button("Log Reply + Update Stage", key=f"reply_{msg['id'][:8]}"):
-                    match = log_activity(match, "reply_received",
-                                        subject=msg["subject"],
-                                        preview=msg["bodyPreview"][:150],
-                                        source="outlook")
-                    match["status"] = "replied"
-                    pipeline = upsert_company(pipeline, match)
-                    save_pipeline(pipeline)
-                    st.success("Logged and stage updated to Replied!")
-                    st.rerun()
-                st.divider()
-        else:
-            st.info("No replies from prospects in recent inbox.")
-
-    with col2:
-        st.subheader("📤 Sent to Prospects")
-        with st.spinner("Checking sent items..."):
-            sent = outlook.get_sent_to_prospects(prospect_emails)
-        if sent:
-            for msg in sent:
-                to_addr = msg["toRecipients"][0]["emailAddress"]["address"] if msg.get("toRecipients") else ""
-                match = next((c for c in pipeline if c.get("contact_email","").lower() == to_addr.lower()), None)
-                company_name = match["company"] if match else to_addr
-                st.markdown(f"**{company_name}**")
-                st.caption(f"{msg['subject']} · {msg['sentDateTime'][:10]}")
-                st.divider()
-        else:
-            st.info("No sent emails to prospects found.")
-
-    st.divider()
-    st.subheader("✉️ Send an Email")
-    contacts_with_email = [c for c in pipeline if c.get("contact_email") and c.get("emails")]
-    if not contacts_with_email:
-        st.info("No contacts with both an email address and generated sequences yet.")
     else:
-        options = {f"{c['company']} — {c.get('contact_name', c['contact_email'])}": c for c in contacts_with_email}
-        selected_label = st.selectbox("Select contact", list(options.keys()))
-        selected_company = options[selected_label]
+        profile = outlook.get_profile()
+        st.success(f"Connected as **{profile.get('displayName', '')}** ({profile.get('mail', '')})")
+        st.divider()
 
-        touch_num = st.selectbox("Which touch", ["Touch 1 (Day 1)", "Touch 2 (Day 4)", "Touch 3 (Day 9)"])
-        touch_idx = int(touch_num[6]) - 1
-        email_data = selected_company["emails"][touch_idx]
+        pipeline = load_pipeline()
+        prospect_emails = [c.get("contact_email", "") for c in pipeline if c.get("contact_email")]
 
-        subject = st.text_input("Subject", value=email_data["subject"])
-        body = st.text_area("Body", value=email_data["body"], height=220)
+        col1, col2 = st.columns(2)
 
-        if st.button("📤 Send", type="primary"):
-            success = outlook.send_email(selected_company["contact_email"], subject, body)
-            if success:
-                selected_company = log_activity(selected_company, "email_sent",
-                                                touch=touch_idx + 1,
-                                                subject=subject,
-                                                source="outlook")
-                if selected_company.get("status") == "researched":
-                    selected_company["status"] = "contacted"
-                pipeline = upsert_company(pipeline, selected_company)
-                save_pipeline(pipeline)
-                st.success(f"✅ Sent to {selected_company['contact_email']}")
-                st.rerun()
+        with col1:
+            st.subheader(f"📥 Replies from Prospects")
+            with st.spinner("Checking inbox..."):
+                replies = outlook.get_recent_replies(prospect_emails)
+            if replies:
+                for msg in replies:
+                    sender = msg["from"]["emailAddress"]["address"]
+                    match = next((c for c in pipeline if c.get("contact_email","").lower() == sender.lower()), None)
+                    company_name = match["company"] if match else sender
+                    st.markdown(f"**{company_name}** · {msg['receivedDateTime'][:10]}")
+                    st.caption(f"Re: {msg['subject']}")
+                    st.caption(msg["bodyPreview"][:150])
+                    if match and st.button("Log Reply + Update Stage", key=f"reply_{msg['id'][:8]}"):
+                        match = log_activity(match, "reply_received",
+                                            subject=msg["subject"],
+                                            preview=msg["bodyPreview"][:150],
+                                            source="outlook")
+                        match["status"] = "replied"
+                        pipeline = upsert_company(pipeline, match)
+                        save_pipeline(pipeline)
+                        st.success("Logged and stage updated to Replied!")
+                        st.rerun()
+                    st.divider()
+            else:
+                st.info("No replies from prospects in recent inbox.")
+
+        with col2:
+            st.subheader("📤 Sent to Prospects")
+            with st.spinner("Checking sent items..."):
+                sent = outlook.get_sent_to_prospects(prospect_emails)
+            if sent:
+                for msg in sent:
+                    to_addr = msg["toRecipients"][0]["emailAddress"]["address"] if msg.get("toRecipients") else ""
+                    match = next((c for c in pipeline if c.get("contact_email","").lower() == to_addr.lower()), None)
+                    company_name = match["company"] if match else to_addr
+                    st.markdown(f"**{company_name}**")
+                    st.caption(f"{msg['subject']} · {msg['sentDateTime'][:10]}")
+                    st.divider()
+            else:
+                st.info("No sent emails to prospects found.")
+
+        st.divider()
+        st.subheader("✉️ Send an Email")
+        contacts_with_email = [c for c in pipeline if c.get("contact_email") and c.get("emails")]
+        if not contacts_with_email:
+            st.info("No contacts with both an email address and generated sequences yet.")
+        else:
+            options = {f"{c['company']} — {c.get('contact_name', c['contact_email'])}": c for c in contacts_with_email}
+            selected_label = st.selectbox("Select contact", list(options.keys()))
+            selected_company = options[selected_label]
+
+            touch_num = st.selectbox("Which touch", ["Touch 1 (Day 1)", "Touch 2 (Day 4)", "Touch 3 (Day 9)"])
+            touch_idx = int(touch_num[6]) - 1
+            email_data = selected_company["emails"][touch_idx]
+
+            subject = st.text_input("Subject", value=email_data["subject"])
+            body = st.text_area("Body", value=email_data["body"], height=220)
+
+            if st.button("📤 Send", type="primary"):
+                success = outlook.send_email(selected_company["contact_email"], subject, body)
+                if success:
+                    selected_company = log_activity(selected_company, "email_sent",
+                                                    touch=touch_idx + 1,
+                                                    subject=subject,
+                                                    source="outlook")
+                    if selected_company.get("status") == "researched":
+                        selected_company["status"] = "contacted"
+                    pipeline = upsert_company(pipeline, selected_company)
+                    save_pipeline(pipeline)
+                    st.success(f"✅ Sent to {selected_company['contact_email']}")
+                    st.rerun()
             else:
                 st.error("Send failed — check your Outlook connection.")
 
