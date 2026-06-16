@@ -174,6 +174,57 @@ Return ONLY valid JSON:
     return json.loads(raw.strip())
 
 
+def generate_meeting_email(company_data: dict, contact_name: str, contact_title: str, icp: dict) -> dict:
+    """Generate a single, direct email asking for a meeting — uses the pitch angle as the hook."""
+    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+    pitch_angle = company_data.get("pitch_angle") or company_data.get("outreach_note") or company_data.get("fit_reason") or ""
+    vs_sponsor = company_data.get("vs_sponsor", "")
+    competitor_line = f"Their competitors already sponsoring: {vs_sponsor}." if vs_sponsor else ""
+
+    prompt = f"""You are Ryan Casale, a sponsorship sales rep for Field Service East (Orlando, Aug 10-12, 2026).
+
+EVENT AUDIENCE:
+- {icp['buyer_count']} registered buyers, {icp['senior_buyer_pct']}% VP/Director/SVP level
+- Top attending companies: {', '.join(icp['top_companies'][:10])}
+- Top titles: {', '.join(icp['top_titles'][:8])}
+- Already sponsoring: {', '.join(set(icp['existing_sponsors']))}
+
+TARGET:
+- Company: {company_data['company']}
+- Contact: {contact_name}, {contact_title}
+- What they do: {company_data.get('what_they_do', '')}
+- Who they sell to: {company_data.get('who_they_sell_to', '')}
+- Why they fit: {pitch_angle}
+{competitor_line}
+
+Write ONE short, direct email asking for a 15-minute call to explore sponsorship.
+- Lead with the ONE most relevant reason their buyers are in the room (from the pitch angle above)
+- Be specific — name actual attendee titles or companies if it strengthens the case
+- Ask for a specific, low-friction action: "15 minutes this week or next?"
+- Under 120 words total
+- Tone: peer-to-peer, confident, no fluff
+- Never use: "I hope this email finds you well", "synergy", "leverage", "cutting-edge", "robust"
+- Sign off: Ryan Casale | Field Service East
+
+Return ONLY valid JSON:
+{{"subject": "...", "body": "..."}}
+"""
+
+    message = client.messages.create(
+        model="claude-opus-4-5",
+        max_tokens=600,
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    raw = message.content[0].text.strip()
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    return json.loads(raw.strip())
+
+
 def generate_emails(company_data: dict, contact_name: str, contact_title: str, icp: dict) -> list:
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
@@ -536,8 +587,26 @@ def render_account_page(company_name: str):
     st.subheader("👥 Contacts")
     contacts = get_contacts(company)
 
+    # Auto-save any contacts that exist but aren't yet persisted (e.g. pulled from Tiga)
+    if contacts and not company.get("contacts"):
+        company["contacts"] = contacts
+        pipeline = upsert_company(pipeline, company)
+        save_pipeline(pipeline)
+
     if not contacts:
         st.caption("No contacts yet. Add one below.")
+
+    def _save_contact_field(ci, contacts, company, pipeline):
+        """Auto-save callback — fires when any contact field loses focus."""
+        c = contacts[ci]
+        c["name"]  = st.session_state.get(f"ct_name_{ci}",  c.get("name", ""))
+        c["title"] = st.session_state.get(f"ct_title_{ci}", c.get("title", ""))
+        c["email"] = st.session_state.get(f"ct_email_{ci}", c.get("email", ""))
+        c["phone"] = st.session_state.get(f"ct_phone_{ci}", c.get("phone", ""))
+        c["notes"] = st.session_state.get(f"ct_notes_{ci}", c.get("notes", ""))
+        company["contacts"] = contacts
+        updated = upsert_company(pipeline, company)
+        save_pipeline(updated)
 
     for ci, contact in enumerate(contacts):
         label = contact.get("name") or "(unnamed contact)"
@@ -545,21 +614,18 @@ def render_account_page(company_name: str):
             label += f" — {contact['title']}"
         with st.expander(label, expanded=len(contacts) == 1):
             cc1, cc2 = st.columns(2)
-            name = cc1.text_input("Name", contact.get("name", ""), key=f"ct_name_{ci}")
-            title = cc2.text_input("Title", contact.get("title", ""), key=f"ct_title_{ci}")
-            email = cc1.text_input("Email", contact.get("email", ""), key=f"ct_email_{ci}")
-            phone = cc2.text_input("Phone", contact.get("phone", ""), key=f"ct_phone_{ci}")
-            notes = st.text_area("Notes about this contact", contact.get("notes", ""), key=f"ct_notes_{ci}", height=90)
+            cc1.text_input("Name",  contact.get("name", ""),  key=f"ct_name_{ci}",
+                           on_change=_save_contact_field, args=(ci, contacts, company, pipeline))
+            cc2.text_input("Title", contact.get("title", ""), key=f"ct_title_{ci}",
+                           on_change=_save_contact_field, args=(ci, contacts, company, pipeline))
+            cc1.text_input("Email", contact.get("email", ""), key=f"ct_email_{ci}",
+                           on_change=_save_contact_field, args=(ci, contacts, company, pipeline))
+            cc2.text_input("Phone", contact.get("phone", ""), key=f"ct_phone_{ci}",
+                           on_change=_save_contact_field, args=(ci, contacts, company, pipeline))
+            st.text_area("Notes about this contact", contact.get("notes", ""), key=f"ct_notes_{ci}",
+                         height=90, on_change=_save_contact_field, args=(ci, contacts, company, pipeline))
 
-            b1, b2 = st.columns([1, 1])
-            if b1.button("💾 Save contact", key=f"ct_save_{ci}"):
-                contact.update({"name": name, "title": title, "email": email, "phone": phone, "notes": notes})
-                company["contacts"] = contacts
-                pipeline = upsert_company(pipeline, company)
-                save_pipeline(pipeline)
-                st.success("Contact saved")
-                st.rerun()
-            if b2.button("🗑️ Remove", key=f"ct_del_{ci}"):
+            if st.button("🗑️ Remove", key=f"ct_del_{ci}"):
                 contacts.pop(ci)
                 company["contacts"] = contacts
                 pipeline = upsert_company(pipeline, company)
@@ -633,9 +699,9 @@ st.markdown(
 )
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "🔍 Research", "📋 Pipeline", "✉️ Outreach Queue",
-    "📡 Radar", "📥 Import", "🏆 Funnel", "📬 Outlook",
+    "📡 Radar", "📥 Import", "🏆 Funnel", "📬 Outlook", "👥 Contacts",
 ])
 
 
@@ -836,19 +902,38 @@ with tab2:
                     st.success("Contact saved!")
                     st.rerun()
 
-                if col_b.button("✉️ Generate Emails", key=f"gen_{idx}"):
+                if col_b.button("✉️ Draft Meeting Email", key=f"gen_{idx}"):
                     if not contact_name:
                         st.warning("Add a contact name first")
                     else:
-                        with st.spinner("Writing personalized emails..."):
-                            emails = generate_emails(company, contact_name, contact_title, icp)
-                            company["emails"] = emails
-                            if company.get("status") == "researched":
-                                company["status"] = "contacted"
-                            pipeline = upsert_company(pipeline, company)
-                            save_pipeline(pipeline)
-                            st.success("Emails generated — review them in ✉️ Outreach Queue")
-                            st.rerun()
+                        with st.spinner("Writing personalized email..."):
+                            try:
+                                email = generate_meeting_email(company, contact_name, contact_title, icp)
+                                st.session_state[f"meeting_email_{company['company']}"] = email
+                                # Also store a full 3-touch sequence for Outreach Queue
+                                emails = generate_emails(company, contact_name, contact_title, icp)
+                                company["emails"] = emails
+                                if company.get("status") == "researched":
+                                    company["status"] = "contacted"
+                                pipeline = upsert_company(pipeline, company)
+                                save_pipeline(pipeline)
+                            except Exception as e:
+                                st.error(f"Error generating email: {e}")
+
+                # Show generated meeting email inline (persists across reruns via session state)
+                draft = st.session_state.get(f"meeting_email_{company['company']}")
+                if draft:
+                    st.markdown("**📧 Meeting Email Draft**")
+                    draft_subject = st.text_input("Subject", value=draft["subject"], key=f"draft_subj_{idx}")
+                    draft_body = st.text_area("Body", value=draft["body"], height=200, key=f"draft_body_{idx}")
+                    dcol1, dcol2 = st.columns(2)
+                    if dcol1.button("✅ Looks good — keep it", key=f"draft_keep_{idx}"):
+                        # Update the email in the stored sequence with any edits
+                        st.session_state.pop(f"meeting_email_{company['company']}", None)
+                        st.success("Saved! Find the full 3-touch sequence in ✉️ Outreach Queue.")
+                    if dcol2.button("🔄 Regenerate", key=f"draft_regen_{idx}"):
+                        st.session_state.pop(f"meeting_email_{company['company']}", None)
+                        st.rerun()
 
                 if col_c.button("🗑️ Remove", key=f"del_{idx}"):
                     pipeline = [c for c in pipeline if c["company"] != company["company"]]
@@ -1468,3 +1553,88 @@ with tab7:
                 st.rerun()
             else:
                 st.error("Send failed — check your Outlook connection.")
+
+# ════════════════════════════════════════════════════════════════════════════════
+# TAB 8 — CONTACTS
+# ════════════════════════════════════════════════════════════════════════════════
+with tab8:
+    st.header("\U0001f465 All Contacts")
+    st.caption("Every contact across all pipeline accounts, in one place.")
+
+    # Allow syncing live data from GitHub when running locally
+    gh_token = os.environ.get("GITHUB_TOKEN") or ""
+    if gh_token:
+        col_sync, _ = st.columns([1, 4])
+        with col_sync:
+            if st.button("\U0001f504 Sync from GitHub"):
+                storage.refresh_cache()
+                st.rerun()
+
+    pipeline_data = load_pipeline()
+
+    # Gather all contacts from every company
+    all_rows = []
+    for company in pipeline_data:
+        company_name = company.get("company", "")
+        tier = company.get("tier", "")
+        score = company.get("score", "")
+        status = company.get("status", "")
+        contacts = get_contacts(company)
+        for contact in contacts:
+            all_rows.append({
+                "Company": company_name,
+                "Tier": tier,
+                "Score": score,
+                "Status": status,
+                "Name": contact.get("name", ""),
+                "Title": contact.get("title", ""),
+                "Email": contact.get("email", ""),
+                "Phone": contact.get("phone", ""),
+                "LinkedIn": contact.get("linkedin", ""),
+                "Notes": contact.get("notes", ""),
+                "Source": contact.get("source", ""),
+            })
+
+    if not all_rows:
+        st.info("No contacts yet. Add contacts to companies in the Pipeline tab, or run `tiga_contacts.py` to discover them automatically.")
+    else:
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Total Contacts", len(all_rows))
+        m2.metric("Companies with Contacts", len({r["Company"] for r in all_rows}))
+        m3.metric("Contacts with Email", sum(1 for r in all_rows if r["Email"]))
+
+        st.divider()
+
+        fc1, fc2, fc3 = st.columns(3)
+        with fc1:
+            filter_company = st.text_input("Filter by company", placeholder="Type to search...")
+        with fc2:
+            all_tiers = sorted({str(r["Tier"]) for r in all_rows if r["Tier"] != ""})
+            filter_tier = st.selectbox("Tier", ["All"] + all_tiers)
+        with fc3:
+            filter_email_only = st.checkbox("Email only", value=False)
+
+        filtered = all_rows
+        if filter_company:
+            filtered = [r for r in filtered if filter_company.lower() in r["Company"].lower()]
+        if filter_tier != "All":
+            filtered = [r for r in filtered if str(r["Tier"]) == filter_tier]
+        if filter_email_only:
+            filtered = [r for r in filtered if r["Email"]]
+
+        st.caption(f"Showing {len(filtered)} of {len(all_rows)} contacts")
+
+        import pandas as pd
+        display_cols = ["Company", "Tier", "Score", "Name", "Title", "Email", "Phone", "Status"]
+        df = pd.DataFrame(filtered)[display_cols]
+        st.dataframe(df, use_container_width=True, hide_index=True)
+
+        st.divider()
+        csv_data = pd.DataFrame(filtered).to_csv(index=False)
+        st.download_button(
+            label="\u2b07\ufe0f Download CSV",
+            data=csv_data,
+            file_name="fse_contacts.csv",
+            mime="text/csv",
+            type="primary",
+        )
