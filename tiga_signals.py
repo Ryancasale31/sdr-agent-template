@@ -106,7 +106,6 @@ def get_or_create_account(company_name: str) -> str:
     # Try to find existing
     resp = requests.get(
         f"{BASE_URL}/api/v1/accounts",
-        headers=HEADERS,
         headers={**HEADERS, "Tiga-Filter": json.dumps({"search_term": company_name})},
     )
     if resp.ok:

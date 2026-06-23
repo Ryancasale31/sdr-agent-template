@@ -580,4 +580,29 @@ def main():
     prospects = run_prospecting(
         signal_ids=args.signals,
         pages=args.pages,
-   
+        min_score=args.min_score,
+        auto_add=args.auto_add,
+    )
+    print(f"\n{len(prospects)} qualified prospects found.")
+
+
+if __name__ == "__main__":
+    main()
+        auto_add_min_score=70,
+    )
+
+    if not prospects:
+        print("\nNo new prospects found.")
+        return
+
+    print(f"\n{'='*60}")
+    print(f"Results ({len(prospects)} prospects):")
+    print(f"{'='*60}")
+    for p in prospects:
+        score_str = f" | signal: {p['signal_score']}" if "signal_score" in p else ""
+        print(f"  {'[AUTO-ADDED]' if p.get('auto_added') else '[pending]'} "
+              f"{p['company']}{score_str} | {p.get('industry','?')} | {p.get('headcount','?')} employees")
+
+
+if __name__ == "__main__":
+    main()
