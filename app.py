@@ -699,9 +699,9 @@ st.markdown(
 )
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "🔍 Research", "📋 Pipeline", "✉️ Outreach Queue",
-    "📡 Radar", "📥 Import", "🏆 Funnel", "📬 Outlook", "👥 Contacts",
+    "📡 Radar", "🎯 Prospect", "📥 Import", "🏆 Funnel", "📬 Outlook", "👥 Contacts",
 ])
 
 
@@ -1068,18 +1068,24 @@ with tab4:
     reviewed = [c for c in radar_finds if c.get("reviewed")]
 
     # Manual run button
-    col_r1, col_r2 = st.columns([2,1])
+    col_r1, col_r2, col_r3 = st.columns([2, 1, 1])
     col_r1.info(f"**{len(unreviewed)} new companies** waiting for review · {len(reviewed)} previously reviewed")
+    auto_add_toggle = col_r3.checkbox("Auto-add to pipeline", value=True, help="Automatically add finds (score ≥ 60) straight to your pipeline without manual review")
     if col_r2.button("🔍 Run Radar Now", type="primary"):
-        with st.spinner("Searching for new sponsor targets... (this takes ~2 minutes)"):
+        with st.spinner("🔍 Searching 31 queries across the web... this takes 10-15 minutes, keep this tab open"):
             try:
                 import radar as radar_module
                 importlib.reload(radar_module)
-                finds = radar_module.run_radar()
-                st.success(f"Found {len(finds)} new companies!")
+                finds = radar_module.run_radar(auto_add=auto_add_toggle, auto_add_min_score=60)
+                added = len([f for f in finds if f.get("auto_added")])
+                queued = len([f for f in finds if not f.get("auto_added")])
+                msg = f"✅ Found {len(finds)} new companies!"
+                if auto_add_toggle and added:
+                    msg += f" {added} added to pipeline, {queued} queued for review."
+                st.success(msg)
                 st.rerun()
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"Radar error: {e}")
 
     st.divider()
 
@@ -1158,157 +1164,338 @@ with tab4:
 # TAB 5 — IMPORT
 # ════════════════════════════════════════════════════════════════════════════
 with tab5:
-    st.header("📥 Import Companies")
-    st.caption("Upload a CSV from LinkedIn Sales Navigator, Seamless.AI, or any spreadsheet. The agent scores each company and adds them to your pipeline.")
+    # ════════════════════════════════════════════════════════════════════════
+    # TAB 5 — PROSPECT (Tiga Apollo + Signals)
+    # ════════════════════════════════════════════════════════════════════════
+    st.header("🎯 Prospect")
+    st.caption("Search Seamless.ai using your FSE ICP keywords, run your Tiga signals to score results, and auto-build a pipeline list.")
 
-    # ── Format guide ──
+    import tiga_prospector as tp
+
+    # ── Load signals ──────────────────────────────────────────────────────
+    @st.cache_data(ttl=300, show_spinner=False)
+    def fetch_signals():
+        try:
+            return tp.list_signals()
+        except Exception as e:
+            return []
+
+    with st.spinner("Loading your Tiga signals..."):
+        signals = fetch_signals()
+
+    col_p1, col_p2 = st.columns([2, 1])
+
+    with col_p1:
+        st.subheader("Search settings")
+
+        # Signal picker
+        if signals:
+            signal_options = {f"{tp._signal_name(s)} (ID: {s.get('id')})": s.get("id") for s in signals}
+            selected_signal_labels = st.multiselect(
+                "Score results with your Tiga signals (optional)",
+                options=list(signal_options.keys()),
+                help="Selected signals run against every company found. Leave blank to skip scoring."
+            )
+            selected_signal_ids = [str(signal_options[lbl]) for lbl in selected_signal_labels]
+        else:
+            st.info("No Tiga signals found — results won't be scored. You can still build the list.")
+            selected_signal_ids = []
+
+        min_score = st.slider(
+            "Only show results with signal score ≥",
+            min_value=0, max_value=100, value=0, step=5,
+            help="0 = show everything. Requires at least one signal selected.",
+            disabled=len(selected_signal_ids) == 0,
+        )
+
+        auto_add = st.checkbox(
+            "Auto-add companies scoring ≥ 70 to pipeline",
+            value=False,
+            help="Adds high-confidence finds straight to pipeline without manual review"
+        )
+
+    with col_p2:
+        st.subheader("Search preview")
+        st.caption("Seamless searches these keyword combos:")
+        st.markdown("""
+- field service management software
+- workforce management software
+- predictive maintenance software
+- IoT field service platform
+- AR remote assistance field service
+- service parts planning software
+- knowledge management field technician
+- AI service operations software
+        """)
+        st.caption("Edit `tiga_prospector.py → SEAMLESS_SEARCHES` to customize.")
+
+    st.divider()
+
+    if st.button("🚀 Build Prospect List", type="primary", key="prospect_run"):
+        prog_bar = st.progress(0)
+        prog_label = st.empty()
+        results_placeholder = st.empty()
+
+        def _progress(label, current, total):
+            prog_label.write(label)
+            if total > 0:
+                prog_bar.progress(min(current / total, 1.0))
+
+        try:
+            prospects = tp.run_prospecting(
+                signal_ids=selected_signal_ids or None,
+                min_score=min_score if selected_signal_ids else 0,
+                auto_add=auto_add,
+                auto_add_min_score=70,
+                progress_cb=_progress,
+            )
+            prog_bar.empty()
+            prog_label.empty()
+
+            if not prospects:
+                st.warning("No new companies found — they may all already be in your pipeline.")
+            else:
+                auto_added = len([p for p in prospects if p.get("auto_added")])
+                pending = len(prospects) - auto_added
+                st.success(f"✅ Found **{len(prospects)} new companies** · {auto_added} auto-added to pipeline · {pending} ready to review")
+
+                # Store in session for review
+                st.session_state["prospect_results"] = prospects
+                st.rerun()
+
+        except Exception as e:
+            prog_bar.empty()
+            prog_label.empty()
+            st.error(f"Prospecting error: {e}")
+
+    # ── Review results ────────────────────────────────────────────────────
+    prospects = st.session_state.get("prospect_results", [])
+    if prospects:
+        st.subheader(f"Results ({len(prospects)} companies)")
+
+        not_added = [p for p in prospects if not p.get("auto_added")]
+        added = [p for p in prospects if p.get("auto_added")]
+
+        if added:
+            st.success(f"✅ {len(added)} already auto-added to pipeline")
+
+        if not_added:
+            if st.button(f"➕ Add all {len(not_added)} to pipeline", type="primary", key="prospect_add_all"):
+                pipeline = load_pipeline()
+                for p in not_added:
+                    entry = {
+                        "company": p["company"],
+                        "category": p.get("industry", "Other"),
+                        "what_they_do": p.get("description", ""),
+                        "score": p.get("signal_score", 0),
+                        "tier": "B",
+                        "priority": "medium",
+                        "status": "researched",
+                        "source": "tiga_prospector",
+                        "website": p.get("website", ""),
+                        "linkedin_url": p.get("linkedin_url", ""),
+                        "fit_reason": p.get("signal_reasoning", "Found via Tiga Apollo prospecting"),
+                        "pitch_angle": "",
+                        "outreach_note": "",
+                        "contacts": [],
+                    }
+                    pipeline = upsert_company(pipeline, entry)
+                save_pipeline(pipeline)
+                st.success(f"✅ Added {len(not_added)} companies!")
+                st.session_state["prospect_results"] = []
+                st.rerun()
+
+            for pidx, p in enumerate(not_added):
+                sig_str = f" · Signal: {p['signal_score']}/100" if "signal_score" in p else ""
+                icon = "🟢" if p.get("signal_score", 0) >= 70 else "🟡" if p.get("signal_score", 0) >= 40 else "⬜"
+                with st.expander(f"{icon} **{p['company']}**{sig_str} · {p.get('industry','?')} · {p.get('headcount','?')} employees"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write(f"**Website:** {p.get('website') or '—'}")
+                        st.write(f"**Location:** {p.get('location') or '—'}")
+                        if p.get("linkedin_url"):
+                            st.write(f"**LinkedIn:** [{p['linkedin_url'][:50]}]({p['linkedin_url']})")
+                    with col2:
+                        if p.get("description"):
+                            st.write(f"**About:** {p['description'][:200]}")
+                        if p.get("signal_reasoning"):
+                            st.info(f"**Signal:** {p['signal_reasoning'][:200]}")
+
+                    if st.button("➕ Add to Pipeline", key=f"prospect_add_{pidx}", type="primary"):
+                        pipeline = load_pipeline()
+                        entry = {
+                            "company": p["company"],
+                            "category": p.get("industry", "Other"),
+                            "what_they_do": p.get("description", ""),
+                            "score": p.get("signal_score", 0),
+                            "tier": "B",
+                            "priority": "medium",
+                            "status": "researched",
+                            "source": "tiga_prospector",
+                            "website": p.get("website", ""),
+                            "fit_reason": p.get("signal_reasoning", "Found via Tiga Apollo"),
+                            "pitch_angle": "",
+                            "outreach_note": "",
+                            "contacts": [],
+                        }
+                        pipeline = upsert_company(pipeline, entry)
+                        save_pipeline(pipeline)
+                        p["auto_added"] = True
+                        st.success(f"✅ {p['company']} added!")
+                        st.rerun()
+
+with tab6:
+    st.header("📥 Import")
+    st.caption("Upload a CSV from LinkedIn Sales Navigator. The agent auto-detects accounts vs. contacts, deduplicates against your pipeline, and enriches contacts via Tiga.")
+
+    import salesnav_import as sni
+    import io
+    import pandas as pd
+
+    # ── How-to guide ──
     with st.expander("📋 How to export from LinkedIn Sales Navigator"):
         st.markdown("""
-**LinkedIn Sales Navigator:**
-1. Run your search (filter by industry, company size, title)
-2. Click **Export** → download CSV
-3. Upload it here — the agent reads: Company, Industry, Employee Count, Website
+**Accounts list (adds companies to pipeline):**
+1. In Sales Nav → Accounts → run your search
+2. Select accounts → **Export** → CSV
+3. Upload here — agent reads: Account Name, Industry, Headcount, Website, HQ
 
-**Seamless.AI:**
-1. Run a company search
-2. Click **Export to CSV**
-3. Upload here
+**Leads/Contacts list (finds people at your accounts):**
+1. In Sales Nav → Leads → run your search
+2. Select leads → **Export** → CSV
+3. Upload here — agent reads: First/Last Name, Title, Company, Email, LinkedIn URL
 
-**Any spreadsheet:**
-Just make sure it has at least a **Company Name** column.
-The agent will figure out the rest.
+**Auto-detect:** The agent figures out which type it is automatically.
         """)
 
     st.divider()
 
     uploaded_file = st.file_uploader(
-        "Drop your CSV here",
+        "Drop your Sales Navigator CSV here",
         type=["csv"],
-        help="CSV from LinkedIn Sales Nav, Seamless.AI, or any spreadsheet with company names"
+        help="Accounts export or Leads export from LinkedIn Sales Navigator"
     )
 
     if uploaded_file:
-        import io
-        import pandas as pd
+        # Read raw CSV bytes into a temp file path for salesnav_import
+        import tempfile
+        raw_bytes = uploaded_file.read()
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode="wb") as tmp:
+            tmp.write(raw_bytes)
+            tmp_path = tmp.name
 
-        df = pd.read_csv(uploaded_file, encoding="latin1")
-        st.success(f"✅ Loaded {len(df)} rows · {len(df.columns)} columns")
+        # Read headers for type detection
+        import csv as _csv
+        decoded = raw_bytes.decode("utf-8-sig", errors="replace")
+        reader = _csv.DictReader(io.StringIO(decoded))
+        headers = list(reader.fieldnames or [])
+        csv_type = sni.detect_csv_type(headers)
 
-        # Show preview
-        st.subheader("Preview")
-        st.dataframe(df.head(5), use_container_width=True)
+        df_preview = pd.read_csv(io.StringIO(decoded), encoding="utf-8-sig", on_bad_lines="skip")
+        type_label = {"accounts": "📊 Accounts list", "contacts": "👤 Contacts list", "unknown": "❓ Unknown"}.get(csv_type, "❓")
+        st.success(f"✅ Loaded **{len(df_preview)} rows** · {type_label} detected")
+        st.dataframe(df_preview.head(5), use_container_width=True)
 
-        # Column mapping
-        st.subheader("Map your columns")
-        st.caption("Tell the agent which column has the company name, and optionally more context.")
-        cols = ["(none)"] + list(df.columns)
+        if csv_type == "unknown":
+            st.warning("Could not auto-detect CSV type. Please check column names match Sales Nav export format.")
 
-        col_m1, col_m2, col_m3 = st.columns(3)
-        company_col = col_m1.selectbox("Company Name *", [c for c in cols if c != "(none)"], index=0)
-        description_col = col_m2.selectbox("Description / What they do", cols, index=0)
-        contact_name_col = col_m3.selectbox("Contact Name (optional)", cols, index=0)
+        elif csv_type == "accounts":
+            st.subheader("Import Accounts → Pipeline")
+            entries, skipped, total = sni.parse_accounts_csv(tmp_path)
+            col_a1, col_a2 = st.columns(2)
+            col_a1.metric("New companies", len(entries))
+            col_a2.metric("Already in pipeline (skipped)", len(skipped))
 
-        col_m4, col_m5, col_m6 = st.columns(3)
-        contact_title_col = col_m4.selectbox("Contact Title (optional)", cols, index=0)
-        contact_email_col = col_m5.selectbox("Contact Email (optional)", cols, index=0)
-        industry_col = col_m6.selectbox("Industry (optional)", cols, index=0)
+            if entries:
+                with st.expander(f"Preview {len(entries)} new companies"):
+                    for e in entries[:20]:
+                        st.write(f"• **{e['company']}** — {e.get('category','') or 'No industry'} · {e.get('headcount','') or '?'} employees")
+                    if len(entries) > 20:
+                        st.caption(f"...and {len(entries)-20} more")
 
-        st.divider()
+                col_opt1, col_opt2 = st.columns(2)
+                score_them = col_opt1.checkbox("Score each company with AI", value=False,
+                    help="Uses Claude to score FSE sponsor fit — ~1-2 min per 10 companies. You can always score later from the Pipeline tab.")
+                limit = col_opt2.number_input("Max to import", min_value=1,
+                    max_value=len(entries), value=min(100, len(entries)))
 
-        # Filter out already-in-pipeline companies
-        pipeline = load_pipeline()
-        existing = set(c["company"].lower() for c in pipeline)
-        new_rows = df[~df[company_col].str.lower().isin(existing)]
-        already_in = len(df) - len(new_rows)
+                if st.button("🚀 Add to Pipeline", type="primary", key="sn_accounts_import"):
+                    to_add = entries[:limit]
+                    if score_them:
+                        prog = st.progress(0)
+                        stat = st.empty()
+                        for i, entry in enumerate(to_add):
+                            stat.write(f"Scoring {entry['company']}... ({i+1}/{len(to_add)})")
+                            try:
+                                scored = research_company(entry["company"], icp)
+                                entry.update({k: v for k, v in scored.items() if k not in ("company",)})
+                                entry["source"] = "salesnav_import"
+                            except Exception:
+                                pass
+                            prog.progress((i+1) / len(to_add))
+                        stat.empty()
+                        prog.empty()
 
-        st.info(f"**{len(new_rows)} new companies** to import · {already_in} already in your pipeline")
+                    n = sni.add_accounts_to_pipeline(to_add)
+                    st.success(f"✅ Added {n} companies to your pipeline!")
+                    st.rerun()
+            else:
+                st.info("All companies in this file are already in your pipeline.")
 
-        if len(new_rows) == 0:
-            st.warning("All companies from this file are already in your pipeline.")
-        else:
-            col_opt1, col_opt2 = st.columns(2)
-            score_them = col_opt1.checkbox("Score each company with AI", value=True,
-                help="Uses Claude to score sponsor fit. Takes ~1-2 min per 10 companies.")
-            limit = col_opt2.number_input("Max companies to import", min_value=1,
-                max_value=len(new_rows), value=min(50, len(new_rows)))
+        elif csv_type == "contacts":
+            st.subheader("Import Contacts")
+            contacts, total = sni.parse_contacts_csv(tmp_path)
+            missing_email = len([c for c in contacts if not c.get("email")])
+            has_email = len(contacts) - missing_email
 
-            if st.button("🚀 Import to Pipeline", type="primary"):
-                new_rows = new_rows.head(limit)
-                progress = st.progress(0)
-                status = st.empty()
-                added = 0
-                errors = 0
+            col_c1, col_c2, col_c3 = st.columns(3)
+            col_c1.metric("Contacts parsed", len(contacts))
+            col_c2.metric("Have email", has_email)
+            col_c3.metric("Need enrichment", missing_email)
 
-                for i, (_, row) in enumerate(new_rows.iterrows()):
-                    company_name = str(row[company_col]).strip()
-                    if not company_name or company_name.lower() == "nan":
-                        continue
+            if contacts:
+                with st.expander(f"Preview {len(contacts)} contacts"):
+                    for c in contacts[:20]:
+                        email_str = c.get("email") or "⚠️ no email"
+                        st.write(f"• **{c['name']}** · {c.get('title','')} @ {c.get('company','')} · {email_str}")
+                    if len(contacts) > 20:
+                        st.caption(f"...and {len(contacts)-20} more")
 
-                    status.write(f"Processing {company_name}... ({i+1}/{len(new_rows)})")
+                enrich = st.checkbox(
+                    f"Enrich {missing_email} contacts missing email via Tiga",
+                    value=missing_email > 0,
+                    disabled=missing_email == 0,
+                    help="Runs Tiga waterfall enrichment to find work emails for contacts that Sales Nav didn't include"
+                )
 
-                    description = str(row[description_col]).strip() if description_col != "(none)" else ""
-                    if description.lower() == "nan":
-                        description = ""
+                if st.button("💾 Save Contacts", type="primary", key="sn_contacts_import"):
+                    if enrich and missing_email:
+                        prog = st.progress(0)
+                        stat = st.empty()
+                        def _cb(i, total_n, name):
+                            stat.write(f"Enriching {name}... ({i+1}/{total_n})")
+                            prog.progress((i+1) / max(total_n, 1))
+                        contacts, n_enriched = sni.enrich_contacts_batch(contacts, progress_cb=_cb)
+                        stat.empty()
+                        prog.empty()
+                        st.info(f"Enriched {n_enriched} contacts via Tiga")
 
-                    industry = str(row[industry_col]).strip() if industry_col != "(none)" else ""
-                    contact_name = str(row[contact_name_col]).strip() if contact_name_col != "(none)" else ""
-                    contact_title = str(row[contact_title_col]).strip() if contact_title_col != "(none)" else ""
-                    contact_email = str(row[contact_email_col]).strip() if contact_email_col != "(none)" else ""
+                    n_saved = sni.save_contacts_csv(contacts)
+                    st.success(f"✅ Saved {n_saved} contacts to contacts.csv!")
+                    st.caption("Go to the 👥 Contacts tab to view them.")
 
-                    if score_them and icp:
-                        try:
-                            result = research_company(company_name, icp)
-                            result["source"] = "csv_import"
-                            result["import_file"] = uploaded_file.name
-                        except Exception as e:
-                            # Fall back to basic entry if scoring fails
-                            result = {
-                                "company": company_name,
-                                "what_they_do": description,
-                                "category": industry,
-                                "score": 70,
-                                "tier": "B",
-                                "fit_reason": "Imported — not yet scored",
-                                "pitch_angle": "",
-                                "status": "researched",
-                                "source": "csv_import",
-                            }
-                    else:
-                        result = {
-                            "company": company_name,
-                            "what_they_do": description,
-                            "category": industry,
-                            "score": 0,
-                            "tier": "?",
-                            "fit_reason": "Not scored yet — click Research to score",
-                            "pitch_angle": "",
-                            "status": "researched",
-                            "source": "csv_import",
-                        }
-
-                    # Add contact info if provided
-                    if contact_name and contact_name.lower() != "nan":
-                        result["contact_name"] = contact_name
-                        result["contact_title"] = contact_title
-                        result["contact_email"] = contact_email
-                        result["status"] = "contact_found"
-
-                    pipeline = upsert_company(pipeline, result)
-                    save_pipeline(pipeline)
-                    added += 1
-                    progress.progress((i + 1) / len(new_rows))
-
-                status.empty()
-                progress.empty()
-                st.success(f"✅ Imported {added} companies into your pipeline!")
-                if not score_them:
-                    st.info("Go to 📋 Pipeline to research and score each company.")
+        # Cleanup temp file
+        try:
+            import os as _os
+            _os.unlink(tmp_path)
+        except Exception:
+            pass
 
 
 # ════════════════════════════════════════════════════════════════════════════
 # TAB 6 — FUNNEL
 # ════════════════════════════════════════════════════════════════════════════
-with tab6:
+with tab7:
     st.header("🏆 Sales Funnel")
     st.caption("Pipeline by sales stage and priority. Your CRM view.")
 
@@ -1434,206 +1621,12 @@ with tab6:
             st.info("No activity logged yet. Use the Pipeline tab to log sends, replies, and notes.")
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 7 — OUTLOOK
+# TAB 8 — OUTLOOK
 # ════════════════════════════════════════════════════════════════════════════
-with tab7:
+with tab8:
     st.header("📬 Outlook Integration")
 
     if not outlook.is_configured():
         st.info(
             "**Waiting on Azure App Registration.**\n\n"
-            "Once Gabe provides the credentials, add them to your `.env` file on Streamlit Cloud "
-            "(Settings → Secrets) and this tab activates automatically.\n\n"
-            "```\nAZURE_CLIENT_ID=...\nAZURE_CLIENT_SECRET=...\nAZURE_TENANT_ID=...\n```"
-        )
-        st.divider()
-        st.subheader("What this will do once connected")
-        st.markdown(
-            "- **Reply detection** — flags when a prospect replies to your outreach\n"
-            "- **Sent log** — shows which touches have been sent per company\n"
-            "- **Send from here** — send approved sequences directly without going to Outlook\n"
-            "- **Hot leads** — surfaces replies at the top so nothing slips through"
-        )
-
-    elif not outlook.is_authenticated():
-        st.warning("Outlook is configured but needs one-time authorization.")
-        auth_url = outlook.get_auth_url()
-        st.markdown(f"[**Click here to authorize Outlook access →**]({auth_url})")
-        st.caption("You'll be redirected back to the app. Paste the `code=` value from the URL below if it doesn't auto-complete.")
-        code = st.text_input("Authorization code (from redirect URL)")
-        if code and st.button("Complete Authorization", type="primary"):
-            try:
-                outlook.exchange_code_for_token(code)
-                st.success("✅ Connected!")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Authorization failed: {e}")
-
-    else:
-        profile = outlook.get_profile()
-        st.success(f"Connected as **{profile.get('displayName', '')}** ({profile.get('mail', '')})")
-        st.divider()
-
-        pipeline = load_pipeline()
-        prospect_emails = [c.get("contact_email", "") for c in pipeline if c.get("contact_email")]
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.subheader(f"📥 Replies from Prospects")
-            with st.spinner("Checking inbox..."):
-                replies = outlook.get_recent_replies(prospect_emails)
-            if replies:
-                for msg in replies:
-                    sender = msg["from"]["emailAddress"]["address"]
-                    match = next((c for c in pipeline if c.get("contact_email","").lower() == sender.lower()), None)
-                    company_name = match["company"] if match else sender
-                    st.markdown(f"**{company_name}** · {msg['receivedDateTime'][:10]}")
-                    st.caption(f"Re: {msg['subject']}")
-                    st.caption(msg["bodyPreview"][:150])
-                    if match and st.button("Log Reply + Update Stage", key=f"reply_{msg['id'][:8]}"):
-                        match = log_activity(match, "reply_received",
-                                            subject=msg["subject"],
-                                            preview=msg["bodyPreview"][:150],
-                                            source="outlook")
-                        match["status"] = "replied"
-                        pipeline = upsert_company(pipeline, match)
-                        save_pipeline(pipeline)
-                        st.success("Logged and stage updated to Replied!")
-                        st.rerun()
-                    st.divider()
-            else:
-                st.info("No replies from prospects in recent inbox.")
-
-        with col2:
-            st.subheader("📤 Sent to Prospects")
-            with st.spinner("Checking sent items..."):
-                sent = outlook.get_sent_to_prospects(prospect_emails)
-            if sent:
-                for msg in sent:
-                    to_addr = msg["toRecipients"][0]["emailAddress"]["address"] if msg.get("toRecipients") else ""
-                    match = next((c for c in pipeline if c.get("contact_email","").lower() == to_addr.lower()), None)
-                    company_name = match["company"] if match else to_addr
-                    st.markdown(f"**{company_name}**")
-                    st.caption(f"{msg['subject']} · {msg['sentDateTime'][:10]}")
-                    st.divider()
-            else:
-                st.info("No sent emails to prospects found.")
-
-        st.divider()
-        st.subheader("✉️ Send an Email")
-        contacts_with_email = [c for c in pipeline if c.get("contact_email") and c.get("emails")]
-        if not contacts_with_email:
-            st.info("No contacts with both an email address and generated sequences yet.")
-        else:
-            options = {f"{c['company']} — {c.get('contact_name', c['contact_email'])}": c for c in contacts_with_email}
-            selected_label = st.selectbox("Select contact", list(options.keys()))
-            selected_company = options[selected_label]
-
-            touch_num = st.selectbox("Which touch", ["Touch 1 (Day 1)", "Touch 2 (Day 4)", "Touch 3 (Day 9)"])
-            touch_idx = int(touch_num[6]) - 1
-            email_data = selected_company["emails"][touch_idx]
-
-            subject = st.text_input("Subject", value=email_data["subject"])
-            body = st.text_area("Body", value=email_data["body"], height=220)
-
-            if st.button("📤 Send", type="primary"):
-                success = outlook.send_email(selected_company["contact_email"], subject, body)
-                if success:
-                    selected_company = log_activity(selected_company, "email_sent",
-                                                    touch=touch_idx + 1,
-                                                    subject=subject,
-                                                    source="outlook")
-                    if selected_company.get("status") == "researched":
-                        selected_company["status"] = "contacted"
-                    pipeline = upsert_company(pipeline, selected_company)
-                    save_pipeline(pipeline)
-                    st.success(f"✅ Sent to {selected_company['contact_email']}")
-                    st.rerun()
-            else:
-                st.error("Send failed — check your Outlook connection.")
-
-
-
-# ════════════════════════════════════════════════════════════════════════════════
-# TAB 8 — CONTACTS
-# ════════════════════════════════════════════════════════════════════════════════
-with tab8:
-    try:
-        import pandas as pd
-        import traceback
-
-        st.header("👥 All Contacts")
-        st.caption("Every contact across all pipeline accounts, in one place.")
-
-        if st.button("🔄 Refresh"):
-            storage.refresh_cache()
-            st.rerun()
-
-        pipeline_data = load_pipeline()
-        st.write(f"DEBUG: loaded {len(pipeline_data)} companies")
-
-        all_rows = []
-        for company in pipeline_data:
-            for contact in get_contacts(company):
-                all_rows.append({
-                    "Company": company.get("company", ""),
-                    "Tier":    company.get("tier", ""),
-                    "Score":   company.get("score", ""),
-                    "Status":  company.get("status", ""),
-                    "Name":    contact.get("name", ""),
-                    "Title":   contact.get("title", ""),
-                    "Email":   contact.get("email", ""),
-                    "Phone":   contact.get("phone", ""),
-                    "LinkedIn": contact.get("linkedin", ""),
-                    "Notes":   contact.get("notes", ""),
-                    "Source":  contact.get("source", ""),
-                })
-
-        st.write(f"DEBUG: found {len(all_rows)} contacts")
-
-        if not all_rows:
-            st.info("No contacts yet. Add contacts via the Pipeline tab or run tiga_contacts.py.")
-        else:
-            m1, m2, m3 = st.columns(3)
-            m1.metric("Total Contacts", len(all_rows))
-            m2.metric("Companies with Contacts", len({r["Company"] for r in all_rows}))
-            m3.metric("Contacts with Email", sum(1 for r in all_rows if r["Email"]))
-
-            st.divider()
-
-            fc1, fc2, fc3 = st.columns(3)
-            with fc1:
-                filter_company = st.text_input("Filter by company", placeholder="Type to search...")
-            with fc2:
-                all_tiers = sorted({str(r["Tier"]) for r in all_rows if r["Tier"] != ""})
-                filter_tier = st.selectbox("Tier", ["All"] + all_tiers)
-            with fc3:
-                filter_email_only = st.checkbox("Email only", value=False)
-
-            filtered = all_rows
-            if filter_company:
-                filtered = [r for r in filtered if filter_company.lower() in r["Company"].lower()]
-            if filter_tier != "All":
-                filtered = [r for r in filtered if str(r["Tier"]) == filter_tier]
-            if filter_email_only:
-                filtered = [r for r in filtered if r["Email"]]
-
-            st.caption(f"Showing {len(filtered)} of {len(all_rows)} contacts")
-
-            display_cols = ["Company", "Tier", "Score", "Name", "Title", "Email", "Phone", "Status"]
-            df = pd.DataFrame(filtered)[display_cols]
-            st.dataframe(df, use_container_width=True, hide_index=True)
-
-            st.divider()
-            st.download_button(
-                label="⬇️ Download CSV",
-                data=pd.DataFrame(filtered).to_csv(index=False),
-                file_name="fse_contacts.csv",
-                mime="text/csv",
-                type="primary",
-            )
-
-    except Exception as e:
-        st.error(f"Contacts tab error: {e}")
-        st.code(traceback.format_exc())
+            "Once Gabe provides the credentials, add them to 

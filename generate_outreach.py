@@ -3,17 +3,26 @@ Generate a 3-touch personalized email sequence for a target sponsor company.
 Usage:
     python generate_outreach.py "ServiceMax" "John Smith" "VP Marketing" "FSM software for asset-intensive industries"
     python generate_outreach.py --from-scored scored_companies.json --min-score 70
-    python generate_outreach.py --contacts your_contacts.csv
+    python generate_outreach.py --contacts tiga_contacts.csv --hubspot
 """
+import os
 import sys
 import json
 import csv
 import argparse
 from pathlib import Path
 import anthropic
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
+
+TIGA_API_KEY = os.getenv("TIGA_API_KEY")
+TIGA_BASE_URL = "https://app.tigalabs.com"
+TIGA_HEADERS = {
+    "X-Tiga-Auth": TIGA_API_KEY,
+    "Content-Type": "application/json",
+}
 
 ICP_FILE = "icp_summary.json"
 
@@ -124,6 +133,46 @@ def export_hubspot_csv(sequences, output_file="hubspot_import.csv"):
     print(f"[OK] HubSpot CSV saved to {output_file}")
 
 
+def sync_to_hubspot_via_tiga(sequences):
+    """Push contacts directly into HubSpot via Tiga API. Requires tiga_person_id on each sequence."""
+    if not TIGA_API_KEY:
+        print("[!] TIGA_API_KEY not set — cannot sync to HubSpot")
+        return
+
+    synced, skipped, failed = 0, 0, 0
+
+    for seq in sequences:
+        person_id = seq.get("tiga_person_id")
+        name = seq.get("contact_name", seq.get("company", "?"))
+
+        if not person_id:
+            print(f"  [SKIP] {name} — no tiga_person_id (run via --contacts from tiga_contacts.csv)")
+            skipped += 1
+            continue
+
+        resp = requests.post(
+            f"{TIGA_BASE_URL}/api/v1/hubspot/create-or-update-contact",
+            headers=TIGA_HEADERS,
+            json={
+                "person_id": person_id,
+                "find_person_by": {"email": True, "linkedin_url": True},
+                "sync_account_association": True,
+            },
+        )
+
+        if resp.ok:
+            data = resp.json()
+            action = "created" if data.get("contact_created") else "updated"
+            hs_id = data.get("hubspot_contact_id", "")
+            print(f"  [OK] {name} → HubSpot contact {action} (id: {hs_id})")
+            synced += 1
+        else:
+            print(f"  [FAIL] {name} → {resp.status_code}: {resp.text[:120]}")
+            failed += 1
+
+    print(f"\n[HubSpot Sync] {synced} synced | {skipped} skipped (no ID) | {failed} failed")
+
+
 def load_icp():
     if not Path(ICP_FILE).exists():
         print(f"[!] {ICP_FILE} not found. Run: python icp_profile.py first.")
@@ -152,6 +201,7 @@ def main():
     parser.add_argument("--from-scored", help="Use scored_companies.json as input")
     parser.add_argument("--min-score", type=int, default=70)
     parser.add_argument("--contacts", help="CSV: company,email,first_name,last_name,title,description")
+    parser.add_argument("--hubspot", action="store_true", help="Sync contacts directly to HubSpot via Tiga (requires tiga_person_id)")
     args = parser.parse_args()
 
     icp = load_icp()
@@ -165,11 +215,17 @@ def main():
                 print(f"  Generating for {row['company']}...")
                 seq = generate_sequence(row["company"], name, row.get("title",""), row.get("description",""), icp)
                 seq["email"] = row.get("email", "")
+                seq["tiga_person_id"] = row.get("tiga_person_id", "")
                 sequences.append(seq)
                 print_sequence(seq)
         with open("sequences.json", "w") as f:
             json.dump(sequences, f, indent=2)
-        export_hubspot_csv(sequences)
+        if args.hubspot:
+            print("\n[HubSpot] Syncing contacts via Tiga...")
+            sync_to_hubspot_via_tiga(sequences)
+        else:
+            export_hubspot_csv(sequences)
+            print("\nTip: rerun with --hubspot to push directly to HubSpot instead of CSV")
 
     elif args.from_scored:
         with open(args.from_scored) as f:

@@ -1,0 +1,90 @@
+# Tier A — Direct FSM/Field Service Tech (sells directly to this audience)
+ServiceMax | Field service management software for asset-intensive industries including medical devices and industrial equipment
+IFS | Enterprise software for field service management, ERP, and asset lifecycle management
+ClickSoftware (Salesforce FSL) | AI-powered field service scheduling and workforce optimization
+ServiceNow FSM | IT and field service management platform for enterprise operations
+Astea Alliance | Field service management and workforce scheduling software
+TOA Technologies (Oracle FSM) | Cloud-based field service management and scheduling optimization
+ServiceTitan | Field service software for commercial and residential service businesses
+Jobber | Field service management software for home and commercial service companies
+BuildOps | Commercial field service management platform
+FieldEdge | Field service management software for HVAC, plumbing, and electrical contractors
+Samsara | IoT fleet and field operations platform with real-time visibility
+Zuper | Intelligent field service management platform
+Praxedo | Cloud-based field service management software
+Zinier | AI-powered field service automation platform
+Workwave | Field service management software for service businesses
+ServicePower | Workforce management and field service optimization
+Corrigo (JLL) | Facilities and field service management software
+Plannix | AI scheduling and dispatch for field service operations
+
+# Tier A — Parts, Inventory & Supply Chain for Service
+Syncron | Service parts planning and inventory optimization for manufacturers
+Baxter Planning (already sponsoring — validate renewal) | Service supply chain planning and optimization
+LiquidPower Technologies | Field service supply chain optimization
+Servigistics (PTC) | Service parts management and optimization
+Cribmaster | Industrial vending and supply chain management for field operations
+Pooling Partners | Reusable packaging and supply chain solutions for field service
+
+# Tier A — AI / Analytics for Service Operations
+Neuron7 (already sponsoring — validate renewal) | AI-powered service intelligence and resolution recommendations
+Aquant | AI platform for service intelligence and workforce optimization
+Resolve Systems | Intelligent automation for IT and service operations
+Verint | Customer engagement and field service analytics
+Brightfield | Workforce analytics for extended field workforces
+Circuitry.ai (already sponsoring) | AI for field service automation
+
+# Tier A — Remote Assistance / AR for Technicians
+TeamViewer Frontline | Augmented reality and remote assistance for field technicians
+Scope AR | Enterprise augmented reality for field service and remote support
+Librestream Onsight | Remote visual assistance and AR for field service workers
+PTC Vuforia | Industrial augmented reality platform for service and training
+RealWear | Wearable computing devices for hands-free field service operations
+Streem | AR-powered remote assistance for field service and support
+Help Lightning | Augmented reality remote assistance for field service
+XMReality | Remote guidance and AR support for field technicians
+
+# Tier B — Workforce Management & Scheduling
+Kronos/UKG | Workforce management, scheduling, and HR for field operations
+Shiftboard | Scheduling and workforce management for field service
+Deputy | Workforce scheduling and management for field operations
+Quinyx | AI-powered workforce management for field service teams
+Humanity | Employee scheduling software for distributed field teams
+
+# Tier B — Training & Knowledge Management
+TechnicianU | Online training and certification for field service technicians
+Vector Solutions | Training and compliance management for field service industries
+Inkling | Mobile knowledge management for field technicians
+Spekit | Real-time enablement and knowledge platform for field teams
+Scribe | Process documentation and SOPs for field service operations
+Dozuki | Work instruction software for manufacturing and field service
+
+# Tier B — IoT & Predictive Maintenance
+PTC ThingWorx (already has presence — upsell) | Industrial IoT platform for connected products and service
+GE Digital | Industrial IoT and digital twin solutions for asset management
+Augury | Machine health monitoring and predictive maintenance AI
+Uptake | Industrial AI for predictive maintenance and asset performance
+SparkCognition | AI for predictive maintenance in industrial field operations
+C3.ai | Enterprise AI for predictive maintenance and service operations
+Aspentech | Asset optimization and predictive maintenance software
+Planon | Integrated workplace and field service management
+
+# Tier B — ERP / Service Modules
+Microsoft Dynamics 365 Field Service | ERP and field service management for enterprises
+SAP Field Service Management | Enterprise field service integrated with SAP ERP
+HSO (already sponsoring) | Microsoft Dynamics implementation for field service
+Infor | Industry-specific ERP with field service and asset management modules
+
+# Tier B — Customer Experience / Service CRM
+Zendesk | Customer service and field operations management platform
+Freshworks | Customer engagement and field service software
+HubSpot Service Hub | CRM and service management for field operations teams
+Medallia | Customer experience management for field service organizations
+
+# Tier C — Adjacent / Niche Fit
+Fluke | Test and measurement tools for field technicians
+Snap-on | Professional tools and equipment for field service technicians
+Aruba Networks (HPE) | Enterprise networking solutions for field operations connectivity
+Zebra Technologies | Mobile computing and printing for field service operations
+Panasonic Toughbook | Rugged mobile computing devices for field technicians
+Getac | Rugged computers and tablets for field service applications
