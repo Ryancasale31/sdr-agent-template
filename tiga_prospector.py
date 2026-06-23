@@ -582,12 +582,6 @@ def main():
         pages=args.pages,
         min_score=args.min_score,
         auto_add=args.auto_add,
-    )
-    print(f"\n{len(prospects)} qualified prospects found.")
-
-
-if __name__ == "__main__":
-    main()
         auto_add_min_score=70,
     )
 

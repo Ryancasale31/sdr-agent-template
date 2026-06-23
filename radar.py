@@ -425,4 +425,19 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="FSE Prospecting Radar")
     parser.add_argument("--auto-add", action="store_true",
-                        help="Auto-add finds (score >= min-score)
+                        help="Auto-add finds (score >= min-score) directly to pipeline")
+    parser.add_argument("--min-score", type=int, default=60,
+                        help="Minimum score to auto-add (default: 60)")
+    args = parser.parse_args()
+
+    finds = run_radar(auto_add=args.auto_add, auto_add_min_score=args.min_score)
+
+    if not finds:
+        print("\nNo new companies found this run.")
+    else:
+        print(f"\nNew finds ({len(finds)}):")
+        for f in finds:
+            tag = "[AUTO-ADDED]" if f.get("auto_added") else "[pending review]"
+            print(f"  [{f.get('tier','?')}] {f['company']} ({f.get('score','?')}) {tag}")
+        if not args.auto_add:
+            print("\nTip: run with --auto-add to send finds straight to pipeline")
