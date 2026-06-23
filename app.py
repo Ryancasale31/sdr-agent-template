@@ -95,7 +95,7 @@ def _show_login():
     .login-sub   { font-size: .88rem; color: #6B7280; margin-bottom: 24px; }
     </style>
     <div class="login-wrap">
-      <div class="login-title">🎯 WBR SDR Agent</div>
+      <div class="login-title">WBR SDR Agent</div>
       <div class="login-sub">Select your event and enter the access code.</div>
     </div>
     """, unsafe_allow_html=True)
@@ -110,7 +110,7 @@ def _show_login():
             label_visibility="collapsed",
         )
         password = st.text_input("Access code", type="password", placeholder="Access code")
-        if st.button("Enter →", type="primary", use_container_width=True):
+        if st.button("Enter", type="primary", use_container_width=True):
             try:
                 expected = st.secrets.get("event_passwords", {}).get(selected, "")
             except Exception:
@@ -205,7 +205,7 @@ Return ONLY valid JSON:
   "score": <0-100>,
   "tier": "<A|B|C>",
   "fit_reason": "<2-3 sentences on why they fit this audience>",
-  "pitch_angle": "<the ONE strongest reason they should sponsor — specific to our attendee list>",
+  "pitch_angle": "<the ONE strongest reason they should sponsor -- specific to our attendee list>",
   "risk": "<one sentence on potential objection>",
   "status": "researched"
 }}
@@ -226,7 +226,7 @@ Return ONLY valid JSON:
 
 
 def generate_meeting_email(company_data: dict, contact_name: str, contact_title: str, icp: dict) -> dict:
-    """Generate a single, direct email asking for a meeting — uses the pitch angle as the hook."""
+    """Generate a single, direct email asking for a meeting -- uses the pitch angle as the hook."""
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     ecfg = st.session_state.get("event_cfg", {})
 
@@ -234,7 +234,7 @@ def generate_meeting_email(company_data: dict, contact_name: str, contact_title:
     vs_sponsor = company_data.get("vs_sponsor", "")
     competitor_line = f"Their competitors already sponsoring: {vs_sponsor}." if vs_sponsor else ""
 
-    sender    = ecfg.get("sender_name", "Your Name")
+    sender = ecfg.get("sender_name", "Your Name")
     event_label = f"{ecfg.get('name','the event')} ({ecfg.get('location','')}, {ecfg.get('dates','')})"
     prompt = f"""You are {sender}, a sponsorship sales rep for {event_label}.
 
@@ -254,7 +254,7 @@ TARGET:
 
 Write ONE short, direct email asking for a 15-minute call to explore sponsorship.
 - Lead with the ONE most relevant reason their buyers are in the room (from the pitch angle above)
-- Be specific — name actual attendee titles or companies if it strengthens the case
+- Be specific -- name actual attendee titles or companies if it strengthens the case
 - Ask for a specific, low-friction action: "15 minutes this week or next?"
 - Under 120 words total
 - Tone: peer-to-peer, confident, no fluff
@@ -322,7 +322,7 @@ Write a 3-touch cold email sequence to sell them a sponsorship.
 
 Rules:
 - Email 1: Lead with ONE specific audience insight most relevant to them. Under 150 words. Curiosity only, no hard pitch.
-- Email 2 (Day 4): Connect their product to specific buyer titles/companies attending. If their competitors are sponsoring, mention it as social proof — not as a threat. Under 175 words.
+- Email 2 (Day 4): Connect their product to specific buyer titles/companies attending. If their competitors are sponsoring, mention it as social proof -- not as a threat. Under 175 words.
 - Email 3 (Day 9): Soft close, limited spots, reference existing sponsors as validation. Under 100 words.
 - Tone: Direct, peer-to-peer, confident. No fluff, no corporate speak.
 - Never use: "I hope this email finds you well", "synergy", "leverage", "cutting-edge", "robust", "game-changing"
@@ -382,27 +382,27 @@ with st.sidebar:
     radar_finds = load_json("radar_finds.json", [])
     unreviewed = [c for c in radar_finds if not c.get("reviewed")]
     if unreviewed:
-        st.error(f"📡 {len(unreviewed)} new radar finds waiting!")
+        st.error(f"Radar: {len(unreviewed)} new finds waiting!")
     else:
-        st.caption("📡 Radar: no new finds")
+        st.caption("Radar: no new finds")
 
     st.divider()
     # Storage status
     if storage.github_configured():
-        st.success("💾 Saving to GitHub (persistent)")
-        if st.button("🔄 Refresh data"):
+        st.success("Saving to GitHub (persistent)")
+        if st.button("Refresh data"):
             storage.refresh_cache(event_id=_event_id)
             st.rerun()
     elif storage.gsheets_configured():
-        st.success("💾 Saving to Google Sheets")
-        if st.button("🔄 Refresh data"):
+        st.success("Saving to Google Sheets")
+        if st.button("Refresh data"):
             storage.refresh_cache(event_id=_event_id)
             st.rerun()
     else:
-        st.warning("💾 Local storage only\n(edits reset on reboot)")
+        st.warning("Local storage only\n(edits reset on reboot)")
 
     # Rebuild ICP from an uploaded attendee CSV (persists to storage)
-    with st.expander("⚙️ Rebuild ICP"):
+    with st.expander("Rebuild ICP"):
         st.caption("Upload your attendee registration CSV to regenerate the buyer profile.")
         icp_csv = st.file_uploader("Attendee CSV", type="csv", key="icp_csv")
         if icp_csv and st.button("Rebuild ICP from CSV"):
@@ -414,7 +414,7 @@ with st.sidebar:
             try:
                 new_icp = build_icp(tmp_path)
                 storage.save_icp(new_icp, event_id=_event_id)
-                st.success(f"ICP rebuilt — {new_icp['buyer_count']} buyers.")
+                st.success(f"ICP rebuilt -- {new_icp['buyer_count']} buyers.")
                 st.rerun()
             except Exception as e:
                 st.error(f"Failed: {e}")
@@ -427,24 +427,24 @@ with st.sidebar:
         if outlook.is_authenticated():
             profile = outlook.get_profile()
             name = profile.get("displayName", "") if profile else ""
-            st.success(f"📧 Outlook: {name or 'Connected'}")
+            st.success(f"Outlook: {name or 'Connected'}")
         else:
-            st.warning("📧 Outlook: needs auth")
+            st.warning("Outlook: needs auth")
     else:
-        st.caption("📧 Outlook: awaiting Azure setup")
+        st.caption("Outlook: awaiting Azure setup")
 
     st.divider()
     # Hot leads badge
     hot = [c for c in pipeline if c.get("priority") == "hot" and c.get("status") not in ("closed_won","closed_lost")]
     replied = [c for c in pipeline if c.get("status") == "replied"]
     if replied:
-        st.error(f"🔥 {len(replied)} replied — follow up!")
+        st.error(f"{len(replied)} replied -- follow up!")
     if hot:
-        st.warning(f"⚡ {len(hot)} hot prospects")
+        st.warning(f"{len(hot)} hot prospects")
 
     st.divider()
     st.caption("Sales stages")
-    st.markdown("🔵 Researched · 📞 Contacted · 💬 Replied · 📅 Meeting · 📄 Contract · ✅ Won · ❌ Lost")
+    st.markdown("Researched > Contacted > Replied > Meeting > Contract > Won / Lost")
 
 # ── Helpers: activity log & CRM ───────────────────────────────────────────────
 from datetime import date, datetime
@@ -454,20 +454,20 @@ STATUSES = [
     "meeting_booked", "contract_out", "closed_won", "closed_lost",
 ]
 STATUS_LABELS = {
-    "researched":    "🔵 Researched",
-    "contacted":     "📞 Contacted",
-    "replied":       "💬 Replied",
-    "meeting_booked":"📅 Meeting Booked",
-    "contract_out":  "📄 Contract Out",
-    "closed_won":    "✅ Closed Won",
-    "closed_lost":   "❌ Closed Lost",
+    "researched":    "Researched",
+    "contacted":     "Contacted",
+    "replied":       "Replied",
+    "meeting_booked":"Meeting Booked",
+    "contract_out":  "Contract Out",
+    "closed_won":    "Closed Won",
+    "closed_lost":   "Closed Lost",
     # legacy values
-    "contact_found": "📞 Contacted",
-    "approved":      "📞 Contacted",
-    "sent":          "📞 Contacted",
-    "skipped":       "🔵 Researched",
+    "contact_found": "Contacted",
+    "approved":      "Contacted",
+    "sent":          "Contacted",
+    "skipped":       "Researched",
 }
-PRIORITY_LABELS = {"hot": "🔥 Hot", "medium": "⚡ Medium", "cold": "🧊 Cold"}
+PRIORITY_LABELS = {"hot": "Hot", "medium": "Medium", "cold": "Cold"}
 
 def log_activity(company: dict, activity_type: str, **kwargs) -> dict:
     """Append an activity entry to company['activity_log']."""
@@ -498,24 +498,23 @@ def render_activity_log(company: dict, key_prefix: str):
     log = sorted(company.get("activity_log", []), key=lambda x: x.get("date",""), reverse=True)
 
     icons = {
-        "email_sent":       "📤",
-        "reply_received":   "💬",
-        "call":             "📞",
-        "note":             "📝",
-        "meeting_booked":   "📅",
-        "contract_sent":    "📄",
-        "status_change":    "🔄",
+        "email_sent":       "Email Sent",
+        "reply_received":   "Reply",
+        "call":             "Call",
+        "note":             "Note",
+        "meeting_booked":   "Meeting",
+        "contract_sent":    "Contract",
+        "status_change":    "Stage Change",
     }
 
     if log:
         st.markdown("**Activity Log**")
         for entry in log:
-            icon = icons.get(entry["type"], "•")
+            icon = icons.get(entry["type"], entry["type"])
             date_str = entry.get("date","")
-            src = "🔗" if entry.get("source") == "outlook" else ""
-            label = entry["type"].replace("_"," ").title()
+            src = " (Outlook)" if entry.get("source") == "outlook" else ""
             detail = entry.get("subject") or entry.get("note") or entry.get("preview","")
-            st.markdown(f"{icon} **{label}** {src} · {date_str}")
+            st.markdown(f"**{icon}**{src} - {date_str}")
             if detail:
                 st.caption(f"  {detail[:120]}")
     else:
@@ -523,7 +522,7 @@ def render_activity_log(company: dict, key_prefix: str):
 
     st.markdown("**Log Activity**")
     log_cols = st.columns(4)
-    if log_cols[0].button("📤 Email Sent", key=f"{key_prefix}_log_sent"):
+    if log_cols[0].button("Email Sent", key=f"{key_prefix}_log_sent"):
         touch_opt = st.session_state.get(f"{key_prefix}_touch", 1)
         company = log_activity(company, "email_sent", touch=touch_opt, subject=f"Touch {touch_opt}")
         pipeline_local = load_pipeline()
@@ -532,21 +531,21 @@ def render_activity_log(company: dict, key_prefix: str):
             company["status"] = "contacted"
         save_pipeline(pipeline_local)
         st.rerun()
-    if log_cols[1].button("💬 Reply In", key=f"{key_prefix}_log_reply"):
+    if log_cols[1].button("Reply In", key=f"{key_prefix}_log_reply"):
         company = log_activity(company, "reply_received")
         company["status"] = "replied"
         pipeline_local = load_pipeline()
         pipeline_local = upsert_company(pipeline_local, company)
         save_pipeline(pipeline_local)
         st.rerun()
-    if log_cols[2].button("📅 Mtg Booked", key=f"{key_prefix}_log_mtg"):
+    if log_cols[2].button("Mtg Booked", key=f"{key_prefix}_log_mtg"):
         company = log_activity(company, "meeting_booked")
         company["status"] = "meeting_booked"
         pipeline_local = load_pipeline()
         pipeline_local = upsert_company(pipeline_local, company)
         save_pipeline(pipeline_local)
         st.rerun()
-    if log_cols[3].button("📞 Call", key=f"{key_prefix}_log_call"):
+    if log_cols[3].button("Call", key=f"{key_prefix}_log_call"):
         company = log_activity(company, "call")
         pipeline_local = load_pipeline()
         pipeline_local = upsert_company(pipeline_local, company)
@@ -554,7 +553,7 @@ def render_activity_log(company: dict, key_prefix: str):
         st.rerun()
 
     note_text = st.text_input("Add a note", key=f"{key_prefix}_note_input", placeholder="e.g. Left voicemail, asked about budget...")
-    if st.button("📝 Save Note", key=f"{key_prefix}_save_note") and note_text:
+    if st.button("Save Note", key=f"{key_prefix}_save_note") and note_text:
         company = log_activity(company, "note", note=note_text)
         pipeline_local = load_pipeline()
         pipeline_local = upsert_company(pipeline_local, company)
@@ -583,8 +582,8 @@ def get_contacts(company: dict) -> list:
     return contacts
 
 CONTACT_ACT_ICONS = {
-    "email_sent": "📤", "reply_received": "💬", "call": "📞",
-    "meeting": "📅", "note": "📝", "task": "✅",
+    "email_sent": "Email", "reply_received": "Reply", "call": "Call",
+    "meeting": "Meeting", "note": "Note", "task": "Task",
 }
 
 def log_contact_activity(contact: dict, atype: str, **kw):
@@ -595,7 +594,7 @@ def render_account_page(company_name: str):
     pipeline = load_pipeline()
     company = get_company(pipeline, company_name)
 
-    if st.button("← Back to pipeline"):
+    if st.button("<- Back to pipeline"):
         st.session_state["view"] = None
         st.session_state.pop("selected_company", None)
         st.rerun()
@@ -605,14 +604,14 @@ def render_account_page(company_name: str):
         return
 
     score = company.get("score", 0)
-    score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
-    st.title(f"{score_color} {company['company']}")
+    score_color = "High" if score >= 80 else "Medium" if score >= 60 else "Low"
+    st.title(f"{company['company']} (Score: {score}/100)")
 
     m = st.columns(4)
     m[0].metric("Score", f"{score}/100")
     m[1].metric("Tier", company.get("tier", "?"))
     m[2].metric("Priority", PRIORITY_LABELS.get(company.get("priority", ""), "—"))
-    m[3].metric("Stage", STATUS_LABELS.get(company.get("status", ""), "—").split(" ", 1)[-1])
+    m[3].metric("Stage", STATUS_LABELS.get(company.get("status", ""), "—"))
 
     # Editable priority + stage
     e1, e2, e3 = st.columns([2, 2, 1])
@@ -623,12 +622,12 @@ def render_account_page(company_name: str):
     new_status = e2.selectbox("Sales stage", STATUSES, index=STATUSES.index(cur_status) if cur_status in STATUSES else 0, key="acc_stage")
     e3.write("")
     e3.write("")
-    if e3.button("💾 Save"):
+    if e3.button("Save"):
         old = company.get("status", "")
         company["priority"] = new_pri
         company["status"] = new_status
         if old != new_status:
-            company = log_activity(company, "status_change", note=f"{old} → {new_status}")
+            company = log_activity(company, "status_change", note=f"{old} -> {new_status}")
         pipeline = upsert_company(pipeline, company)
         save_pipeline(pipeline)
         st.success("Saved")
@@ -641,9 +640,9 @@ def render_account_page(company_name: str):
     if company.get("vs_sponsor"):
         st.warning(f"**Competitors already sponsoring:** {company['vs_sponsor']}")
 
-    # ── Contacts ──
+    # -- Contacts --
     st.divider()
-    st.subheader("👥 Contacts")
+    st.subheader("Contacts")
     contacts = get_contacts(company)
 
     # Auto-save any contacts that exist but aren't yet persisted (e.g. pulled from Tiga)
@@ -656,7 +655,7 @@ def render_account_page(company_name: str):
         st.caption("No contacts yet. Add one below.")
 
     def _save_contact_field(ci, contacts, company, pipeline):
-        """Auto-save callback — fires when any contact field loses focus."""
+        """Auto-save callback -- fires when any contact field loses focus."""
         c = contacts[ci]
         c["name"]  = st.session_state.get(f"ct_name_{ci}",  c.get("name", ""))
         c["title"] = st.session_state.get(f"ct_title_{ci}", c.get("title", ""))
@@ -670,7 +669,7 @@ def render_account_page(company_name: str):
     for ci, contact in enumerate(contacts):
         label = contact.get("name") or "(unnamed contact)"
         if contact.get("title"):
-            label += f" — {contact['title']}"
+            label += f" -- {contact['title']}"
         with st.expander(label, expanded=len(contacts) == 1):
             cc1, cc2 = st.columns(2)
             cc1.text_input("Name",  contact.get("name", ""),  key=f"ct_name_{ci}",
@@ -684,7 +683,7 @@ def render_account_page(company_name: str):
             st.text_area("Notes about this contact", contact.get("notes", ""), key=f"ct_notes_{ci}",
                          height=90, on_change=_save_contact_field, args=(ci, contacts, company, pipeline))
 
-            if st.button("🗑️ Remove", key=f"ct_del_{ci}"):
+            if st.button("Remove", key=f"ct_del_{ci}"):
                 contacts.pop(ci)
                 company["contacts"] = contacts
                 pipeline = upsert_company(pipeline, company)
@@ -696,16 +695,16 @@ def render_account_page(company_name: str):
             clog = sorted(contact.get("activity_log", []), key=lambda x: x.get("date", ""), reverse=True)
             if clog:
                 for entry in clog:
-                    icon = CONTACT_ACT_ICONS.get(entry["type"], "•")
+                    icon = CONTACT_ACT_ICONS.get(entry["type"], entry["type"])
                     detail = entry.get("note") or entry.get("subject") or entry.get("preview", "")
-                    src = " 🔗" if entry.get("source") == "outlook" else ""
-                    st.caption(f"{icon} {entry['type'].replace('_', ' ').title()}{src} · {entry.get('date', '')} {('— ' + detail) if detail else ''}")
+                    src = " (Outlook)" if entry.get("source") == "outlook" else ""
+                    st.caption(f"{icon}{src} - {entry.get('date', '')} {('-- ' + detail) if detail else ''}")
             else:
                 st.caption("No history yet.")
 
             # Log activity for this contact (manual; Azure will auto-add later)
             a = st.columns(4)
-            for col, (atype, lbl) in zip(a, [("email_sent", "📤 Email"), ("reply_received", "💬 Reply"), ("call", "📞 Call"), ("meeting", "📅 Meeting")]):
+            for col, (atype, lbl) in zip(a, [("email_sent", "Email"), ("reply_received", "Reply"), ("call", "Call"), ("meeting", "Meeting")]):
                 if col.button(lbl, key=f"ct_act_{ci}_{atype}"):
                     log_contact_activity(contact, atype)
                     company["contacts"] = contacts
@@ -713,7 +712,7 @@ def render_account_page(company_name: str):
                     save_pipeline(pipeline)
                     st.rerun()
             tnote = st.text_input("Log a note/task for this contact", key=f"ct_actnote_{ci}", placeholder="e.g. Sent follow-up, scheduling call next week")
-            if st.button("➕ Add note", key=f"ct_addnote_{ci}") and tnote:
+            if st.button("Add note", key=f"ct_addnote_{ci}") and tnote:
                 log_contact_activity(contact, "note", note=tnote)
                 company["contacts"] = contacts
                 pipeline = upsert_company(pipeline, company)
@@ -721,7 +720,7 @@ def render_account_page(company_name: str):
                 st.rerun()
 
     # Add a new contact
-    with st.expander("➕ Add a contact"):
+    with st.expander("Add a contact"):
         n1, n2 = st.columns(2)
         nn = n1.text_input("Name", key="newc_name")
         nt = n2.text_input("Title", key="newc_title")
@@ -735,9 +734,9 @@ def render_account_page(company_name: str):
             st.success("Contact added")
             st.rerun()
 
-    # ── Account-level tasks & activity ──
+    # -- Account-level tasks & activity --
     st.divider()
-    st.subheader("📋 Account Activity & Tasks")
+    st.subheader("Account Activity & Tasks")
     st.caption("Log touches and tasks manually now. Once Azure is connected, sent/received emails will auto-log here.")
     render_activity_log(company, key_prefix="acc")
 
@@ -750,26 +749,26 @@ if st.session_state.get("view") == "account" and st.session_state.get("selected_
 # ── Hero banner ───────────────────────────────────────────────────────────────
 st.markdown(
     f'<div class="hero">'
-    f'<h1>{_event_cfg.get("name","WBR")} — Sponsorship Pipeline</h1>'
-    f'<p>Research · score · sequence · track — for the {_event_cfg.get("focus","event")} leaders in the room.</p>'
-    f'<span class="pill">{_event_cfg.get("location","")} · {_event_cfg.get("dates","")}</span>'
+    f'<h1>{_event_cfg.get("name","WBR")} -- Sponsorship Pipeline</h1>'
+    f'<p>Research, score, sequence, track -- for the {_event_cfg.get("focus","event")} leaders in the room.</p>'
+    f'<span class="pill">{_event_cfg.get("location","")} - {_event_cfg.get("dates","")}</span>'
     f'</div>',
     unsafe_allow_html=True,
 )
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
-    "🔍 Research", "📋 Pipeline", "✉️ Outreach Queue",
-    "📡 Radar", "🎯 Prospect", "📥 Import", "🏆 Funnel", "📬 Outlook", "👥 Contacts",
+    "Research", "Pipeline", "Outreach Queue",
+    "Radar", "Prospect", "Import", "Funnel", "Outlook", "Contacts",
 ])
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 1 — RESEARCH
+# TAB 1 -- RESEARCH
 # ════════════════════════════════════════════════════════════════════════════
 with tab1:  # Research
     st.header("Research a Company")
-    st.caption("Enter any company name — the agent will research them online, score their fit, and explain why they should sponsor.")
+    st.caption("Enter any company name -- the agent will research them online, score their fit, and explain why they should sponsor.")
 
     col1, col2 = st.columns([3, 1])
     with col1:
@@ -777,7 +776,7 @@ with tab1:  # Research
     with col2:
         st.write("")
         st.write("")
-        research_btn = st.button("🔍 Research", type="primary", use_container_width=True)
+        research_btn = st.button("Research", type="primary", use_container_width=True)
 
     if research_btn and company_input:
         if not icp:
@@ -790,12 +789,12 @@ with tab1:  # Research
                     # Score color
                     score = result.get("score", 0)
                     tier = result.get("tier", "C")
-                    score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
+                    score_color = "High" if score >= 80 else "Medium" if score >= 60 else "Low"
 
                     st.divider()
                     col_a, col_b, col_c = st.columns(3)
                     col_a.metric("Fit Score", f"{score}/100")
-                    col_b.metric("Tier", f"{score_color} Tier {tier}")
+                    col_b.metric("Tier", f"Tier {tier} ({score_color})")
                     col_c.metric("Status", "Researched")
 
                     st.subheader(result["company"])
@@ -808,10 +807,10 @@ with tab1:  # Research
 
                     # Add to pipeline
                     st.divider()
-                    if st.button("➕ Add to Pipeline", type="primary"):
+                    if st.button("Add to Pipeline", type="primary"):
                         pipeline = upsert_company(pipeline, result)
                         save_pipeline(pipeline)
-                        st.success(f"✅ {result['company']} added to your pipeline!")
+                        st.success(f"{result['company']} added to your pipeline!")
                         st.rerun()
 
                     # Store in session for re-use
@@ -822,11 +821,11 @@ with tab1:  # Research
 
     elif "last_research" in st.session_state:
         r = st.session_state["last_research"]
-        st.info(f"Last researched: **{r['company']}** — Score {r['score']}/100")
+        st.info(f"Last researched: **{r['company']}** -- Score {r['score']}/100")
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 2 — PIPELINE
+# TAB 2 -- PIPELINE
 # ════════════════════════════════════════════════════════════════════════════
 with tab2:
     st.header("My Sponsor Pipeline")
@@ -834,7 +833,7 @@ with tab2:
     pipeline = load_pipeline()
 
     if not pipeline:
-        st.info("No companies yet — research one in the 🔍 tab to get started.")
+        st.info("No companies yet -- research one in the Research tab to get started.")
     else:
         # Filters
         col_f1, col_f2, col_f3, col_f4 = st.columns(4)
@@ -855,7 +854,7 @@ with tab2:
             filtered = [c for c in filtered if c.get("category","") == cat_filter]
 
         # Search by company name (fast way to find one among hundreds)
-        search = st.text_input("🔎 Search company", key="pl_search", placeholder="Type a company name...")
+        search = st.text_input("Search company", key="pl_search", placeholder="Type a company name...")
         if search:
             filtered = [c for c in filtered if search.lower() in c.get("company", "").lower()]
 
@@ -863,7 +862,7 @@ with tab2:
         priority_order = {"hot": 0, "medium": 1, "cold": 2, None: 3, "": 3}
         filtered_sorted = sorted(filtered, key=lambda x: (priority_order.get(x.get("priority"), 3), -x.get("score", 0)))
 
-        # Cap how many cards render at once — rendering 400+ expanders is very slow.
+        # Cap how many cards render at once -- rendering 400+ expanders is very slow.
         PAGE = 25
         total_filtered = len(filtered_sorted)
         show_n = st.session_state.get("pl_show_n", PAGE)
@@ -875,13 +874,13 @@ with tab2:
             tier = company.get("tier", "?")
             status = company.get("status", "researched")
             priority = company.get("priority", "")
-            score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
+            score_label = "High" if score >= 80 else "Medium" if score >= 60 else "Low"
             status_label = STATUS_LABELS.get(status, status.replace("_"," ").title())
             priority_label = PRIORITY_LABELS.get(priority, "")
             days = days_since_last_activity(company)
             days_str = f"· {days}d ago" if days is not None else ""
 
-            header = f"{score_color} **{company['company']}** — {score}/100 · {status_label}"
+            header = f"**{company['company']}** -- {score}/100 ({score_label}) · {status_label}"
             if priority_label:
                 header += f" · {priority_label}"
             if days_str:
@@ -896,22 +895,22 @@ with tab2:
                         email = ct.get("email","").strip()
                         parts = " · ".join(filter(None, [name, title, email]))
                         if parts:
-                            st.caption(f"👤 {parts}")
+                            st.caption(f"Contact: {parts}")
                 else:
-                    st.caption("👤 No contact yet")
-                if st.button("👤 Open account page", key=f"open_acct_{idx}"):
+                    st.caption("No contact yet")
+                if st.button("Open account page", key=f"open_acct_{idx}"):
                     open_account(company["company"])
                 col1, col2 = st.columns(2)
                 with col1:
-                    st.write(f"**What they do:** {company.get('what_they_do','—')}")
-                    st.write(f"**Who they sell to:** {company.get('who_they_sell_to', company.get('what_they_do','—'))}")
+                    st.write(f"**What they do:** {company.get('what_they_do','--')}")
+                    st.write(f"**Who they sell to:** {company.get('who_they_sell_to', company.get('what_they_do','--'))}")
                     if company.get("fit_reason"):
                         st.write(f"**Fit reason:** {company.get('fit_reason')}")
                     if company.get("hq"):
                         st.write(f"**HQ:** {company.get('hq')}")
                 with col2:
                     if company.get("pitch_angle") or company.get("outreach_note"):
-                        st.info(f"**Pitch angle:** {company.get('pitch_angle', company.get('outreach_note','—'))}")
+                        st.info(f"**Pitch angle:** {company.get('pitch_angle', company.get('outreach_note','--'))}")
                     if company.get("vs_sponsor"):
                         st.warning(f"**Competitors already sponsoring:** {company.get('vs_sponsor')}")
                     if company.get("risk"):
@@ -930,12 +929,12 @@ with tab2:
                     index=STATUSES.index(status) if status in STATUSES else 0,
                     key=f"stage_{idx}",
                 )
-                if ctrl3.button("💾 Save Stage", key=f"savestage_{idx}"):
+                if ctrl3.button("Save Stage", key=f"savestage_{idx}"):
                     old_status = company.get("status","")
                     company["priority"] = new_priority
                     company["status"] = new_status
                     if old_status != new_status:
-                        company = log_activity(company, "status_change", note=f"{old_status} → {new_status}")
+                        company = log_activity(company, "status_change", note=f"{old_status} -> {new_status}")
                     pipeline = upsert_company(pipeline, company)
                     save_pipeline(pipeline)
                     st.success("Saved!")
@@ -950,7 +949,7 @@ with tab2:
                 contact_email = c3.text_input("Email", value=company.get("contact_email",""), key=f"ce_{idx}")
 
                 col_a, col_b, col_c = st.columns(3)
-                if col_a.button("💾 Save Contact", key=f"save_{idx}"):
+                if col_a.button("Save Contact", key=f"save_{idx}"):
                     company["contact_name"] = contact_name
                     company["contact_title"] = contact_title
                     company["contact_email"] = contact_email
@@ -961,7 +960,7 @@ with tab2:
                     st.success("Contact saved!")
                     st.rerun()
 
-                if col_b.button("✉️ Draft Meeting Email", key=f"gen_{idx}"):
+                if col_b.button("Draft Meeting Email", key=f"gen_{idx}"):
                     if not contact_name:
                         st.warning("Add a contact name first")
                     else:
@@ -982,19 +981,18 @@ with tab2:
                 # Show generated meeting email inline (persists across reruns via session state)
                 draft = st.session_state.get(f"meeting_email_{company['company']}")
                 if draft:
-                    st.markdown("**📧 Meeting Email Draft**")
+                    st.markdown("**Meeting Email Draft**")
                     draft_subject = st.text_input("Subject", value=draft["subject"], key=f"draft_subj_{idx}")
                     draft_body = st.text_area("Body", value=draft["body"], height=200, key=f"draft_body_{idx}")
                     dcol1, dcol2 = st.columns(2)
-                    if dcol1.button("✅ Looks good — keep it", key=f"draft_keep_{idx}"):
-                        # Update the email in the stored sequence with any edits
+                    if dcol1.button("Looks good -- keep it", key=f"draft_keep_{idx}"):
                         st.session_state.pop(f"meeting_email_{company['company']}", None)
-                        st.success("Saved! Find the full 3-touch sequence in ✉️ Outreach Queue.")
-                    if dcol2.button("🔄 Regenerate", key=f"draft_regen_{idx}"):
+                        st.success("Saved! Find the full 3-touch sequence in Outreach Queue.")
+                    if dcol2.button("Regenerate", key=f"draft_regen_{idx}"):
                         st.session_state.pop(f"meeting_email_{company['company']}", None)
                         st.rerun()
 
-                if col_c.button("🗑️ Remove", key=f"del_{idx}"):
+                if col_c.button("Remove", key=f"del_{idx}"):
                     pipeline = [c for c in pipeline if c["company"] != company["company"]]
                     save_pipeline(pipeline)
                     st.rerun()
@@ -1003,12 +1001,12 @@ with tab2:
                 render_activity_log(company, key_prefix=f"pl_{idx}")
 
         if show_n < total_filtered:
-            if st.button(f"⬇️ Show {min(PAGE, total_filtered - show_n)} more"):
+            if st.button(f"Show {min(PAGE, total_filtered - show_n)} more"):
                 st.session_state["pl_show_n"] = show_n + PAGE
                 st.rerun()
 
         st.divider()
-        if st.button("📥 Export Pipeline to CSV"):
+        if st.button("Export Pipeline to CSV"):
             rows = []
             for c in pipeline:
                 rows.append({
@@ -1030,7 +1028,7 @@ with tab2:
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 3 — OUTREACH QUEUE
+# TAB 3 -- OUTREACH QUEUE
 # ════════════════════════════════════════════════════════════════════════════
 with tab3:
     st.header("Outreach Queue")
@@ -1040,15 +1038,15 @@ with tab3:
     companies_with_emails = [c for c in pipeline if c.get("emails")]
 
     if not companies_with_emails:
-        st.info("No emails drafted yet. Go to 📋 Pipeline, add a contact, and click 'Generate Emails'.")
+        st.info("No emails drafted yet. Go to Pipeline, add a contact, and click 'Generate Emails'.")
     else:
         for company in companies_with_emails:
             status = company.get("status", "")
-            status_icon = "✅" if status == "approved" else "🟡"
+            status_icon = "Approved" if status == "approved" else "Pending"
 
-            with st.expander(f"{status_icon} **{company['company']}** · {company.get('contact_name','No contact')} · {status.replace('_',' ').title()}"):
+            with st.expander(f"**{company['company']}** · {company.get('contact_name','No contact')} · {status_icon}"):
                 for email in company.get("emails", []):
-                    st.markdown(f"#### Touch {email['touch']} — {email['send_day']}")
+                    st.markdown(f"#### Touch {email['touch']} -- {email['send_day']}")
                     st.markdown(f"**Subject:** {email['subject']}")
                     st.text_area(
                         "Body",
@@ -1059,14 +1057,14 @@ with tab3:
                     st.divider()
 
                 col1, col2, col3 = st.columns(3)
-                if col1.button("✅ Approve Sequence", key=f"approve_{company['company']}", type="primary"):
+                if col1.button("Approve Sequence", key=f"approve_{company['company']}", type="primary"):
                     company["status"] = "approved"
                     pipeline = upsert_company(pipeline, company)
                     save_pipeline(pipeline)
-                    st.success(f"✅ {company['company']} approved! Ready to load into Tiga.")
+                    st.success(f"{company['company']} approved! Ready to load into Tiga.")
                     st.rerun()
 
-                if col2.button("🔄 Regenerate", key=f"regen_{company['company']}"):
+                if col2.button("Regenerate", key=f"regen_{company['company']}"):
                     with st.spinner("Rewriting..."):
                         emails = generate_emails(
                             company,
@@ -1079,7 +1077,7 @@ with tab3:
                         save_pipeline(pipeline)
                         st.rerun()
 
-                if col3.button("⏭️ Skip", key=f"skip_{company['company']}"):
+                if col3.button("Skip", key=f"skip_{company['company']}"):
                     company["status"] = "skipped"
                     pipeline = upsert_company(pipeline, company)
                     save_pipeline(pipeline)
@@ -1089,8 +1087,8 @@ with tab3:
         approved = [c for c in pipeline if c.get("status") == "approved"]
         if approved:
             st.divider()
-            st.subheader(f"✅ {len(approved)} sequences approved")
-            if st.button("📤 Export Approved to Tiga CSV", type="primary"):
+            st.subheader(f"{len(approved)} sequences approved")
+            if st.button("Export Approved to Tiga CSV", type="primary"):
                 rows = []
                 for c in approved:
                     emails = c.get("emails", [{},{},{}])
@@ -1111,14 +1109,14 @@ with tab3:
                     writer = csv.DictWriter(f, fieldnames=rows[0].keys())
                     writer.writeheader()
                     writer.writerows(rows)
-                st.success("✅ Saved to tiga_import.csv — ready to import into Tiga!")
+                st.success("Saved to tiga_import.csv -- ready to import into Tiga!")
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 4 — RADAR
+# TAB 4 -- RADAR
 # ════════════════════════════════════════════════════════════════════════════
 with tab4:
-    st.header("📡 Prospecting Radar")
+    st.header("Prospecting Radar")
     st.caption("New companies found automatically based on event signals, press releases, and competitor tracking. Review and approve before they hit your pipeline.")
 
     RADAR_FILE = "radar_finds.json"
@@ -1129,16 +1127,16 @@ with tab4:
     # Manual run button
     col_r1, col_r2, col_r3 = st.columns([2, 1, 1])
     col_r1.info(f"**{len(unreviewed)} new companies** waiting for review · {len(reviewed)} previously reviewed")
-    auto_add_toggle = col_r3.checkbox("Auto-add to pipeline", value=True, help="Automatically add finds (score ≥ 60) straight to your pipeline without manual review")
-    if col_r2.button("🔍 Run Radar Now", type="primary"):
-        with st.spinner("🔍 Searching 31 queries across the web... this takes 10-15 minutes, keep this tab open"):
+    auto_add_toggle = col_r3.checkbox("Auto-add to pipeline", value=True, help="Automatically add finds (score >= 60) straight to your pipeline without manual review")
+    if col_r2.button("Run Radar Now", type="primary"):
+        with st.spinner("Searching queries across the web... this takes 10-15 minutes, keep this tab open"):
             try:
                 import radar as radar_module
                 importlib.reload(radar_module)
                 finds = radar_module.run_radar(auto_add=auto_add_toggle, auto_add_min_score=60)
                 added = len([f for f in finds if f.get("auto_added")])
                 queued = len([f for f in finds if not f.get("auto_added")])
-                msg = f"✅ Found {len(finds)} new companies!"
+                msg = f"Found {len(finds)} new companies!"
                 if auto_add_toggle and added:
                     msg += f" {added} added to pipeline, {queued} queued for review."
                 st.success(msg)
@@ -1149,12 +1147,12 @@ with tab4:
     st.divider()
 
     if not unreviewed:
-        st.success("✅ All caught up — no new companies to review.")
+        st.success("All caught up -- no new companies to review.")
         st.caption("The radar runs every morning automatically. Check back tomorrow for new finds.")
     else:
         st.subheader(f"Review New Finds ({len(unreviewed)})")
 
-        if st.button(f"➕ Add all {len(unreviewed)} to Pipeline", type="primary", key="radar_add_all"):
+        if st.button(f"Add all {len(unreviewed)} to Pipeline", type="primary", key="radar_add_all"):
             pipeline = load_pipeline()
             for rc in radar_finds:
                 if not rc.get("reviewed"):
@@ -1165,29 +1163,29 @@ with tab4:
             save_pipeline(pipeline)
             with open(RADAR_FILE, "w") as f:
                 json.dump(radar_finds, f, indent=2)
-            st.success(f"✅ Added {len(unreviewed)} companies to your pipeline!")
+            st.success(f"Added {len(unreviewed)} companies to your pipeline!")
             st.rerun()
 
         for ridx, company in enumerate(unreviewed):
             score = company.get("score", 0)
             tier = company.get("tier", "?")
-            score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
+            score_label = "High" if score >= 80 else "Medium" if score >= 60 else "Low"
             signal = company.get("signal", "")
 
-            with st.expander(f"{score_color} **{company['company']}** — {score}/100 · Tier {tier} · 📍 {signal}"):
+            with st.expander(f"**{company['company']}** -- {score}/100 · Tier {tier} · {signal}"):
                 col1, col2 = st.columns(2)
                 with col1:
-                    st.write(f"**What they do:** {company.get('what_they_do','—')}")
-                    st.write(f"**Category:** {company.get('category','—')}")
-                    st.write(f"**Found:** {company.get('found_date','—')}")
+                    st.write(f"**What they do:** {company.get('what_they_do','--')}")
+                    st.write(f"**Category:** {company.get('category','--')}")
+                    st.write(f"**Found:** {company.get('found_date','--')}")
                     if company.get("source_url"):
                         st.write(f"**Source:** [{company['source_url'][:60]}...]({company['source_url']})")
                 with col2:
-                    st.info(f"**Pitch angle:** {company.get('pitch_angle','—')}")
-                    st.write(f"**Fit reason:** {company.get('fit_reason','—')}")
+                    st.info(f"**Pitch angle:** {company.get('pitch_angle','--')}")
+                    st.write(f"**Fit reason:** {company.get('fit_reason','--')}")
 
                 col_a, col_b = st.columns(2)
-                if col_a.button("✅ Add to Pipeline", key=f"radar_add_{ridx}", type="primary"):
+                if col_a.button("Add to Pipeline", key=f"radar_add_{ridx}", type="primary"):
                     company["reviewed"] = True
                     company["status"] = "researched"
                     pipeline = upsert_company(pipeline, company)
@@ -1198,10 +1196,10 @@ with tab4:
                             rc["reviewed"] = True
                     with open(RADAR_FILE, "w") as f:
                         json.dump(radar_finds, f, indent=2)
-                    st.success(f"✅ {company['company']} added to pipeline!")
+                    st.success(f"{company['company']} added to pipeline!")
                     st.rerun()
 
-                if col_b.button("⏭️ Dismiss", key=f"radar_skip_{ridx}"):
+                if col_b.button("Dismiss", key=f"radar_skip_{ridx}"):
                     for rc in radar_finds:
                         if rc["company"] == company["company"]:
                             rc["reviewed"] = True
@@ -1215,23 +1213,20 @@ with tab4:
         with st.expander(f"Previously reviewed ({len(reviewed)})"):
             for c in reviewed:
                 dismissed = c.get("dismissed", False)
-                icon = "⏭️" if dismissed else "✅"
-                st.write(f"{icon} {c['company']} — {c.get('signal','')}")
+                icon = "Dismissed" if dismissed else "Added"
+                st.write(f"{icon}: {c['company']} -- {c.get('signal','')}")
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 5 — IMPORT
+# TAB 5 -- PROSPECT (Tiga Apollo + Signals)
 # ════════════════════════════════════════════════════════════════════════════
 with tab5:
-    # ════════════════════════════════════════════════════════════════════════
-    # TAB 5 — PROSPECT (Tiga Apollo + Signals)
-    # ════════════════════════════════════════════════════════════════════════
-    st.header("🎯 Prospect")
-    st.caption("Search Seamless.ai using your FSE ICP keywords, run your Tiga signals to score results, and auto-build a pipeline list.")
+    st.header("Prospect")
+    st.caption("Search Seamless.ai using your ICP keywords, run your Tiga signals to score results, and auto-build a pipeline list.")
 
     import tiga_prospector as tp
 
-    # ── Load signals ──────────────────────────────────────────────────────
+    # -- Load signals --
     @st.cache_data(ttl=300, show_spinner=False)
     def fetch_signals():
         try:
@@ -1257,18 +1252,18 @@ with tab5:
             )
             selected_signal_ids = [str(signal_options[lbl]) for lbl in selected_signal_labels]
         else:
-            st.info("No Tiga signals found — results won't be scored. You can still build the list.")
+            st.info("No Tiga signals found -- results won't be scored. You can still build the list.")
             selected_signal_ids = []
 
         min_score = st.slider(
-            "Only show results with signal score ≥",
+            "Only show results with signal score >=",
             min_value=0, max_value=100, value=0, step=5,
             help="0 = show everything. Requires at least one signal selected.",
             disabled=len(selected_signal_ids) == 0,
         )
 
         auto_add = st.checkbox(
-            "Auto-add companies scoring ≥ 70 to pipeline",
+            "Auto-add companies scoring >= 70 to pipeline",
             value=False,
             help="Adds high-confidence finds straight to pipeline without manual review"
         )
@@ -1286,11 +1281,11 @@ with tab5:
 - knowledge management field technician
 - AI service operations software
         """)
-        st.caption("Edit `tiga_prospector.py → SEAMLESS_SEARCHES` to customize.")
+        st.caption("Edit tiga_prospector.py SEAMLESS_SEARCHES to customize.")
 
     st.divider()
 
-    if st.button("🚀 Build Prospect List", type="primary", key="prospect_run"):
+    if st.button("Build Prospect List", type="primary", key="prospect_run"):
         prog_bar = st.progress(0)
         prog_label = st.empty()
         results_placeholder = st.empty()
@@ -1312,11 +1307,11 @@ with tab5:
             prog_label.empty()
 
             if not prospects:
-                st.warning("No new companies found — they may all already be in your pipeline.")
+                st.warning("No new companies found -- they may all already be in your pipeline.")
             else:
                 auto_added = len([p for p in prospects if p.get("auto_added")])
                 pending = len(prospects) - auto_added
-                st.success(f"✅ Found **{len(prospects)} new companies** · {auto_added} auto-added to pipeline · {pending} ready to review")
+                st.success(f"Found **{len(prospects)} new companies** · {auto_added} auto-added to pipeline · {pending} ready to review")
 
                 # Store in session for review
                 st.session_state["prospect_results"] = prospects
@@ -1327,7 +1322,7 @@ with tab5:
             prog_label.empty()
             st.error(f"Prospecting error: {e}")
 
-    # ── Review results ────────────────────────────────────────────────────
+    # -- Review results --
     prospects = st.session_state.get("prospect_results", [])
     if prospects:
         st.subheader(f"Results ({len(prospects)} companies)")
@@ -1336,10 +1331,10 @@ with tab5:
         added = [p for p in prospects if p.get("auto_added")]
 
         if added:
-            st.success(f"✅ {len(added)} already auto-added to pipeline")
+            st.success(f"{len(added)} already auto-added to pipeline")
 
         if not_added:
-            if st.button(f"➕ Add all {len(not_added)} to pipeline", type="primary", key="prospect_add_all"):
+            if st.button(f"Add all {len(not_added)} to pipeline", type="primary", key="prospect_add_all"):
                 pipeline = load_pipeline()
                 for p in not_added:
                     entry = {
@@ -1360,18 +1355,18 @@ with tab5:
                     }
                     pipeline = upsert_company(pipeline, entry)
                 save_pipeline(pipeline)
-                st.success(f"✅ Added {len(not_added)} companies!")
+                st.success(f"Added {len(not_added)} companies!")
                 st.session_state["prospect_results"] = []
                 st.rerun()
 
             for pidx, p in enumerate(not_added):
                 sig_str = f" · Signal: {p['signal_score']}/100" if "signal_score" in p else ""
-                icon = "🟢" if p.get("signal_score", 0) >= 70 else "🟡" if p.get("signal_score", 0) >= 40 else "⬜"
-                with st.expander(f"{icon} **{p['company']}**{sig_str} · {p.get('industry','?')} · {p.get('headcount','?')} employees"):
+                score_label = "High" if p.get("signal_score", 0) >= 70 else "Medium" if p.get("signal_score", 0) >= 40 else "Low"
+                with st.expander(f"**{p['company']}**{sig_str} · {p.get('industry','?')} · {p.get('headcount','?')} employees"):
                     col1, col2 = st.columns(2)
                     with col1:
-                        st.write(f"**Website:** {p.get('website') or '—'}")
-                        st.write(f"**Location:** {p.get('location') or '—'}")
+                        st.write(f"**Website:** {p.get('website') or '--'}")
+                        st.write(f"**Location:** {p.get('location') or '--'}")
                         if p.get("linkedin_url"):
                             st.write(f"**LinkedIn:** [{p['linkedin_url'][:50]}]({p['linkedin_url']})")
                     with col2:
@@ -1380,7 +1375,7 @@ with tab5:
                         if p.get("signal_reasoning"):
                             st.info(f"**Signal:** {p['signal_reasoning'][:200]}")
 
-                    if st.button("➕ Add to Pipeline", key=f"prospect_add_{pidx}", type="primary"):
+                    if st.button("Add to Pipeline", key=f"prospect_add_{pidx}", type="primary"):
                         pipeline = load_pipeline()
                         entry = {
                             "company": p["company"],
@@ -1400,29 +1395,29 @@ with tab5:
                         pipeline = upsert_company(pipeline, entry)
                         save_pipeline(pipeline)
                         p["auto_added"] = True
-                        st.success(f"✅ {p['company']} added!")
+                        st.success(f"{p['company']} added!")
                         st.rerun()
 
 with tab6:
-    st.header("📥 Import")
+    st.header("Import")
     st.caption("Upload a CSV from LinkedIn Sales Navigator. The agent auto-detects accounts vs. contacts, deduplicates against your pipeline, and enriches contacts via Tiga.")
 
     import salesnav_import as sni
     import io
     import pandas as pd
 
-    # ── How-to guide ──
-    with st.expander("📋 How to export from LinkedIn Sales Navigator"):
+    # -- How-to guide --
+    with st.expander("How to export from LinkedIn Sales Navigator"):
         st.markdown("""
 **Accounts list (adds companies to pipeline):**
-1. In Sales Nav → Accounts → run your search
-2. Select accounts → **Export** → CSV
-3. Upload here — agent reads: Account Name, Industry, Headcount, Website, HQ
+1. In Sales Nav, Accounts, run your search
+2. Select accounts, Export, CSV
+3. Upload here -- agent reads: Account Name, Industry, Headcount, Website, HQ
 
 **Leads/Contacts list (finds people at your accounts):**
-1. In Sales Nav → Leads → run your search
-2. Select leads → **Export** → CSV
-3. Upload here — agent reads: First/Last Name, Title, Company, Email, LinkedIn URL
+1. In Sales Nav, Leads, run your search
+2. Select leads, Export, CSV
+3. Upload here -- agent reads: First/Last Name, Title, Company, Email, LinkedIn URL
 
 **Auto-detect:** The agent figures out which type it is automatically.
         """)
@@ -1436,14 +1431,12 @@ with tab6:
     )
 
     if uploaded_file:
-        # Read raw CSV bytes into a temp file path for salesnav_import
         import tempfile
         raw_bytes = uploaded_file.read()
         with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode="wb") as tmp:
             tmp.write(raw_bytes)
             tmp_path = tmp.name
 
-        # Read headers for type detection
         import csv as _csv
         decoded = raw_bytes.decode("utf-8-sig", errors="replace")
         reader = _csv.DictReader(io.StringIO(decoded))
@@ -1451,15 +1444,15 @@ with tab6:
         csv_type = sni.detect_csv_type(headers)
 
         df_preview = pd.read_csv(io.StringIO(decoded), encoding="utf-8-sig", on_bad_lines="skip")
-        type_label = {"accounts": "📊 Accounts list", "contacts": "👤 Contacts list", "unknown": "❓ Unknown"}.get(csv_type, "❓")
-        st.success(f"✅ Loaded **{len(df_preview)} rows** · {type_label} detected")
+        type_label = {"accounts": "Accounts list", "contacts": "Contacts list", "unknown": "Unknown"}.get(csv_type, "Unknown")
+        st.success(f"Loaded **{len(df_preview)} rows** · {type_label} detected")
         st.dataframe(df_preview.head(5), use_container_width=True)
 
         if csv_type == "unknown":
             st.warning("Could not auto-detect CSV type. Please check column names match Sales Nav export format.")
 
         elif csv_type == "accounts":
-            st.subheader("Import Accounts → Pipeline")
+            st.subheader("Import Accounts to Pipeline")
             entries, skipped, total = sni.parse_accounts_csv(tmp_path)
             col_a1, col_a2 = st.columns(2)
             col_a1.metric("New companies", len(entries))
@@ -1468,17 +1461,17 @@ with tab6:
             if entries:
                 with st.expander(f"Preview {len(entries)} new companies"):
                     for e in entries[:20]:
-                        st.write(f"• **{e['company']}** — {e.get('category','') or 'No industry'} · {e.get('headcount','') or '?'} employees")
+                        st.write(f"- **{e['company']}** -- {e.get('category','') or 'No industry'} · {e.get('headcount','') or '?'} employees")
                     if len(entries) > 20:
                         st.caption(f"...and {len(entries)-20} more")
 
                 col_opt1, col_opt2 = st.columns(2)
                 score_them = col_opt1.checkbox("Score each company with AI", value=False,
-                    help="Uses Claude to score FSE sponsor fit — ~1-2 min per 10 companies. You can always score later from the Pipeline tab.")
+                    help="Uses Claude to score sponsor fit -- ~1-2 min per 10 companies. You can always score later from the Pipeline tab.")
                 limit = col_opt2.number_input("Max to import", min_value=1,
                     max_value=len(entries), value=min(100, len(entries)))
 
-                if st.button("🚀 Add to Pipeline", type="primary", key="sn_accounts_import"):
+                if st.button("Add to Pipeline", type="primary", key="sn_accounts_import"):
                     to_add = entries[:limit]
                     if score_them:
                         prog = st.progress(0)
@@ -1496,7 +1489,7 @@ with tab6:
                         prog.empty()
 
                     n = sni.add_accounts_to_pipeline(to_add)
-                    st.success(f"✅ Added {n} companies to your pipeline!")
+                    st.success(f"Added {n} companies to your pipeline!")
                     st.rerun()
             else:
                 st.info("All companies in this file are already in your pipeline.")
@@ -1515,8 +1508,8 @@ with tab6:
             if contacts:
                 with st.expander(f"Preview {len(contacts)} contacts"):
                     for c in contacts[:20]:
-                        email_str = c.get("email") or "⚠️ no email"
-                        st.write(f"• **{c['name']}** · {c.get('title','')} @ {c.get('company','')} · {email_str}")
+                        email_str = c.get("email") or "no email"
+                        st.write(f"- **{c['name']}** · {c.get('title','')} @ {c.get('company','')} · {email_str}")
                     if len(contacts) > 20:
                         st.caption(f"...and {len(contacts)-20} more")
 
@@ -1527,7 +1520,7 @@ with tab6:
                     help="Runs Tiga waterfall enrichment to find work emails for contacts that Sales Nav didn't include"
                 )
 
-                if st.button("💾 Save Contacts", type="primary", key="sn_contacts_import"):
+                if st.button("Save Contacts", type="primary", key="sn_contacts_import"):
                     if enrich and missing_email:
                         prog = st.progress(0)
                         stat = st.empty()
@@ -1540,8 +1533,8 @@ with tab6:
                         st.info(f"Enriched {n_enriched} contacts via Tiga")
 
                     n_saved = sni.save_contacts_csv(contacts)
-                    st.success(f"✅ Saved {n_saved} contacts to contacts.csv!")
-                    st.caption("Go to the 👥 Contacts tab to view them.")
+                    st.success(f"Saved {n_saved} contacts to contacts.csv!")
+                    st.caption("Go to the Contacts tab to view them.")
 
         # Cleanup temp file
         try:
@@ -1552,26 +1545,26 @@ with tab6:
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 6 — FUNNEL
+# TAB 7 -- FUNNEL
 # ════════════════════════════════════════════════════════════════════════════
 with tab7:
-    st.header("🏆 Sales Funnel")
-    st.caption("Pipeline by sales stage and priority. Your CRM view.")
+    st.header("Sales Funnel")
+    st.caption("Pipeline by sales stage and priority.")
 
     pipeline = load_pipeline()
 
     if not pipeline:
-        st.info("No companies yet — start in 🔍 Research.")
+        st.info("No companies yet -- start in Research.")
     else:
-        # ── Summary metrics ──
+        # -- Summary metrics --
         m_cols = st.columns(7)
         for i, s in enumerate(STATUSES):
             count = sum(1 for c in pipeline if c.get("status") == s)
-            m_cols[i].metric(STATUS_LABELS[s].split(" ",1)[1], count)
+            m_cols[i].metric(STATUS_LABELS[s], count)
 
         st.divider()
 
-        # ── Priority breakdown ──
+        # -- Priority breakdown --
         st.subheader("By Priority")
         p_cols = st.columns(3)
         for col, (pkey, plabel) in zip(p_cols, PRIORITY_LABELS.items()):
@@ -1581,11 +1574,10 @@ with tab7:
                 ranked = sorted(companies, key=lambda x: -x.get("score",0))
                 for ri, c in enumerate(ranked[:12]):
                     score = c.get("score",0)
-                    score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
                     status_label = STATUS_LABELS.get(c.get("status",""), c.get("status",""))
                     days = days_since_last_activity(c)
                     days_str = f" · {days}d" if days is not None else ""
-                    if st.button(f"{score_color} {c['company']}", key=f"fn_pri_{pkey}_{ri}"):
+                    if st.button(f"{c['company']}", key=f"fn_pri_{pkey}_{ri}"):
                         open_account(c["company"])
                     st.caption(f"{status_label}{days_str}")
                 if len(ranked) > 12:
@@ -1593,23 +1585,8 @@ with tab7:
 
         st.divider()
 
-        # ── Stage columns ──
+        # -- Stage columns --
         st.subheader("By Sales Stage")
-        st.markdown("""
-        <style>
-        .hs-card {
-            background: var(--secondary-background-color);
-            border: 1px solid rgba(128,128,128,0.25);
-            border-radius: 6px;
-            padding: 10px 12px 6px 12px;
-            margin-bottom: 6px;
-        }
-        .hs-card-name { font-weight: 600; font-size: 0.88em; margin-bottom: 2px; }
-        .hs-card-contact { font-size: 0.78em; color: rgba(160,160,160,0.95); margin-bottom: 2px; }
-        .hs-card-meta { font-size: 0.72em; color: rgba(128,128,128,0.8); }
-        </style>
-        """, unsafe_allow_html=True)
-
         active_statuses = [s for s in STATUSES if s not in ("closed_won","closed_lost")]
         stage_cols = st.columns(len(active_statuses))
         for col, s in zip(stage_cols, active_statuses):
@@ -1620,47 +1597,36 @@ with tab7:
                     badge = PRIORITY_LABELS.get(c.get("priority",""), "")
                     contacts = get_contacts(c)
                     score = c.get("score", 0)
-                    score_color = "🟢" if score >= 80 else "🟡" if score >= 60 else "🔴"
 
-                    contact_html = ""
-                    for ct in contacts[:2]:
+                    contact_info = ""
+                    for ct in contacts[:1]:
                         name = ct.get("name", "").strip()
-                        title = ct.get("title", "").strip()
-                        email = ct.get("email", "").strip()
-                        line = name or email or ""
-                        if title:
-                            line += f" · {title}"
-                        if line:
-                            contact_html += f'<div class="hs-card-contact">👤 {line}</div>'
+                        if name:
+                            contact_info = f" · {name}"
 
-                    st.markdown(f"""
-                    <div class="hs-card">
-                        <div class="hs-card-name">{c['company']} {badge}</div>
-                        {contact_html if contact_html else '<div class="hs-card-contact" style="opacity:0.4">No contact yet</div>'}
-                        <div class="hs-card-meta">{score_color} {score}/100</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    if st.button("Open →", key=f"fn_stg_{s}_{si}", use_container_width=True):
+                    st.markdown(f"**{c['company']}** {badge}{contact_info}")
+                    st.caption(f"{score}/100")
+                    if st.button("Open", key=f"fn_stg_{s}_{si}", use_container_width=True):
                         open_account(c["company"])
 
         st.divider()
 
-        # ── Closed ──
+        # -- Closed --
         won = [c for c in pipeline if c.get("status") == "closed_won"]
         lost = [c for c in pipeline if c.get("status") == "closed_lost"]
         w_col, l_col = st.columns(2)
         with w_col:
-            st.markdown(f"### ✅ Closed Won ({len(won)})")
+            st.markdown(f"### Closed Won ({len(won)})")
             for c in won:
                 st.markdown(f"**{c['company']}**")
         with l_col:
-            st.markdown(f"### ❌ Closed Lost ({len(lost)})")
+            st.markdown(f"### Closed Lost ({len(lost)})")
             for c in lost:
                 st.markdown(f"**{c['company']}**")
 
         st.divider()
 
-        # ── Activity feed ──
+        # -- Activity feed --
         st.subheader("Recent Activity")
         all_activities = []
         for c in pipeline:
@@ -1670,47 +1636,45 @@ with tab7:
 
         if all_activities:
             for entry in all_activities[:20]:
-                icons = {"email_sent":"📤","reply_received":"💬","call":"📞","note":"📝","meeting_booked":"📅","contract_sent":"📄","status_change":"🔄"}
-                icon = icons.get(entry["type"],"•")
                 detail = entry.get("subject") or entry.get("note") or entry.get("preview","")
-                st.markdown(f"{icon} **{entry['_company']}** · {entry['type'].replace('_',' ').title()} · {entry.get('date','')}")
+                st.markdown(f"**{entry['_company']}** · {entry['type'].replace('_',' ').title()} · {entry.get('date','')}")
                 if detail:
                     st.caption(f"  {detail[:100]}")
         else:
             st.info("No activity logged yet. Use the Pipeline tab to log sends, replies, and notes.")
 
 # ════════════════════════════════════════════════════════════════════════════
-# TAB 8 — OUTLOOK
+# TAB 8 -- OUTLOOK
 # ════════════════════════════════════════════════════════════════════════════
 with tab8:
-    st.header("📬 Outlook Integration")
+    st.header("Outlook Integration")
 
     if not outlook.is_configured():
         st.info(
             "**Waiting on Azure App Registration.**\n\n"
-            "Once Gabe provides the credentials, add them to your `.env` file on Streamlit Cloud "
-            "(Settings → Secrets) and this tab activates automatically.\n\n"
-            "```\nAZURE_CLIENT_ID=...\nAZURE_CLIENT_SECRET=...\nAZURE_TENANT_ID=...\n```"
+            "Once Gabe provides the credentials, add them to your .env file on Streamlit Cloud "
+            "(Settings > Secrets) and this tab activates automatically.\n\n"
+            "AZURE_CLIENT_ID=...\nAZURE_CLIENT_SECRET=...\nAZURE_TENANT_ID=..."
         )
         st.divider()
         st.subheader("What this will do once connected")
         st.markdown(
-            "- **Reply detection** — flags when a prospect replies to your outreach\n"
-            "- **Sent log** — shows which touches have been sent per company\n"
-            "- **Send from here** — send approved sequences directly without going to Outlook\n"
-            "- **Hot leads** — surfaces replies at the top so nothing slips through"
+            "- **Reply detection** -- flags when a prospect replies to your outreach\n"
+            "- **Sent log** -- shows which touches have been sent per company\n"
+            "- **Send from here** -- send approved sequences directly without going to Outlook\n"
+            "- **Hot leads** -- surfaces replies at the top so nothing slips through"
         )
 
     elif not outlook.is_authenticated():
         st.warning("Outlook is configured but needs one-time authorization.")
         auth_url = outlook.get_auth_url()
-        st.markdown(f"[**Click here to authorize Outlook access →**]({auth_url})")
-        st.caption("You'll be redirected back to the app. Paste the `code=` value from the URL below if it doesn't auto-complete.")
+        st.markdown(f"[Click here to authorize Outlook access]({auth_url})")
+        st.caption("You'll be redirected back to the app. Paste the code= value from the URL below if it doesn't auto-complete.")
         code = st.text_input("Authorization code (from redirect URL)")
         if code and st.button("Complete Authorization", type="primary"):
             try:
                 outlook.exchange_code_for_token(code)
-                st.success("✅ Connected!")
+                st.success("Connected!")
                 st.rerun()
             except Exception as e:
                 st.error(f"Authorization failed: {e}")
@@ -1726,7 +1690,7 @@ with tab8:
         col1, col2 = st.columns(2)
 
         with col1:
-            st.subheader(f"📥 Replies from Prospects")
+            st.subheader("Replies from Prospects")
             with st.spinner("Checking inbox..."):
                 replies = outlook.get_recent_replies(prospect_emails)
             if replies:
@@ -1752,7 +1716,7 @@ with tab8:
                 st.info("No replies from prospects in recent inbox.")
 
         with col2:
-            st.subheader("📤 Sent to Prospects")
+            st.subheader("Sent to Prospects")
             with st.spinner("Checking sent items..."):
                 sent = outlook.get_sent_to_prospects(prospect_emails)
             if sent:
@@ -1767,12 +1731,12 @@ with tab8:
                 st.info("No sent emails to prospects found.")
 
         st.divider()
-        st.subheader("✉️ Send an Email")
+        st.subheader("Send an Email")
         contacts_with_email = [c for c in pipeline if c.get("contact_email") and c.get("emails")]
         if not contacts_with_email:
             st.info("No contacts with both an email address and generated sequences yet.")
         else:
-            options = {f"{c['company']} — {c.get('contact_name', c['contact_email'])}": c for c in contacts_with_email}
+            options = {f"{c['company']} -- {c.get('contact_name', c['contact_email'])}": c for c in contacts_with_email}
             selected_label = st.selectbox("Select contact", list(options.keys()))
             selected_company = options[selected_label]
 
@@ -1783,7 +1747,7 @@ with tab8:
             subject = st.text_input("Subject", value=email_data["subject"])
             body = st.text_area("Body", value=email_data["body"], height=220)
 
-            if st.button("📤 Send", type="primary"):
+            if st.button("Send", type="primary"):
                 success = outlook.send_email(selected_company["contact_email"], subject, body)
                 if success:
                     selected_company = log_activity(selected_company, "email_sent",
@@ -1794,13 +1758,88 @@ with tab8:
                         selected_company["status"] = "contacted"
                     pipeline = upsert_company(pipeline, selected_company)
                     save_pipeline(pipeline)
-                    st.success(f"✅ Sent to {selected_company['contact_email']}")
+                    st.success(f"Sent to {selected_company['contact_email']}")
                     st.rerun()
             else:
-                st.error("Send failed — check your Outlook connection.")
+                st.error("Send failed -- check your Outlook connection.")
 
 
+# ════════════════════════════════════════════════════════════════════════════
+# TAB 9 -- CONTACTS
+# ════════════════════════════════════════════════════════════════════════════
+with tab9:
+    try:
+        import pandas as pd
+        import traceback
 
-# ════════════════════════════════════════════════════════════════════════════════
-# TAB 9 — CONTACTS
-# ══════════════════════════════════════════════════════════════════════════�
+        st.header("All Contacts")
+        st.caption("Every contact across all pipeline accounts, in one place.")
+
+        if st.button("Refresh"):
+            storage.refresh_cache(event_id=_event_id)
+            st.rerun()
+
+        pipeline_data = load_pipeline()
+
+        all_rows = []
+        for company in pipeline_data:
+            for contact in get_contacts(company):
+                all_rows.append({
+                    "Company": company.get("company", ""),
+                    "Tier":    company.get("tier", ""),
+                    "Score":   company.get("score", ""),
+                    "Status":  company.get("status", ""),
+                    "Name":    contact.get("name", ""),
+                    "Title":   contact.get("title", ""),
+                    "Email":   contact.get("email", ""),
+                    "Phone":   contact.get("phone", ""),
+                    "LinkedIn": contact.get("linkedin", ""),
+                    "Notes":   contact.get("notes", ""),
+                    "Source":  contact.get("source", ""),
+                })
+
+        if not all_rows:
+            st.info("No contacts yet. Add contacts via the Pipeline tab or run tiga_contacts.py.")
+        else:
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Total Contacts", len(all_rows))
+            m2.metric("Companies with Contacts", len({r["Company"] for r in all_rows}))
+            m3.metric("Contacts with Email", sum(1 for r in all_rows if r["Email"]))
+
+            st.divider()
+
+            fc1, fc2, fc3 = st.columns(3)
+            with fc1:
+                filter_company = st.text_input("Filter by company", placeholder="Type to search...")
+            with fc2:
+                all_tiers = sorted({str(r["Tier"]) for r in all_rows if r["Tier"] != ""})
+                filter_tier = st.selectbox("Tier", ["All"] + all_tiers)
+            with fc3:
+                filter_email_only = st.checkbox("Email only", value=False)
+
+            filtered = all_rows
+            if filter_company:
+                filtered = [r for r in filtered if filter_company.lower() in r["Company"].lower()]
+            if filter_tier != "All":
+                filtered = [r for r in filtered if str(r["Tier"]) == filter_tier]
+            if filter_email_only:
+                filtered = [r for r in filtered if r["Email"]]
+
+            st.caption(f"Showing {len(filtered)} of {len(all_rows)} contacts")
+
+            display_cols = ["Company", "Tier", "Score", "Name", "Title", "Email", "Phone", "Status"]
+            df = pd.DataFrame(filtered)[display_cols]
+            st.dataframe(df, use_container_width=True, hide_index=True)
+
+            st.divider()
+            st.download_button(
+                label="Download CSV",
+                data=pd.DataFrame(filtered).to_csv(index=False),
+                file_name="contacts_export.csv",
+                mime="text/csv",
+                type="primary",
+            )
+
+    except Exception as e:
+        st.error(f"Contacts tab error: {e}")
+        st.code(traceback.format_exc())
