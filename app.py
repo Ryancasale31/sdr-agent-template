@@ -1,5 +1,5 @@
 """
-Field Service East — AI SDR Agent
+WBR SDR Agent — multi-event sponsorship pipeline
 Run with: streamlit run app.py
 """
 import streamlit as st
@@ -13,13 +13,14 @@ import anthropic
 from tavily import TavilyClient
 import outlook_integration as outlook
 import storage
+from events_registry import EVENTS
 
 load_dotenv()
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="FSE SDR Agent",
-    page_icon="🌊",
+    page_title="WBR SDR Agent",
+    page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -83,13 +84,60 @@ def inject_theme():
 
 inject_theme()
 
+# ── Event selector / login ────────────────────────────────────────────────────
+def _show_login():
+    st.markdown("""
+    <style>
+    .login-wrap { max-width: 420px; margin: 80px auto; padding: 36px 40px;
+                  background: white; border-radius: 16px;
+                  box-shadow: 0 8px 32px rgba(14,39,71,.12); }
+    .login-title { font-size: 1.6rem; font-weight: 800; color: #0E2747; margin-bottom: 4px; }
+    .login-sub   { font-size: .88rem; color: #6B7280; margin-bottom: 24px; }
+    </style>
+    <div class="login-wrap">
+      <div class="login-title">🎯 WBR SDR Agent</div>
+      <div class="login-sub">Select your event and enter the access code.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_l, col_c, col_r = st.columns([1, 2, 1])
+    with col_c:
+        st.markdown("#### Select Event")
+        selected = st.selectbox(
+            "Event",
+            options=list(EVENTS.keys()),
+            format_func=lambda k: EVENTS[k]["name"],
+            label_visibility="collapsed",
+        )
+        password = st.text_input("Access code", type="password", placeholder="Access code")
+        if st.button("Enter →", type="primary", use_container_width=True):
+            try:
+                expected = st.secrets.get("event_passwords", {}).get(selected, "")
+            except Exception:
+                expected = ""
+            # Also allow empty password in local dev (no secrets configured)
+            if password == expected or (not expected and not password):
+                st.session_state["event_id"] = selected
+                st.session_state["event_cfg"] = EVENTS[selected]
+                st.rerun()
+            else:
+                st.error("Incorrect access code.")
+
+if "event_id" not in st.session_state:
+    _show_login()
+    st.stop()
+
+# ── Active event ──────────────────────────────────────────────────────────────
+_event_id  = st.session_state["event_id"]
+_event_cfg = st.session_state["event_cfg"]
+
 # ── Data files ────────────────────────────────────────────────────────────────
 ICP_FILE = "icp_summary.json"
 PIPELINE_FILE = "pipeline.json"
 
 # ── Load ICP ──────────────────────────────────────────────────────────────────
 def load_icp():
-    return storage.load_icp()
+    return storage.load_icp(event_id=_event_id)
 
 # ── Pipeline helpers ──────────────────────────────────────────────────────────
 def load_json(path, default):
@@ -100,10 +148,10 @@ def load_json(path, default):
         return json.load(f)
 
 def load_pipeline():
-    return storage.load_pipeline()
+    return storage.load_pipeline(event_id=_event_id)
 
 def save_pipeline(pipeline):
-    storage.save_pipeline(pipeline)
+    storage.save_pipeline(pipeline, event_id=_event_id)
 
 def get_company(pipeline, name):
     return next((c for c in pipeline if c["company"].lower() == name.lower()), None)
@@ -120,10 +168,12 @@ def upsert_company(pipeline, company_data):
 def research_company(company_name: str, icp: dict) -> dict:
     tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    ecfg = st.session_state.get("event_cfg", {})
 
     # Web research
+    search_kw = ecfg.get("search_keywords", "software products customers target market")
     results = tavily.search(
-        query=f"{company_name} field service software products customers target market",
+        query=f"{company_name} {search_kw}",
         max_results=5,
         search_depth="advanced",
     )
@@ -132,7 +182,8 @@ def research_company(company_name: str, icp: dict) -> dict:
         for r in results.get("results", [])
     ])
 
-    prompt = f"""You are a sponsorship sales analyst for Field Service East (Orlando, Aug 10-12, 2025).
+    event_label = f"{ecfg.get('name','the event')} ({ecfg.get('location','')}, {ecfg.get('dates','')})"
+    prompt = f"""You are a sponsorship sales analyst for {event_label}.
 
 EVENT BUYER PROFILE:
 - {icp['buyer_count']} registered buyers, {icp['senior_buyer_pct']}% VP/Director/SVP level
@@ -177,12 +228,15 @@ Return ONLY valid JSON:
 def generate_meeting_email(company_data: dict, contact_name: str, contact_title: str, icp: dict) -> dict:
     """Generate a single, direct email asking for a meeting — uses the pitch angle as the hook."""
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    ecfg = st.session_state.get("event_cfg", {})
 
     pitch_angle = company_data.get("pitch_angle") or company_data.get("outreach_note") or company_data.get("fit_reason") or ""
     vs_sponsor = company_data.get("vs_sponsor", "")
     competitor_line = f"Their competitors already sponsoring: {vs_sponsor}." if vs_sponsor else ""
 
-    prompt = f"""You are Ryan Casale, a sponsorship sales rep for Field Service East (Orlando, Aug 10-12, 2026).
+    sender    = ecfg.get("sender_name", "Your Name")
+    event_label = f"{ecfg.get('name','the event')} ({ecfg.get('location','')}, {ecfg.get('dates','')})"
+    prompt = f"""You are {sender}, a sponsorship sales rep for {event_label}.
 
 EVENT AUDIENCE:
 - {icp['buyer_count']} registered buyers, {icp['senior_buyer_pct']}% VP/Director/SVP level
@@ -205,7 +259,7 @@ Write ONE short, direct email asking for a 15-minute call to explore sponsorship
 - Under 120 words total
 - Tone: peer-to-peer, confident, no fluff
 - Never use: "I hope this email finds you well", "synergy", "leverage", "cutting-edge", "robust"
-- Sign off: Ryan Casale | Field Service East
+- Sign off: {sender} | {ecfg.get('event_brand', ecfg.get('name',''))}
 
 Return ONLY valid JSON:
 {{"subject": "...", "body": "..."}}
@@ -227,6 +281,7 @@ Return ONLY valid JSON:
 
 def generate_emails(company_data: dict, contact_name: str, contact_title: str, icp: dict) -> list:
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    ecfg = st.session_state.get("event_cfg", {})
 
     # Build competitor context if available
     vs_sponsor = company_data.get("vs_sponsor", "")
@@ -240,7 +295,11 @@ def generate_emails(company_data: dict, contact_name: str, contact_title: str, i
     category = company_data.get("category", "")
     category_line = f"- Their market category: {category}" if category else ""
 
-    prompt = f"""You are a senior sponsorship sales rep for Field Service East (Orlando, Aug 10-12, 2025).
+    sender = ecfg.get("sender_name", "Your Name")
+    event_label = f"{ecfg.get('name','the event')} ({ecfg.get('location','')}, {ecfg.get('dates','')})"
+    event_brand = ecfg.get("event_brand", ecfg.get("name", "the event"))
+
+    prompt = f"""You are a senior sponsorship sales rep for {event_label}.
 
 EVENT AUDIENCE:
 - {icp['buyer_count']} registered buyers, {icp['senior_buyer_pct']}% VP/Director/SVP level
@@ -267,7 +326,7 @@ Rules:
 - Email 3 (Day 9): Soft close, limited spots, reference existing sponsors as validation. Under 100 words.
 - Tone: Direct, peer-to-peer, confident. No fluff, no corporate speak.
 - Never use: "I hope this email finds you well", "synergy", "leverage", "cutting-edge", "robust", "game-changing"
-- Always sign off: Ryan Casale, Field Service East
+- Always sign off: {sender}, {event_brand}
 
 Return ONLY valid JSON:
 [
@@ -305,8 +364,8 @@ with st.sidebar:
             '<div class="wbr-sub">Worldwide Business Research</div>',
             unsafe_allow_html=True,
         )
-    st.markdown("### FSE SDR Agent")
-    st.caption("Field Service East · Orlando · Aug 10-12")
+    st.markdown(f"### {_event_cfg.get('short_name','WBR')} SDR Agent")
+    st.caption(f"{_event_cfg.get('name','')} · {_event_cfg.get('location','')} · {_event_cfg.get('dates','')}")
     st.divider()
 
     if icp:
@@ -332,12 +391,12 @@ with st.sidebar:
     if storage.github_configured():
         st.success("💾 Saving to GitHub (persistent)")
         if st.button("🔄 Refresh data"):
-            storage.refresh_cache()
+            storage.refresh_cache(event_id=_event_id)
             st.rerun()
     elif storage.gsheets_configured():
         st.success("💾 Saving to Google Sheets")
         if st.button("🔄 Refresh data"):
-            storage.refresh_cache()
+            storage.refresh_cache(event_id=_event_id)
             st.rerun()
     else:
         st.warning("💾 Local storage only\n(edits reset on reboot)")
@@ -354,7 +413,7 @@ with st.sidebar:
                 tmp_path = tmp.name
             try:
                 new_icp = build_icp(tmp_path)
-                storage.save_icp(new_icp)
+                storage.save_icp(new_icp, event_id=_event_id)
                 st.success(f"ICP rebuilt — {new_icp['buyer_count']} buyers.")
                 st.rerun()
             except Exception as e:
@@ -690,11 +749,11 @@ if st.session_state.get("view") == "account" and st.session_state.get("selected_
 
 # ── Hero banner ───────────────────────────────────────────────────────────────
 st.markdown(
-    '<div class="hero">'
-    '<h1>Field Service East — Sponsorship Pipeline</h1>'
-    '<p>Research · score · sequence · track — for the field service leaders in the room.</p>'
-    '<span class="pill">Orlando · Aug 10–12, 2026</span>'
-    '</div>',
+    f'<div class="hero">'
+    f'<h1>{_event_cfg.get("name","WBR")} — Sponsorship Pipeline</h1>'
+    f'<p>Research · score · sequence · track — for the {_event_cfg.get("focus","event")} leaders in the room.</p>'
+    f'<span class="pill">{_event_cfg.get("location","")} · {_event_cfg.get("dates","")}</span>'
+    f'</div>',
     unsafe_allow_html=True,
 )
 
@@ -1744,80 +1803,4 @@ with tab8:
 
 # ════════════════════════════════════════════════════════════════════════════════
 # TAB 9 — CONTACTS
-# ════════════════════════════════════════════════════════════════════════════════
-with tab9:
-    try:
-        import pandas as pd
-        import traceback
-
-        st.header("👥 All Contacts")
-        st.caption("Every contact across all pipeline accounts, in one place.")
-
-        if st.button("🔄 Refresh"):
-            storage.refresh_cache()
-            st.rerun()
-
-        pipeline_data = load_pipeline()
-
-        all_rows = []
-        for company in pipeline_data:
-            for contact in get_contacts(company):
-                all_rows.append({
-                    "Company": company.get("company", ""),
-                    "Tier":    company.get("tier", ""),
-                    "Score":   company.get("score", ""),
-                    "Status":  company.get("status", ""),
-                    "Name":    contact.get("name", ""),
-                    "Title":   contact.get("title", ""),
-                    "Email":   contact.get("email", ""),
-                    "Phone":   contact.get("phone", ""),
-                    "LinkedIn": contact.get("linkedin", ""),
-                    "Notes":   contact.get("notes", ""),
-                    "Source":  contact.get("source", ""),
-                })
-
-        if not all_rows:
-            st.info("No contacts yet. Add contacts via the Pipeline tab or run tiga_contacts.py.")
-        else:
-            m1, m2, m3 = st.columns(3)
-            m1.metric("Total Contacts", len(all_rows))
-            m2.metric("Companies with Contacts", len({r["Company"] for r in all_rows}))
-            m3.metric("Contacts with Email", sum(1 for r in all_rows if r["Email"]))
-
-            st.divider()
-
-            fc1, fc2, fc3 = st.columns(3)
-            with fc1:
-                filter_company = st.text_input("Filter by company", placeholder="Type to search...")
-            with fc2:
-                all_tiers = sorted({str(r["Tier"]) for r in all_rows if r["Tier"] != ""})
-                filter_tier = st.selectbox("Tier", ["All"] + all_tiers)
-            with fc3:
-                filter_email_only = st.checkbox("Email only", value=False)
-
-            filtered = all_rows
-            if filter_company:
-                filtered = [r for r in filtered if filter_company.lower() in r["Company"].lower()]
-            if filter_tier != "All":
-                filtered = [r for r in filtered if str(r["Tier"]) == filter_tier]
-            if filter_email_only:
-                filtered = [r for r in filtered if r["Email"]]
-
-            st.caption(f"Showing {len(filtered)} of {len(all_rows)} contacts")
-
-            display_cols = ["Company", "Tier", "Score", "Name", "Title", "Email", "Phone", "Status"]
-            df = pd.DataFrame(filtered)[display_cols]
-            st.dataframe(df, use_container_width=True, hide_index=True)
-
-            st.divider()
-            st.download_button(
-                label="⬇️ Download CSV",
-                data=pd.DataFrame(filtered).to_csv(index=False),
-                file_name="fse_contacts.csv",
-                mime="text/csv",
-                type="primary",
-            )
-
-    except Exception as e:
-        st.error(f"Contacts tab error: {e}")
-        st.code(traceback.format_exc())
+# ══════════════════════════════════════════════════════════════════════════�

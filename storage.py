@@ -31,6 +31,15 @@ PIPELINE_FILE = Path(__file__).parent / "pipeline.json"
 ICP_FILE = Path(__file__).parent / "icp_summary.json"
 GITHUB_API = "https://api.github.com"
 
+
+def _gh_pipeline_path(event_id: str) -> str:
+    return f"events/{event_id}/pipeline.json"
+
+
+def _gh_icp_path(event_id: str) -> str:
+    return f"events/{event_id}/icp_summary.json"
+
+
 # Fields holding nested structures (lists/dicts) — JSON-encoded into a single cell (Sheets).
 _NESTED_HINT = ("[", "{")
 
@@ -209,45 +218,51 @@ def _warn(msg):
 # ══════════════════════════════════════════════════════════════════════════════
 # Public API — pipeline
 # ══════════════════════════════════════════════════════════════════════════════
-def load_pipeline() -> list:
-    # No network backend: behave exactly like the original local loader.
+def load_pipeline(event_id: str = "field-service-east") -> list:
     if not _network_active():
         return _load_local_pipeline()
 
-    cached = _cache_get("pipeline_cache")
+    cache_key = f"pipeline_cache_{event_id}"
+    cached = _cache_get(cache_key)
     if cached is not None:
         return cached
 
-    data = _load_pipeline_remote()
-    _cache_set("pipeline_cache", data)
+    data = _load_pipeline_remote(event_id)
+    _cache_set(cache_key, data)
     return data
 
 
-def save_pipeline(pipeline: list):
+def save_pipeline(pipeline: list, event_id: str = "field-service-east"):
     _save_local_pipeline(pipeline)  # always keep a local copy
     if not _network_active():
         return
-    _cache_set("pipeline_cache", pipeline)
-    _save_pipeline_remote(pipeline)
+    _cache_set(f"pipeline_cache_{event_id}", pipeline)
+    _save_pipeline_remote(pipeline, event_id)
 
 
-def refresh_cache():
+def refresh_cache(event_id: str = None):
     """Drop cached data so the next load re-fetches from the network backend."""
-    for key in ("pipeline_cache", "icp_cache"):
-        try:
-            import streamlit as st
-            st.session_state.pop(key, None)
-        except Exception:
-            pass
+    try:
+        import streamlit as st
+        if event_id:
+            st.session_state.pop(f"pipeline_cache_{event_id}", None)
+            st.session_state.pop(f"icp_cache_{event_id}", None)
+        else:
+            keys_to_remove = [k for k in st.session_state
+                              if k.startswith(("pipeline_cache_", "icp_cache_"))]
+            for k in keys_to_remove:
+                st.session_state.pop(k, None)
+    except Exception:
+        pass
 
 
-def _load_pipeline_remote() -> list:
+def _load_pipeline_remote(event_id: str = "field-service-east") -> list:
     if github_configured():
         try:
-            content, _ = _gh_get("pipeline.json")
+            content, _ = _gh_get(_gh_pipeline_path(event_id))
             if content:
                 return json.loads(content)
-            return _load_local_pipeline()  # data branch not seeded yet → committed baseline
+            return _load_local_pipeline()
         except Exception as e:
             _warn(f"Could not load pipeline from GitHub ({e}). Showing local baseline.")
             return _load_local_pipeline()
@@ -265,11 +280,12 @@ def _load_pipeline_remote() -> list:
     return _load_local_pipeline()
 
 
-def _save_pipeline_remote(pipeline: list):
+def _save_pipeline_remote(pipeline: list, event_id: str = "field-service-east"):
     if github_configured():
         try:
             content = json.dumps(pipeline, indent=2, ensure_ascii=False)
-            if not _gh_put("pipeline.json", content, "Update pipeline via app"):
+            if not _gh_put(_gh_pipeline_path(event_id), content,
+                           f"Update pipeline [{event_id}] via app"):
                 _warn("GitHub save returned an error. Changes are local-only this session.")
         except Exception as e:
             _warn(f"Could not save pipeline to GitHub ({e}). Saved locally instead.")
@@ -295,32 +311,33 @@ def _save_pipeline_remote(pipeline: list):
 # ══════════════════════════════════════════════════════════════════════════════
 # Public API — ICP
 # ══════════════════════════════════════════════════════════════════════════════
-def load_icp():
+def load_icp(event_id: str = "field-service-east"):
     if not _network_active():
         return _load_local_icp()
 
-    cached = _cache_get("icp_cache")
+    cache_key = f"icp_cache_{event_id}"
+    cached = _cache_get(cache_key)
     if cached is not None:
         return cached
 
-    data = _load_icp_remote()
+    data = _load_icp_remote(event_id)
     if data is not None:
-        _cache_set("icp_cache", data)
+        _cache_set(cache_key, data)
     return data
 
 
-def save_icp(icp: dict):
+def save_icp(icp: dict, event_id: str = "field-service-east"):
     _save_local_icp(icp)
     if not _network_active():
         return
-    _cache_set("icp_cache", icp)
-    _save_icp_remote(icp)
+    _cache_set(f"icp_cache_{event_id}", icp)
+    _save_icp_remote(icp, event_id)
 
 
-def _load_icp_remote():
+def _load_icp_remote(event_id: str = "field-service-east"):
     if github_configured():
         try:
-            content, _ = _gh_get("icp_summary.json")
+            content, _ = _gh_get(_gh_icp_path(event_id))
             if content:
                 return json.loads(content)
             return _load_local_icp()
@@ -337,11 +354,12 @@ def _load_icp_remote():
     return _load_local_icp()
 
 
-def _save_icp_remote(icp: dict):
+def _save_icp_remote(icp: dict, event_id: str = "field-service-east"):
     if github_configured():
         try:
             content = json.dumps(icp, indent=2, ensure_ascii=False)
-            _gh_put("icp_summary.json", content, "Update ICP via app")
+            _gh_put(_gh_icp_path(event_id), content,
+                    f"Update ICP [{event_id}] via app")
         except Exception as e:
             _warn(f"Could not save ICP to GitHub ({e}). Saved locally instead.")
         return
