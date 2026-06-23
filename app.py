@@ -757,9 +757,9 @@ st.markdown(
 )
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
     "Research", "Pipeline", "Outreach Queue",
-    "Radar", "Prospect", "Import", "Funnel", "Outlook", "Contacts",
+    "Radar", "Prospect", "Import", "Funnel", "Outlook", "Contacts", "Setup",
 ])
 
 
@@ -1843,3 +1843,160 @@ with tab9:
     except Exception as e:
         st.error(f"Contacts tab error: {e}")
         st.code(traceback.format_exc())
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# TAB 10 -- SETUP  (only active for new/empty events)
+# ════════════════════════════════════════════════════════════════════════════
+with tab10:
+    import event_setup
+    import tempfile, os as _os
+
+    pipeline_now = load_pipeline()
+    icp_now      = load_icp()
+
+    if pipeline_now:
+        # Already set up -- show summary
+        st.success(f"Setup complete. {len(pipeline_now)} companies in pipeline.")
+        if icp_now:
+            st.info(
+                f"ICP: **{icp_now.get('buyer_count','?')} buyers** · "
+                f"**{icp_now.get('senior_buyer_pct','?')}% senior** · "
+                f"event focus: {_event_cfg.get('focus','')}"
+            )
+        st.caption("To reconfigure, use the Rebuild ICP option in the sidebar.")
+    else:
+        st.header("Event Setup Wizard")
+        st.caption(
+            f"Welcome to **{_event_cfg.get('name','')}**. "
+            "Complete the two steps below to seed your pipeline."
+        )
+
+        # ── STEP 1: Attendee CSV ──────────────────────────────────────────
+        st.divider()
+        st.subheader("Step 1 — Upload Attendee Registration CSV")
+        st.caption(
+            "Export the registration list from your event platform. "
+            "Required columns (same format as WBR events): "
+            "**Account**, **Job Title**, **Price List Type** (Primary = buyer, Vendor = sponsor)."
+        )
+
+        attendee_csv = st.file_uploader(
+            "Attendee CSV", type=["csv"], key="setup_attendee_csv"
+        )
+        icp_built = None
+        if attendee_csv:
+            raw_bytes = attendee_csv.read()
+            if st.button("Build Buyer Profile from CSV", type="primary", key="setup_build_icp"):
+                with st.spinner("Analysing attendees..."):
+                    try:
+                        with tempfile.NamedTemporaryFile(
+                            delete=False, suffix=".csv", mode="wb"
+                        ) as tmp:
+                            tmp.write(raw_bytes)
+                            tmp_path = tmp.name
+                        icp_built = event_setup.build_icp_from_csv(tmp_path)
+                        storage.save_icp(icp_built, event_id=_event_id)
+                        _os.unlink(tmp_path)
+                        st.success(
+                            f"ICP built: **{icp_built['buyer_count']} buyers** · "
+                            f"**{icp_built['senior_buyer_pct']}% VP/Director+**"
+                        )
+                        st.session_state["setup_icp_done"] = True
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"CSV error: {e}")
+
+        if st.session_state.get("setup_icp_done") or icp_now:
+            st.success("Buyer profile ready.")
+
+        # ── STEP 2: Event website ─────────────────────────────────────────
+        st.divider()
+        st.subheader("Step 2 — Research Event Website")
+        st.caption(
+            "Paste your event URL. The agent will scrape it and suggest "
+            "the best search keywords for finding sponsor prospects."
+        )
+
+        default_url = _event_cfg.get("website", "")
+        event_url = st.text_input(
+            "Event website URL", value=default_url, key="setup_event_url"
+        )
+
+        scraped = st.session_state.get("setup_scraped")
+
+        if st.button("Research Event", type="primary", key="setup_scrape_btn"):
+            if not event_url:
+                st.warning("Paste the event URL first.")
+            else:
+                with st.spinner("Researching event website..."):
+                    try:
+                        scraped = event_setup.research_event_website(
+                            event_url, _event_cfg.get("name", "")
+                        )
+                        st.session_state["setup_scraped"] = scraped
+                    except Exception as e:
+                        st.error(f"Research error: {e}")
+
+        if scraped:
+            st.markdown("**What we found:**")
+            st.info(f"**Event focus:** {scraped.get('focus','')}")
+
+            col_t, col_s = st.columns(2)
+            with col_t:
+                st.markdown("**Key topics:**")
+                for t in scraped.get("key_topics", []):
+                    st.markdown(f"- {t}")
+            with col_s:
+                st.markdown("**Sponsor categories:**")
+                for c in scraped.get("sponsor_categories", []):
+                    st.markdown(f"- {c}")
+
+            st.markdown("**Suggested search keywords:**")
+            kw_val = st.text_area(
+                "Edit if needed",
+                value=scraped.get("suggested_search_keywords", ""),
+                height=80,
+                key="setup_keywords",
+            )
+            st.caption(
+                "These keywords drive the Prospect and Radar tabs. "
+                "They are saved to your event config — update events_registry.py "
+                "with the final keywords to make them permanent."
+            )
+
+            if st.session_state.get("setup_icp_done") or icp_now:
+                st.divider()
+                st.subheader("Step 3 — Run First Radar Pass")
+                st.caption(
+                    "The agent will search for companies matching your event "
+                    "audience and add the best fits to your pipeline."
+                )
+                if st.button(
+                    "Seed Pipeline with Radar", type="primary", key="setup_radar_btn"
+                ):
+                    with st.spinner(
+                        "Searching for sponsor prospects... this takes a few minutes."
+                    ):
+                        try:
+                            import radar as radar_module
+                            import importlib
+                            importlib.reload(radar_module)
+                            # Temporarily override search keywords from scraped data
+                            kw_override = st.session_state.get("setup_keywords", "")
+                            if kw_override:
+                                _event_cfg["search_keywords"] = kw_override
+                                st.session_state["event_cfg"] = _event_cfg
+                            finds = radar_module.run_radar(
+                                auto_add=True, auto_add_min_score=60
+                            )
+                            st.success(
+                                f"Done! Found **{len(finds)} companies**. "
+                                "Head to the Pipeline tab to review them."
+                            )
+                            st.session_state.pop("setup_scraped", None)
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Radar error: {e}")
+            else:
+                st.info("Complete Step 1 first to enable the radar seed.")
