@@ -439,7 +439,8 @@ def add_to_pipeline(finds: list, min_score: int = 60) -> int:
 # ── Main radar logic ──────────────────────────────────────────────────────────
 
 def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
-              event_cfg: dict = None, agenda_sessions: list = None, icp: dict = None):
+              event_cfg: dict = None, agenda_sessions: list = None, icp: dict = None,
+              event_id: str = None):
     """
     Run the prospecting radar.
 
@@ -476,7 +477,8 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     all_known = get_all_known_companies()
     print(f"  {len(all_known)} known companies loaded\n")
 
-    existing_finds = load_json(RADAR_FILE, [])
+    radar_file = f"{event_id}_radar_finds.json" if event_id else RADAR_FILE
+    existing_finds = load_json(radar_file, [])
     new_finds = []
     total_searched = 0
 
@@ -540,9 +542,9 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
 
     all_finds = list(existing_map.values())
     all_finds.sort(key=lambda x: x.get("score", 0), reverse=True)
-    save_json(RADAR_FILE, all_finds)
+    save_json(radar_file, all_finds)
     if GITHUB_TOKEN:
-        _github_save("radar_finds.json", all_finds)
+        _github_save(radar_file, all_finds)
 
     unreviewed = [c for c in all_finds if not c.get("reviewed")]
     print(f"\n[OK] Done — {len(new_finds)} new companies found across {total_searched} queries")

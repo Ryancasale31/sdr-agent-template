@@ -1128,7 +1128,7 @@ with tab4:
     st.header("Prospecting Radar")
     st.caption("New companies found automatically based on event signals, press releases, and competitor tracking. Review and approve before they hit your pipeline.")
 
-    RADAR_FILE = "radar_finds.json"
+    RADAR_FILE = f"{_event_id}_radar_finds.json"
     radar_finds = load_json(RADAR_FILE, [])
     unreviewed = [c for c in radar_finds if not c.get("reviewed")]
     reviewed = [c for c in radar_finds if c.get("reviewed")]
@@ -1157,6 +1157,7 @@ with tab4:
                     event_cfg=_event_cfg,
                     agenda_sessions=_agenda_for_radar or None,
                     icp=icp,
+                    event_id=_event_id,
                 )
                 added = len([f for f in finds if f.get("auto_added")])
                 queued = len([f for f in finds if not f.get("auto_added")])
@@ -1990,6 +1991,7 @@ with tab10:
                                 event_cfg=_event_cfg,
                                 agenda_sessions=_agenda_setup or None,
                                 icp=load_icp(),
+                                event_id=_event_id,
                             )
                             st.success(f"Done! Found **{len(finds)} companies**. Head to the Pipeline tab to review them.")
                             st.session_state.pop("setup_scraped", None)
@@ -2243,5 +2245,4 @@ with tab11:
                     except Exception as _e:
                         st.error(f"Failed to build ICP: {_e}")
         else:
-            if not current_icp:
                 st.info("No attendee data yet. Upload your WBR registration export above to seed the buyer profile.")
