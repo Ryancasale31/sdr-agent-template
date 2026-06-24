@@ -1020,11 +1020,13 @@ with tab2:
                     "What They Do": c.get("what_they_do",""),
                     "Pitch Angle": c.get("pitch_angle",""),
                 })
-            with open("pipeline_export.csv", "w", newline="", encoding="utf-8") as f:
+            import pathlib as _pl
+            desktop = _pl.Path.home() / "Desktop" / "pipeline_export.csv"
+            with open(desktop, "w", newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=rows[0].keys())
                 writer.writeheader()
                 writer.writerows(rows)
-            st.success("Saved to pipeline_export.csv")
+            st.success(f"✅ Saved to Desktop: pipeline_export.csv")
 
 
 # ════════════════════════════════════════════════════════════════════════════
