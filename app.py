@@ -1006,27 +1006,25 @@ with tab2:
                 st.rerun()
 
         st.divider()
-        if st.button("Export Pipeline to CSV"):
-            rows = []
-            for c in pipeline:
-                rows.append({
-                    "Company": c.get("company",""),
-                    "Score": c.get("score",""),
-                    "Tier": c.get("tier",""),
-                    "Status": c.get("status",""),
-                    "Contact Name": c.get("contact_name",""),
-                    "Contact Title": c.get("contact_title",""),
-                    "Contact Email": c.get("contact_email",""),
-                    "What They Do": c.get("what_they_do",""),
-                    "Pitch Angle": c.get("pitch_angle",""),
-                })
-            import pathlib as _pl
-            desktop = _pl.Path.home() / "Desktop" / "pipeline_export.csv"
-            with open(desktop, "w", newline="", encoding="utf-8") as f:
-                writer = csv.DictWriter(f, fieldnames=rows[0].keys())
-                writer.writeheader()
-                writer.writerows(rows)
-            st.success(f"✅ Saved to Desktop: pipeline_export.csv")
+        rows = []
+        for c in pipeline:
+            rows.append({
+                "Company": c.get("company",""),
+                "Score": c.get("score",""),
+                "Tier": c.get("tier",""),
+                "Status": c.get("status",""),
+                "Contact Name": c.get("contact_name",""),
+                "Contact Title": c.get("contact_title",""),
+                "Contact Email": c.get("contact_email",""),
+                "What They Do": c.get("what_they_do",""),
+                "Pitch Angle": c.get("pitch_angle",""),
+            })
+        import io as _io
+        _buf = _io.StringIO()
+        _writer = csv.DictWriter(_buf, fieldnames=rows[0].keys())
+        _writer.writeheader()
+        _writer.writerows(rows)
+        st.download_button("📥 Export Pipeline to CSV", data=_buf.getvalue(), file_name="pipeline_export.csv", mime="text/csv")
 
 
 # ════════════════════════════════════════════════════════════════════════════
