@@ -1142,7 +1142,22 @@ with tab4:
             try:
                 import radar as radar_module
                 importlib.reload(radar_module)
-                finds = radar_module.run_radar(auto_add=auto_add_toggle, auto_add_min_score=60)
+                # Load agenda for event-aware query generation
+                _agenda_for_radar = []
+                try:
+                    import json as _jr
+                    _af = Path(__file__).parent / f"{_event_id}_agenda.json"
+                    if _af.exists():
+                        _agenda_for_radar = _jr.load(open(_af))
+                except Exception:
+                    pass
+                finds = radar_module.run_radar(
+                    auto_add=auto_add_toggle,
+                    auto_add_min_score=60,
+                    event_cfg=_event_cfg,
+                    agenda_sessions=_agenda_for_radar or None,
+                    icp=icp,
+                )
                 added = len([f for f in finds if f.get("auto_added")])
                 queued = len([f for f in finds if not f.get("auto_added")])
                 msg = f"Found {len(finds)} new companies!"
@@ -1996,8 +2011,19 @@ with tab10:
                             if kw_override:
                                 _event_cfg["search_keywords"] = kw_override
                                 st.session_state["event_cfg"] = _event_cfg
+                            _agenda_setup = []
+                            try:
+                                import json as _js2
+                                _af2 = Path(__file__).parent / f"{_event_id}_agenda.json"
+                                if _af2.exists():
+                                    _agenda_setup = _js2.load(open(_af2))
+                            except Exception:
+                                pass
                             finds = radar_module.run_radar(
-                                auto_add=True, auto_add_min_score=60
+                                auto_add=True, auto_add_min_score=60,
+                                event_cfg=_event_cfg,
+                                agenda_sessions=_agenda_setup or None,
+                                icp=load_icp(),
                             )
                             st.success(
                                 f"Done! Found **{len(finds)} companies**. "
@@ -2075,26 +2101,46 @@ with tab11:
                 elif fname.endswith(".docx"):
                     from docx import Document as _DocxDoc
                     doc = _DocxDoc(agenda_file)
-                    # Try the largest table first (most agendas live in a table)
-                    best_table = max(doc.tables, key=lambda t: len(t.rows)) if doc.tables else None
-                    if best_table and len(best_table.rows) > 1:
-                        all_rows = []
-                        for tr in best_table.rows:
-                            all_rows.append([cell.text.strip() for cell in tr.cells])
-                        # Normalize row lengths to match the widest row
-                        max_cols = max(len(r) for r in all_rows)
-                        all_rows = [r + [""] * (max_cols - len(r)) for r in all_rows]
-                        headers = all_rows[0]
-                        # Deduplicate blank/duplicate headers
-                        seen = {}
-                        clean_headers = []
-                        for h in headers:
-                            h = h or "Col"
-                            seen[h] = seen.get(h, 0) + 1
-                            clean_headers.append(h if seen[h] == 1 else f"{h}_{seen[h]}")
-                        df_ag = _pd_ag.DataFrame(all_rows[1:], columns=clean_headers)
+
+                    def _dedup_cells(cells):
+                        """Remove consecutive duplicate values caused by merged cells."""
+                        seen_t, unique = set(), []
+                        for c in cells:
+                            if c and c not in seen_t:
+                                unique.append(c)
+                                seen_t.add(c)
+                        return unique
+
+                    parsed_rows = []
+                    for table in doc.tables:
+                        if len(table.rows) < 2:
+                            continue
+                        # Row 0 is the day header (e.g. "Day 2: ...")
+                        day_label = _dedup_cells(
+                            [c.text.strip() for c in table.rows[0].cells]
+                        )
+                        day = day_label[0] if day_label else ""
+
+                        for tr in table.rows[1:]:
+                            cells = [c.text.strip() for c in tr.cells]
+                            time_val = cells[0] if cells else ""
+                            sessions_in_row = _dedup_cells(cells[1:])
+                            for sess in sessions_in_row:
+                                if not sess:
+                                    continue
+                                parts = sess.split("\n", 1)
+                                title   = parts[0].strip()
+                                speaker = parts[1].strip() if len(parts) > 1 else ""
+                                parsed_rows.append({
+                                    "Time": time_val,
+                                    "Session": title,
+                                    "Speaker": speaker,
+                                    "Day": day,
+                                })
+
+                    if parsed_rows:
+                        df_ag = _pd_ag.DataFrame(parsed_rows)
                     else:
-                        # Fall back: each non-empty paragraph becomes a session row
                         paras = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
                         df_ag = _pd_ag.DataFrame({"Session": paras})
 
@@ -2120,7 +2166,7 @@ with tab11:
                 with mc1: col_session = _pick("Session / Title",  ["session","title","topic","agenda","item","description"], raw_cols)
                 with mc2: col_time    = _pick("Time / Start",     ["time","start","slot","hour"], raw_cols)
                 with mc3: col_speaker = _pick("Speaker",          ["speaker","presenter","name","host"], raw_cols)
-                with mc4: col_track   = _pick("Track / Room",     ["track","room","stream","stage"], raw_cols)
+                with mc4: col_track   = _pick("Track / Room",     ["track","room","stream","stage","day"], raw_cols)
 
                 if col_session == none_col:
                     st.warning("Select which column contains the session title.")

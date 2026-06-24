@@ -1,5 +1,5 @@
 """
-FSE Prospecting Radar
+WBR SDR Prospecting Radar — multi-event aware
 Searches for new sponsor targets, auto-adds high-confidence finds to pipeline.json,
 and syncs to GitHub so the app updates in real time.
 
@@ -20,6 +20,130 @@ import requests as http_requests
 from tavily import TavilyClient
 
 load_dotenv()
+
+
+# ── Event-aware query + prompt builders ──────────────────────────────────────
+
+def build_queries_from_event(event_cfg: dict, agenda_sessions: list = None, client=None) -> list:
+    """
+    Use Claude to generate 20-30 targeted search queries for this specific event,
+    informed by the event focus, agenda session titles, and known sponsor categories.
+    Falls back to keyword-based queries if Claude is unavailable.
+    """
+    event_name     = event_cfg.get("name", "the event")
+    event_focus    = event_cfg.get("focus", "")
+    search_keywords = event_cfg.get("search_keywords", "")
+
+    # Pull session titles from agenda (first 40 to stay in token budget)
+    session_titles = ""
+    if agenda_sessions:
+        titles = [s.get("session", "") for s in agenda_sessions[:40] if s.get("session")]
+        session_titles = "\n".join(f"- {t}" for t in titles)
+
+    if client and (session_titles or event_focus):
+        prompt = f"""You are a B2B sponsorship sales researcher. Generate 25 targeted web search queries to find companies that would want to sponsor {event_name}.
+
+EVENT FOCUS: {event_focus}
+SEARCH KEYWORDS: {search_keywords}
+
+AGENDA SESSIONS (sample):
+{session_titles or "(no agenda uploaded yet)"}
+
+Generate queries that find:
+1. Companies selling software/tech/services to the people who attend this event
+2. Companies sponsoring similar events in this space
+3. Funded startups or growing vendors in this category
+4. Competitors of known sponsors
+5. Companies hiring in roles that signal they sell to this audience
+
+Return ONLY a JSON array of 25 search query strings. No explanation.
+["query 1", "query 2", ...]"""
+
+        try:
+            msg = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=1200,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            raw = msg.content[0].text.strip()
+            if raw.startswith("```"):
+                raw = raw.split("```")[1]
+                if raw.startswith("json"):
+                    raw = raw[4:]
+            queries = json.loads(raw.strip())
+            if isinstance(queries, list) and queries:
+                return queries
+        except Exception as e:
+            print(f"  [Radar] Query generation failed, using fallback: {e}")
+
+    # Fallback: build keyword-based queries from event config
+    kw = search_keywords or event_focus
+    return [
+        f"{kw} software companies 2026",
+        f"{kw} vendors sponsors conference 2026",
+        f"best {kw} platforms list 2026",
+        f"{event_name} exhibitors sponsors 2026",
+        f"top companies selling to {event_name} audience",
+        f"{kw} startup funding raised 2026",
+        f"{kw} software alternatives comparison 2026",
+        f"G2 {kw} top rated 2026",
+        f"{kw} company hiring marketing director 2026",
+        f"{kw} conference sponsor exhibitor list 2026",
+    ]
+
+
+def build_score_prompt(event_cfg: dict, icp: dict = None) -> str:
+    event_name  = event_cfg.get("name", "the event")
+    event_loc   = event_cfg.get("location", "")
+    event_dates = event_cfg.get("dates", "2026")
+    event_focus = event_cfg.get("focus", "")
+
+    buyer_count  = icp.get("buyer_count", "hundreds of")     if icp else "hundreds of"
+    senior_pct   = icp.get("senior_buyer_pct", "60")         if icp else "60"
+    top_cos      = ", ".join(icp.get("top_companies", [])[:8]) if icp else "leading companies in this space"
+    top_titles   = ", ".join(icp.get("top_titles", [])[:6])   if icp else "VP, Director, SVP level leaders"
+    existing_sp  = ", ".join(set(icp.get("existing_sponsors", []))) if icp else "various sponsors"
+
+    return f"""You are a sponsorship sales analyst for {event_name} ({event_loc}, {event_dates}), a premium B2B conference.
+
+EVENT FOCUS: {event_focus}
+
+EVENT BUYER PROFILE (the people attending):
+- {buyer_count} registered buyers, {senior_pct}% VP/Director/SVP level
+- Top attending companies: {top_cos}
+- Key buyer titles: {top_titles}
+- Already confirmed sponsors (do NOT suggest): {existing_sp}
+
+IDEAL SPONSOR PROFILE:
+A company that sells software, technology, or services TO the leaders attending this event.
+They want access to buyers who make purchasing decisions in: {event_focus}.
+
+WEB SEARCH RESULTS:
+{{search_results}}
+
+TASK: From the search results, extract ALL companies that:
+1. Sell tech/services TO the audience at this event (not the attendees themselves)
+2. Are real, named companies (not generic descriptions)
+3. Would genuinely benefit from sponsoring this event
+
+Score 70-85 for solid fits, 85-100 for ideal fits only.
+
+Return ONLY a valid JSON array ([] if nothing qualifies):
+[
+  {{
+    "company": "Exact Company Name",
+    "what_they_do": "One clear sentence describing their product/service",
+    "category": "Platform / AI / Analytics / Commerce / Marketing / Other",
+    "score": <70-100>,
+    "tier": "<A|B|C>",
+    "fit_reason": "Why they fit this specific audience",
+    "pitch_angle": "One-line hook for the sponsorship pitch",
+    "signal": "What triggered this find",
+    "source_url": "Source URL if available",
+    "status": "radar_find"
+  }}
+]
+"""
 
 PIPELINE_FILE = "pipeline.json"
 SCORED_FILE = "scored_companies.json"
@@ -314,19 +438,42 @@ def add_to_pipeline(finds: list, min_score: int = 60) -> int:
 
 # ── Main radar logic ──────────────────────────────────────────────────────────
 
-def run_radar(auto_add: bool = False, auto_add_min_score: int = 60):
+def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
+              event_cfg: dict = None, agenda_sessions: list = None, icp: dict = None):
+    """
+    Run the prospecting radar.
+
+    When called without event_cfg (e.g. from the FSE scheduler), the original
+    hardcoded FSE queries and prompt are used — no change to FSE behaviour.
+
+    When called with event_cfg (e.g. from the B2B Atlanta app tab), event-aware
+    queries and a dynamic scoring prompt are generated from the agenda + ICP.
+    """
     tavily_key = os.getenv("TAVILY_API_KEY")
     if not tavily_key:
         print("[!] TAVILY_API_KEY not set in .env")
         sys.exit(1)
 
-    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M')}] FSE Radar starting...")
-    print(f"  {len(SEARCH_QUERIES)} queries | search_depth=advanced | max_results=8 per query")
+    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+    # ── Choose queries and scoring prompt ────────────────────────────────────
+    if event_cfg:
+        event_name = event_cfg.get("name", "the event")
+        print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M')}] Radar starting for: {event_name}")
+        queries    = build_queries_from_event(event_cfg, agenda_sessions, client)
+        score_tmpl = build_score_prompt(event_cfg, icp)
+    else:
+        # ── FSE fallback — original hardcoded behaviour, unchanged ──────────
+        event_name = "Field Service East"
+        print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M')}] FSE Radar starting...")
+        queries    = SEARCH_QUERIES
+        score_tmpl = SCORE_PROMPT
+
+    print(f"  {len(queries)} queries | search_depth=advanced | max_results=8 per query")
     if auto_add:
         print(f"  Auto-add ON — score >= {auto_add_min_score} goes straight to pipeline")
 
     tavily = TavilyClient(api_key=tavily_key)
-    client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
     all_known = get_all_known_companies()
     print(f"  {len(all_known)} known companies loaded (pipeline + scored + prior radar)\n")
@@ -335,13 +482,13 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60):
     new_finds = []
     total_searched = 0
 
-    for i, query in enumerate(SEARCH_QUERIES, 1):
+    for i, query in enumerate(queries, 1):
         try:
-            print(f"  [{i}/{len(SEARCH_QUERIES)}] {query[:70]}...")
+            print(f"  [{i}/{len(queries)}] {query[:70]}...")
             results = tavily.search(
                 query=query,
-                max_results=8,           # up from 5
-                search_depth="advanced", # up from basic — richer content
+                max_results=8,
+                search_depth="advanced",
             )
             web_text = "\n\n".join([
                 f"URL: {r.get('url','')}\n{r.get('content','')}"
@@ -351,7 +498,7 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60):
                 continue
 
             total_searched += 1
-            prompt = SCORE_PROMPT.format(
+            prompt = score_tmpl.format(
                 search_results=web_text[:4000],
             )
             message = client.messages.create(
