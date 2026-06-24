@@ -3354,7 +3354,7 @@
     "outreach_note": "",
     "score": 70,
     "priority": "medium",
-    "status": "researched",
+    "status": "contacted",
     "source": "prospect_xlsx_reimport",
     "contacts": [
       {
@@ -3364,6 +3364,26 @@
         "phone": "",
         "linkedin": "https://www.linkedin.com/in/kristiflores",
         "source": "tiga"
+      }
+    ],
+    "emails": [
+      {
+        "touch": 1,
+        "send_day": "Day 1",
+        "subject": "133 facility-heavy buyers in Orlando",
+        "body": "Kristi,\n\nField Service East (Aug 10-12, Orlando) has 133 registered buyers—61% at VP/Director level—from companies like Altec Industries, MC Dean, and Henny Penny.\n\nThese are teams managing complex assets and field operations at scale. The exact profile that needs facilities and asset management solutions but rarely attends traditional FM events.\n\nCurious if Accruent is exploring ways to get in front of this audience?\n\nRyan Casale\nField Service East"
+      },
+      {
+        "touch": 2,
+        "send_day": "Day 4",
+        "subject": "PTC's already in the room",
+        "body": "Kristi,\n\nQuick follow-up on Field Service East.\n\nLooking at our attendee list, you'd be presenting to Directors of Field Services, VPs of Operations, and Service Managers from equipment-intensive companies—people actively solving asset lifecycle and maintenance challenges.\n\nCompanies like MC Dean, Altec Industries, and Oxford Instruments will have decision-makers on-site. These aren't theoretical buyers. They're managing thousands of assets across distributed teams.\n\nWorth noting: PTC is already sponsoring. They clearly see the fit between this audience and asset management. Accruent brings a different angle to the same conversation—facilities-forward, not just product-focused.\n\nThere's room for both perspectives in front of these buyers.\n\nOpen to a quick call this week?\n\nRyan Casale\nField Service East"
+      },
+      {
+        "touch": 3,
+        "send_day": "Day 9",
+        "subject": "Final sponsor slots for August",
+        "body": "Kristi,\n\nSalesforce, PTC, and Neuron7 are locked in. We're filling the last few sponsor positions for Field Service East.\n\n133 buyers. 61% senior leadership. August 10-12 in Orlando.\n\nIf Accruent wants a seat at the table with these asset-heavy organizations, let's talk this week.\n\nRyan Casale\nField Service East"
       }
     ]
   },
