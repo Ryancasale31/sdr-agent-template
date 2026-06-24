@@ -757,9 +757,9 @@ st.markdown(
 )
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs([
     "Research", "Pipeline", "Outreach Queue",
-    "Radar", "Prospect", "Import", "Funnel", "Outlook", "Contacts", "Setup",
+    "Radar", "Prospect", "Import", "Funnel", "Outlook", "Contacts", "Setup", "Event Info",
 ])
 
 
@@ -2009,3 +2009,259 @@ with tab10:
                             st.error(f"Radar error: {e}")
             else:
                 st.info("Complete Step 1 first to enable the radar seed.")
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# TAB 11 -- EVENT INFO  (Agenda + Attendee List)
+# ════════════════════════════════════════════════════════════════════════════
+with tab11:
+    import json as _json_ei
+    import tempfile as _tmp_ei
+    import os as _os_ei
+    import io as _io_ei
+    import csv as _csv_ei
+
+    # ── helpers ──────────────────────────────────────────────────────────────
+    _AGENDA_FILE = Path(__file__).parent / f"{_event_id}_agenda.json"
+
+    def _load_agenda():
+        if _AGENDA_FILE.exists():
+            with open(_AGENDA_FILE) as _f:
+                return _json_ei.load(_f)
+        return []
+
+    def _save_agenda(sessions):
+        with open(_AGENDA_FILE, "w") as _f:
+            _json_ei.dump(sessions, _f, indent=2)
+
+    st.markdown(
+        f'<div class="hero" style="padding:18px 24px;margin-bottom:10px;">'
+        f'<h1 style="font-size:1.3rem;">{_event_cfg.get("name","Event")} — Event Info</h1>'
+        f'<p>{_event_cfg.get("location","")} · {_event_cfg.get("dates","")}</p>'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
+
+    ei_agenda_tab, ei_attendee_tab = st.tabs(["📋 Agenda", "👥 Attendee List"])
+
+    # ── AGENDA ────────────────────────────────────────────────────────────────
+    with ei_agenda_tab:
+        st.subheader("Event Agenda")
+        st.caption("Upload a CSV or add sessions manually. Stored per event so your whole team can see it.")
+
+        sessions = _load_agenda()
+
+        # ── Upload agenda CSV ──
+        st.markdown("**Upload agenda file**")
+        st.caption("Accepts CSV, Excel (.xlsx), or Word (.docx) — any layout works.")
+        agenda_file = st.file_uploader(
+            "Drag & drop your agenda here, or click to browse  (CSV, Excel, or Word)",
+            key="agenda_upload",
+        )
+        if agenda_file:
+            import pandas as _pd_ag
+            fname = agenda_file.name.lower()
+            df_ag = None
+            parse_error = None
+
+            try:
+                if fname.endswith(".csv"):
+                    raw = agenda_file.read().decode("utf-8-sig", errors="replace")
+                    df_ag = _pd_ag.read_csv(_io_ei.StringIO(raw), on_bad_lines="skip")
+
+                elif fname.endswith((".xlsx", ".xls")):
+                    df_ag = _pd_ag.read_excel(agenda_file, engine="openpyxl")
+
+                elif fname.endswith(".docx"):
+                    from docx import Document as _DocxDoc
+                    doc = _DocxDoc(agenda_file)
+                    # Try tables first (most agendas live in a table)
+                    rows = []
+                    headers = None
+                    for table in doc.tables:
+                        if not headers:
+                            headers = [cell.text.strip() for cell in table.rows[0].cells]
+                        for tr in table.rows[1:]:
+                            rows.append([cell.text.strip() for cell in tr.cells])
+                    if rows and headers:
+                        df_ag = _pd_ag.DataFrame(rows, columns=headers)
+                    else:
+                        # Fall back: each non-empty paragraph becomes a session row
+                        paras = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
+                        df_ag = _pd_ag.DataFrame({"Session": paras})
+
+            except Exception as _pe:
+                parse_error = str(_pe)
+
+            if parse_error:
+                st.error(f"Could not read file: {parse_error}")
+            elif df_ag is not None and not df_ag.empty:
+                df_ag.columns = [str(c).strip() for c in df_ag.columns]
+                raw_cols = list(df_ag.columns)
+
+                st.success(f"File loaded — **{len(df_ag)} rows**, columns: {', '.join(raw_cols)}")
+                st.dataframe(df_ag.head(5), use_container_width=True, hide_index=True)
+
+                st.markdown("**Map your columns:**")
+                def _pick(label, hints, cols):
+                    guess = next((c for c in cols for h in hints if h in c.lower()), cols[0])
+                    return st.selectbox(label, ["(none)"] + cols, index=(cols.index(guess)+1) if guess in cols else 0, key=f"ag_map_{label}")
+
+                none_col = "(none)"
+                mc1, mc2, mc3, mc4 = st.columns(4)
+                with mc1: col_session = _pick("Session / Title",  ["session","title","topic","agenda","item","description"], raw_cols)
+                with mc2: col_time    = _pick("Time / Start",     ["time","start","slot","hour"], raw_cols)
+                with mc3: col_speaker = _pick("Speaker",          ["speaker","presenter","name","host"], raw_cols)
+                with mc4: col_track   = _pick("Track / Room",     ["track","room","stream","stage"], raw_cols)
+
+                if col_session == none_col:
+                    st.warning("Select which column contains the session title.")
+                else:
+                    if st.button("Save Agenda", type="primary", key="agenda_save_csv"):
+                        parsed = []
+                        for _, row in df_ag.iterrows():
+                            parsed.append({
+                                "time":    str(row[col_time]).strip()    if col_time != none_col else "",
+                                "session": str(row[col_session]).strip(),
+                                "speaker": str(row[col_speaker]).strip() if col_speaker != none_col else "",
+                                "track":   str(row[col_track]).strip()   if col_track != none_col else "",
+                            })
+                        _save_agenda(parsed)
+                        st.success(f"Agenda saved — {len(parsed)} sessions.")
+                        st.rerun()
+            else:
+                st.warning("File loaded but no rows found. Is it empty?")
+
+        # ── Add session manually ──
+        with st.expander("Add a session manually"):
+            mc1, mc2 = st.columns(2)
+            ms_time    = mc1.text_input("Time", placeholder="e.g. 9:00 AM", key="ms_time")
+            ms_session = mc2.text_input("Session title", placeholder="e.g. Opening Keynote", key="ms_session")
+            ms_speaker = mc1.text_input("Speaker(s)", placeholder="e.g. Jane Smith, Acme Corp", key="ms_speaker")
+            ms_track   = mc2.text_input("Track / Room", placeholder="e.g. Main Stage", key="ms_track")
+            if st.button("Add Session", key="ms_add") and ms_session:
+                sessions.append({
+                    "time": ms_time, "session": ms_session,
+                    "speaker": ms_speaker, "track": ms_track,
+                })
+                _save_agenda(sessions)
+                st.success("Session added.")
+                st.rerun()
+
+        # ── Display agenda ──
+        if not sessions:
+            st.info("No agenda yet — upload a CSV or add sessions above.")
+        else:
+            st.markdown(f"**{len(sessions)} sessions**")
+
+            # Group by track if tracks are present
+            tracks = sorted(set(s.get("track","") for s in sessions if s.get("track")))
+            if len(tracks) > 1:
+                chosen_track = st.selectbox("Filter by track", ["All tracks"] + tracks, key="agenda_track_filter")
+                view = sessions if chosen_track == "All tracks" else [s for s in sessions if s.get("track","") == chosen_track]
+            else:
+                view = sessions
+
+            import pandas as _pd_ei
+            df_agenda = _pd_ei.DataFrame(view)[["time","session","speaker","track"]]
+            df_agenda.columns = ["Time","Session","Speaker","Track"]
+            st.dataframe(df_agenda, use_container_width=True, hide_index=True)
+
+            col_dl, col_clr = st.columns([3,1])
+            col_dl.download_button(
+                "Download Agenda CSV",
+                data=df_agenda.to_csv(index=False),
+                file_name=f"{_event_id}_agenda.csv",
+                mime="text/csv",
+            )
+            if col_clr.button("Clear Agenda", key="agenda_clear"):
+                _save_agenda([])
+                st.rerun()
+
+    # ── ATTENDEE LIST ─────────────────────────────────────────────────────────
+    with ei_attendee_tab:
+        st.subheader("Attendee List")
+        st.caption(
+            "Upload your registration export here. The agent reads it to build your buyer profile "
+            "and understand who's in the room — so your research, scoring, and email sequences are tailored to this exact audience."
+        )
+
+        import pandas as _pd_att
+
+        # Show current ICP summary if one exists
+        current_icp = load_icp()
+        if current_icp:
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Registered Buyers", current_icp.get("buyer_count", "?"))
+            m2.metric("Senior (VP+/Dir)", f"{current_icp.get('senior_buyer_pct','?')}%")
+            top_cos = current_icp.get("top_companies", [])
+            m3.metric("Top Companies", len(top_cos))
+            if top_cos:
+                st.caption("Top attending companies: " + ", ".join(top_cos[:8]))
+            st.divider()
+
+        # Drag-and-drop uploader
+        att_file = st.file_uploader(
+            "Drag & drop your attendee registration CSV here",
+            type=["csv"],
+            key="att_upload",
+            help="WBR registration export. Required columns: Account, Job Title, Price List Type",
+            label_visibility="collapsed",
+        )
+
+        if att_file:
+            raw_att = att_file.read()
+            decoded_att = raw_att.decode("utf-8-sig", errors="replace")
+            df_att = _pd_att.read_csv(_io_ei.StringIO(decoded_att), on_bad_lines="skip")
+
+            # Preview
+            st.success(f"Loaded **{len(df_att)} rows** · {len(df_att.columns)} columns")
+
+            col_prev, col_stats = st.columns(2)
+            with col_prev:
+                st.markdown("**Preview (first 10 rows)**")
+                st.dataframe(df_att.head(10), use_container_width=True, hide_index=True)
+
+            with col_stats:
+                # Quick stats from common WBR column names
+                st.markdown("**Quick stats**")
+                title_col = next((c for c in df_att.columns if "title" in c.lower() or "job" in c.lower()), None)
+                acct_col  = next((c for c in df_att.columns if "account" in c.lower() or "company" in c.lower()), None)
+                type_col  = next((c for c in df_att.columns if "price list" in c.lower() or "type" in c.lower()), None)
+
+                if title_col:
+                    top_titles = df_att[title_col].value_counts().head(6)
+                    st.caption("Top job titles:")
+                    for title, cnt in top_titles.items():
+                        st.caption(f"  {title} ({cnt})")
+
+                if type_col:
+                    buyers = df_att[df_att[type_col].astype(str).str.lower().str.contains("primary|buyer|delegate", na=False)]
+                    vendors = df_att[df_att[type_col].astype(str).str.lower().str.contains("vendor|sponsor|exhibitor", na=False)]
+                    st.caption(f"Buyers: {len(buyers)} · Sponsors: {len(vendors)}")
+
+            st.divider()
+
+            if st.button("Build / Rebuild Buyer Profile from this CSV", type="primary", key="att_build_icp"):
+                with st.spinner("Analysing attendees..."):
+                    try:
+                        import event_setup as _es
+                        with _tmp_ei.NamedTemporaryFile(delete=False, suffix=".csv", mode="wb") as _tmpf:
+                            _tmpf.write(raw_att)
+                            _tmp_path = _tmpf.name
+                        new_icp = _es.build_icp_from_csv(_tmp_path)
+                        storage.save_icp(new_icp, event_id=_event_id)
+                        _os_ei.unlink(_tmp_path)
+                        st.success(
+                            f"Buyer profile updated: **{new_icp['buyer_count']} buyers** · "
+                            f"**{new_icp['senior_buyer_pct']}% VP/Director+**"
+                        )
+                        st.rerun()
+                    except Exception as _e:
+                        st.error(f"Failed to build ICP: {_e}")
+        else:
+            if not current_icp:
+                st.info(
+                    "No attendee data yet. Upload your WBR registration export above to seed the buyer profile. "
+                    "Once uploaded, the Research, Radar, and Outreach tabs will use the real audience data."
+                )
