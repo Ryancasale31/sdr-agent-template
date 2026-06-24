@@ -2075,16 +2075,24 @@ with tab11:
                 elif fname.endswith(".docx"):
                     from docx import Document as _DocxDoc
                     doc = _DocxDoc(agenda_file)
-                    # Try tables first (most agendas live in a table)
-                    rows = []
-                    headers = None
-                    for table in doc.tables:
-                        if not headers:
-                            headers = [cell.text.strip() for cell in table.rows[0].cells]
-                        for tr in table.rows[1:]:
-                            rows.append([cell.text.strip() for cell in tr.cells])
-                    if rows and headers:
-                        df_ag = _pd_ag.DataFrame(rows, columns=headers)
+                    # Try the largest table first (most agendas live in a table)
+                    best_table = max(doc.tables, key=lambda t: len(t.rows)) if doc.tables else None
+                    if best_table and len(best_table.rows) > 1:
+                        all_rows = []
+                        for tr in best_table.rows:
+                            all_rows.append([cell.text.strip() for cell in tr.cells])
+                        # Normalize row lengths to match the widest row
+                        max_cols = max(len(r) for r in all_rows)
+                        all_rows = [r + [""] * (max_cols - len(r)) for r in all_rows]
+                        headers = all_rows[0]
+                        # Deduplicate blank/duplicate headers
+                        seen = {}
+                        clean_headers = []
+                        for h in headers:
+                            h = h or "Col"
+                            seen[h] = seen.get(h, 0) + 1
+                            clean_headers.append(h if seen[h] == 1 else f"{h}_{seen[h]}")
+                        df_ag = _pd_ag.DataFrame(all_rows[1:], columns=clean_headers)
                     else:
                         # Fall back: each non-empty paragraph becomes a session row
                         paras = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
