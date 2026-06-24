@@ -1814,7 +1814,7 @@ with tab9:
                     "Score":   company.get("score", ""),
                     "Status":  company.get("status", ""),
                     "Name":    contact.get("name", ""),
-                    "Title":   contact.get("title", ""),
+                                   "Title":   contact.get("title", ""),
                     "Email":   contact.get("email", ""),
                     "Phone":   contact.get("phone", ""),
                     "LinkedIn": contact.get("linkedin", ""),
@@ -1880,7 +1880,6 @@ with tab10:
     icp_now      = load_icp()
 
     if pipeline_now:
-        # Already set up -- show summary
         st.success(f"Setup complete. {len(pipeline_now)} companies in pipeline.")
         if icp_now:
             st.info(
@@ -1896,13 +1895,11 @@ with tab10:
             "Complete the two steps below to seed your pipeline."
         )
 
-        # ── STEP 1: Attendee CSV ──────────────────────────────────────────
         st.divider()
         st.subheader("Step 1 — Upload Attendee Registration CSV")
         st.caption(
             "Export the registration list from your event platform. "
-            "Required columns (same format as WBR events): "
-            "**Account**, **Job Title**, **Price List Type** (Primary = buyer, Vendor = sponsor)."
+            "Required columns: **Account**, **Job Title**, **Price List Type**."
         )
 
         attendee_csv = st.file_uploader(
@@ -1914,9 +1911,7 @@ with tab10:
             if st.button("Build Buyer Profile from CSV", type="primary", key="setup_build_icp"):
                 with st.spinner("Analysing attendees..."):
                     try:
-                        with tempfile.NamedTemporaryFile(
-                            delete=False, suffix=".csv", mode="wb"
-                        ) as tmp:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode="wb") as tmp:
                             tmp.write(raw_bytes)
                             tmp_path = tmp.name
                         icp_built = event_setup.build_icp_from_csv(tmp_path)
@@ -1934,19 +1929,12 @@ with tab10:
         if st.session_state.get("setup_icp_done") or icp_now:
             st.success("Buyer profile ready.")
 
-        # ── STEP 2: Event website ─────────────────────────────────────────
         st.divider()
         st.subheader("Step 2 — Research Event Website")
-        st.caption(
-            "Paste your event URL. The agent will scrape it and suggest "
-            "the best search keywords for finding sponsor prospects."
-        )
+        st.caption("Paste your event URL. The agent will scrape it and suggest search keywords.")
 
         default_url = _event_cfg.get("website", "")
-        event_url = st.text_input(
-            "Event website URL", value=default_url, key="setup_event_url"
-        )
-
+        event_url = st.text_input("Event website URL", value=default_url, key="setup_event_url")
         scraped = st.session_state.get("setup_scraped")
 
         if st.button("Research Event", type="primary", key="setup_scrape_btn"):
@@ -1955,9 +1943,7 @@ with tab10:
             else:
                 with st.spinner("Researching event website..."):
                     try:
-                        scraped = event_setup.research_event_website(
-                            event_url, _event_cfg.get("name", "")
-                        )
+                        scraped = event_setup.research_event_website(event_url, _event_cfg.get("name", ""))
                         st.session_state["setup_scraped"] = scraped
                     except Exception as e:
                         st.error(f"Research error: {e}")
@@ -1965,7 +1951,6 @@ with tab10:
         if scraped:
             st.markdown("**What we found:**")
             st.info(f"**Event focus:** {scraped.get('focus','')}")
-
             col_t, col_s = st.columns(2)
             with col_t:
                 st.markdown("**Key topics:**")
@@ -1977,36 +1962,17 @@ with tab10:
                     st.markdown(f"- {c}")
 
             st.markdown("**Suggested search keywords:**")
-            kw_val = st.text_area(
-                "Edit if needed",
-                value=scraped.get("suggested_search_keywords", ""),
-                height=80,
-                key="setup_keywords",
-            )
-            st.caption(
-                "These keywords drive the Prospect and Radar tabs. "
-                "They are saved to your event config — update events_registry.py "
-                "with the final keywords to make them permanent."
-            )
+            kw_val = st.text_area("Edit if needed", value=scraped.get("suggested_search_keywords", ""), height=80, key="setup_keywords")
 
             if st.session_state.get("setup_icp_done") or icp_now:
                 st.divider()
                 st.subheader("Step 3 — Run First Radar Pass")
-                st.caption(
-                    "The agent will search for companies matching your event "
-                    "audience and add the best fits to your pipeline."
-                )
-                if st.button(
-                    "Seed Pipeline with Radar", type="primary", key="setup_radar_btn"
-                ):
-                    with st.spinner(
-                        "Searching for sponsor prospects... this takes a few minutes."
-                    ):
+                if st.button("Seed Pipeline with Radar", type="primary", key="setup_radar_btn"):
+                    with st.spinner("Searching for sponsor prospects... this takes a few minutes."):
                         try:
                             import radar as radar_module
                             import importlib
                             importlib.reload(radar_module)
-                            # Temporarily override search keywords from scraped data
                             kw_override = st.session_state.get("setup_keywords", "")
                             if kw_override:
                                 _event_cfg["search_keywords"] = kw_override
@@ -2025,10 +1991,7 @@ with tab10:
                                 agenda_sessions=_agenda_setup or None,
                                 icp=load_icp(),
                             )
-                            st.success(
-                                f"Done! Found **{len(finds)} companies**. "
-                                "Head to the Pipeline tab to review them."
-                            )
+                            st.success(f"Done! Found **{len(finds)} companies**. Head to the Pipeline tab to review them.")
                             st.session_state.pop("setup_scraped", None)
                             st.rerun()
                         except Exception as e:
@@ -2047,7 +2010,6 @@ with tab11:
     import io as _io_ei
     import csv as _csv_ei
 
-    # ── helpers ──────────────────────────────────────────────────────────────
     _AGENDA_FILE = Path(__file__).parent / f"{_event_id}_agenda.json"
 
     def _load_agenda():
@@ -2070,14 +2032,12 @@ with tab11:
 
     ei_agenda_tab, ei_attendee_tab = st.tabs(["📋 Agenda", "👥 Attendee List"])
 
-    # ── AGENDA ────────────────────────────────────────────────────────────────
     with ei_agenda_tab:
         st.subheader("Event Agenda")
         st.caption("Upload a CSV or add sessions manually. Stored per event so your whole team can see it.")
 
         sessions = _load_agenda()
 
-        # ── Upload agenda CSV ──
         st.markdown("**Upload agenda file**")
         st.caption("Accepts CSV, Excel (.xlsx), or Word (.docx) — any layout works.")
         agenda_file = st.file_uploader(
@@ -2103,7 +2063,6 @@ with tab11:
                     doc = _DocxDoc(agenda_file)
 
                     def _dedup_cells(cells):
-                        """Remove consecutive duplicate values caused by merged cells."""
                         seen_t, unique = set(), []
                         for c in cells:
                             if c and c not in seen_t:
@@ -2115,10 +2074,7 @@ with tab11:
                     for table in doc.tables:
                         if len(table.rows) < 2:
                             continue
-                        # Row 0 is the day header (e.g. "Day 2: ...")
-                        day_label = _dedup_cells(
-                            [c.text.strip() for c in table.rows[0].cells]
-                        )
+                        day_label = _dedup_cells([c.text.strip() for c in table.rows[0].cells])
                         day = day_label[0] if day_label else ""
 
                         for tr in table.rows[1:]:
@@ -2143,6 +2099,9 @@ with tab11:
                     else:
                         paras = [p.text.strip() for p in doc.paragraphs if p.text.strip()]
                         df_ag = _pd_ag.DataFrame({"Session": paras})
+
+                else:
+                    parse_error = f"Unsupported file type: {fname}. Please upload CSV, Excel, or Word."
 
             except Exception as _pe:
                 parse_error = str(_pe)
@@ -2186,7 +2145,6 @@ with tab11:
             else:
                 st.warning("File loaded but no rows found. Is it empty?")
 
-        # ── Add session manually ──
         with st.expander("Add a session manually"):
             mc1, mc2 = st.columns(2)
             ms_time    = mc1.text_input("Time", placeholder="e.g. 9:00 AM", key="ms_time")
@@ -2194,21 +2152,15 @@ with tab11:
             ms_speaker = mc1.text_input("Speaker(s)", placeholder="e.g. Jane Smith, Acme Corp", key="ms_speaker")
             ms_track   = mc2.text_input("Track / Room", placeholder="e.g. Main Stage", key="ms_track")
             if st.button("Add Session", key="ms_add") and ms_session:
-                sessions.append({
-                    "time": ms_time, "session": ms_session,
-                    "speaker": ms_speaker, "track": ms_track,
-                })
+                sessions.append({"time": ms_time, "session": ms_session, "speaker": ms_speaker, "track": ms_track})
                 _save_agenda(sessions)
                 st.success("Session added.")
                 st.rerun()
 
-        # ── Display agenda ──
         if not sessions:
             st.info("No agenda yet — upload a CSV or add sessions above.")
         else:
             st.markdown(f"**{len(sessions)} sessions**")
-
-            # Group by track if tracks are present
             tracks = sorted(set(s.get("track","") for s in sessions if s.get("track")))
             if len(tracks) > 1:
                 chosen_track = st.selectbox("Filter by track", ["All tracks"] + tracks, key="agenda_track_filter")
@@ -2222,33 +2174,78 @@ with tab11:
             st.dataframe(df_agenda, use_container_width=True, hide_index=True)
 
             col_dl, col_clr = st.columns([3,1])
-            col_dl.download_button(
-                "Download Agenda CSV",
-                data=df_agenda.to_csv(index=False),
-                file_name=f"{_event_id}_agenda.csv",
-                mime="text/csv",
-            )
+            col_dl.download_button("Download Agenda CSV", data=df_agenda.to_csv(index=False), file_name=f"{_event_id}_agenda.csv", mime="text/csv")
             if col_clr.button("Clear Agenda", key="agenda_clear"):
                 _save_agenda([])
                 st.rerun()
 
-    # ── ATTENDEE LIST ─────────────────────────────────────────────────────────
     with ei_attendee_tab:
         st.subheader("Attendee List")
-        st.caption(
-            "Upload your registration export here. The agent reads it to build your buyer profile "
-            "and understand who's in the room — so your research, scoring, and email sequences are tailored to this exact audience."
-        )
+        st.caption("Upload your registration export here. The agent reads it to build your buyer profile.")
 
         import pandas as _pd_att
 
-        # Show current ICP summary if one exists
         current_icp = load_icp()
         if current_icp:
             m1, m2, m3 = st.columns(3)
             m1.metric("Registered Buyers", current_icp.get("buyer_count", "?"))
             m2.metric("Senior (VP+/Dir)", f"{current_icp.get('senior_buyer_pct','?')}%")
             top_cos = current_icp.get("top_companies", [])
+            m3.metric("Top Companies", len(top_cos))
+            if top_cos:
+                st.caption("Top attending companies: " + ", ".join(top_cos[:8]))
+            st.divider()
+
+        att_file = st.file_uploader(
+            "Drag & drop your attendee registration CSV here",
+            type=["csv"],
+            key="att_upload",
+            help="WBR registration export. Required columns: Account, Job Title, Price List Type",
+        )
+
+        if att_file:
+            raw_att = att_file.read()
+            decoded_att = raw_att.decode("utf-8-sig", errors="replace")
+            df_att = _pd_att.read_csv(_io_ei.StringIO(decoded_att), on_bad_lines="skip")
+
+            st.success(f"Loaded **{len(df_att)} rows** · {len(df_att.columns)} columns")
+            col_prev, col_stats = st.columns(2)
+            with col_prev:
+                st.markdown("**Preview (first 10 rows)**")
+                st.dataframe(df_att.head(10), use_container_width=True, hide_index=True)
+            with col_stats:
+                st.markdown("**Quick stats**")
+                title_col = next((c for c in df_att.columns if "title" in c.lower() or "job" in c.lower()), None)
+                type_col  = next((c for c in df_att.columns if "price list" in c.lower() or "type" in c.lower()), None)
+                if title_col:
+                    top_titles = df_att[title_col].value_counts().head(6)
+                    st.caption("Top job titles:")
+                    for title, cnt in top_titles.items():
+                        st.caption(f"  {title} ({cnt})")
+                if type_col:
+                    buyers  = df_att[df_att[type_col].astype(str).str.lower().str.contains("primary|buyer|delegate", na=False)]
+                    vendors = df_att[df_att[type_col].astype(str).str.lower().str.contains("vendor|sponsor|exhibitor", na=False)]
+                    st.caption(f"Buyers: {len(buyers)} · Sponsors: {len(vendors)}")
+
+            st.divider()
+            if st.button("Build / Rebuild Buyer Profile from this CSV", type="primary", key="att_build_icp"):
+                with st.spinner("Analysing attendees..."):
+                    try:
+                        import event_setup as _es
+                        with _tmp_ei.NamedTemporaryFile(delete=False, suffix=".csv", mode="wb") as _tmpf:
+                            _tmpf.write(raw_att)
+                            _tmp_path = _tmpf.name
+                        new_icp = _es.build_icp_from_csv(_tmp_path)
+                        storage.save_icp(new_icp, event_id=_event_id)
+                        _os_ei.unlink(_tmp_path)
+                        st.success(f"Buyer profile updated: **{new_icp['buyer_count']} buyers** · **{new_icp['senior_buyer_pct']}% VP/Director+**")
+                        st.rerun()
+                    except Exception as _e:
+                        st.error(f"Failed to build ICP: {_e}")
+        else:
+            if not current_icp:
+                st.info("No attendee data yet. Upload your WBR registration export above to seed the buyer profile.")
+    top_cos = current_icp.get("top_companies", [])
             m3.metric("Top Companies", len(top_cos))
             if top_cos:
                 st.caption("Top attending companies: " + ", ".join(top_cos[:8]))
