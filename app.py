@@ -1008,17 +1008,26 @@ with tab2:
         st.divider()
         rows = []
         for c in pipeline:
-            rows.append({
+            contacts = get_contacts(c)
+            base = {
                 "Company": c.get("company",""),
                 "Score": c.get("score",""),
                 "Tier": c.get("tier",""),
                 "Status": c.get("status",""),
-                "Contact Name": c.get("contact_name",""),
-                "Contact Title": c.get("contact_title",""),
-                "Contact Email": c.get("contact_email",""),
                 "What They Do": c.get("what_they_do",""),
                 "Pitch Angle": c.get("pitch_angle",""),
-            })
+            }
+            if contacts:
+                for ct in contacts:
+                    rows.append({**base,
+                        "Contact Name": ct.get("name",""),
+                        "Contact Title": ct.get("title",""),
+                        "Contact Email": ct.get("email",""),
+                        "Contact Phone": ct.get("phone",""),
+                        "LinkedIn": ct.get("linkedin_url",""),
+                    })
+            else:
+                rows.append({**base, "Contact Name":"", "Contact Title":"", "Contact Email":"", "Contact Phone":"", "LinkedIn":""})
         import io as _io
         _buf = _io.StringIO()
         _writer = csv.DictWriter(_buf, fieldnames=rows[0].keys())
