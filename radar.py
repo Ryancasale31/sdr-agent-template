@@ -443,6 +443,7 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     """
     Run the prospecting radar.
 
+    When called without event_cfg (e.g. from the FS
     When called without event_cfg (e.g. from the FSE scheduler), the original
     hardcoded FSE queries and prompt are used — no change to FSE behaviour.
 
@@ -456,14 +457,12 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
 
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-    # ── Choose queries and scoring prompt ────────────────────────────────────
     if event_cfg:
         event_name = event_cfg.get("name", "the event")
         print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M')}] Radar starting for: {event_name}")
         queries    = build_queries_from_event(event_cfg, agenda_sessions, client)
         score_tmpl = build_score_prompt(event_cfg, icp)
     else:
-        # ── FSE fallback — original hardcoded behaviour, unchanged ──────────
         event_name = "Field Service East"
         print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M')}] FSE Radar starting...")
         queries    = SEARCH_QUERIES
@@ -474,9 +473,8 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
         print(f"  Auto-add ON — score >= {auto_add_min_score} goes straight to pipeline")
 
     tavily = TavilyClient(api_key=tavily_key)
-
     all_known = get_all_known_companies()
-    print(f"  {len(all_known)} known companies loaded (pipeline + scored + prior radar)\n")
+    print(f"  {len(all_known)} known companies loaded\n")
 
     existing_finds = load_json(RADAR_FILE, [])
     new_finds = []
@@ -485,25 +483,15 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     for i, query in enumerate(queries, 1):
         try:
             print(f"  [{i}/{len(queries)}] {query[:70]}...")
-            results = tavily.search(
-                query=query,
-                max_results=8,
-                search_depth="advanced",
-            )
-            web_text = "\n\n".join([
-                f"URL: {r.get('url','')}\n{r.get('content','')}"
-                for r in results.get("results", [])
-            ])
+            results = tavily.search(query=query, max_results=8, search_depth="advanced")
+            web_text = "\n\n".join([f"URL: {r.get('url','')}\n{r.get('content','')}" for r in results.get("results", [])])
             if not web_text.strip():
                 continue
-
             total_searched += 1
-            prompt = score_tmpl.format(
-                search_results=web_text[:4000],
-            )
+            prompt = score_tmpl.format(search_results=web_text[:4000])
             message = client.messages.create(
                 model="claude-opus-4-8",
-                max_tokens=2000,          # up from 1000 — room for more finds
+                max_tokens=2000,
                 messages=[{"role": "user", "content": prompt}],
             )
             raw = message.content[0].text.strip()
@@ -511,7 +499,6 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
                 raw = raw.split("```")[1]
                 if raw.startswith("json"):
                     raw = raw[4:]
-
             found = json.loads(raw.strip())
             for company in found:
                 name = company.get("company", "").strip()
@@ -525,15 +512,13 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
                 company["reviewed"] = False
                 new_finds.append(company)
                 all_known.add(name.lower())
-                print(f"    + {name} (score {company.get('score')}, Tier {company.get('tier','?')}) — {company.get('signal','')[:60]}")
-
+                print(f"    + {name} (score {company.get('score')}, Tier {company.get('tier','?')})")
         except json.JSONDecodeError:
             continue
         except Exception as e:
             print(f"    ! Error on query {i}: {e}")
             continue
 
-    # ── Auto-add to pipeline ──────────────────────────────────────────────────
     if auto_add and new_finds:
         to_add = [f for f in new_finds if f.get("score", 0) >= auto_add_min_score]
         if to_add:
@@ -545,7 +530,6 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
                     f["auto_added"] = True
             print(f"  {n} companies added")
 
-    # ── Persist radar_finds.json (permanent log) ──────────────────────────────
     existing_map = {c["company"].lower(): c for c in existing_finds}
     for f in new_finds:
         key = f["company"].lower()
@@ -557,7 +541,6 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     all_finds = list(existing_map.values())
     all_finds.sort(key=lambda x: x.get("score", 0), reverse=True)
     save_json(RADAR_FILE, all_finds)
-
     if GITHUB_TOKEN:
         _github_save("radar_finds.json", all_finds)
 
@@ -566,6 +549,25 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     print(f"[OK] {len(unreviewed)} unreviewed finds in radar_finds.json")
     if auto_add:
         print(f"[OK] {len([f for f in new_finds if f.get('auto_added')])} auto-added to pipeline")
+    return new_finds
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="WBR Prospecting Radar")
+    parser.add_argument("--auto-add", action="store_true")
+    parser.add_argument("--min-score", type=int, default=60)
+    args = parser.parse_args()
+    finds = run_radar(auto_add=args.auto_add, auto_add_min_score=args.min_score)
+    if not finds:
+        print("\nNo new companies found this run.")
+    else:
+        print(f"\nNew finds ({len(finds)}):")
+        for f in finds:
+            tag = "[AUTO-ADDED]" if f.get("auto_added") else "[pending review]"
+            print(f"  [{f.get('tier','?')}] {f['company']} ({f.get('score','?')}) {tag}")
+        if not args.auto_add:
+            print("\nTip: run with --auto-add to send finds straight to pipeline")
+o pipeline")
     return new_finds
 
 
