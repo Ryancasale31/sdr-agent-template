@@ -735,7 +735,16 @@
     "score": 50,
     "priority": "cold",
     "status": "researched",
-    "source": "prospect_xlsx_reimport"
+    "source": "prospect_xlsx_reimport",
+    "activity_log": [
+      {
+        "type": "email_sent",
+        "date": "2026-06-25",
+        "source": "manual",
+        "touch": 1,
+        "subject": "Touch 1"
+      }
+    ]
   },
   {
     "company": "RazorSync",
