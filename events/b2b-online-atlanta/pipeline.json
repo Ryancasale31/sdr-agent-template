@@ -15,7 +15,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Gregory Vasami",
+        "title": "VP of Sales, Americas",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/gregory-vasami-88a21371",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Kateri Osborne",
+        "title": "Director, Global Integrated Demand & NA Regional Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kateriosborne",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Algolia",
@@ -33,7 +54,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Ben Bulpett",
+        "title": "VP Performance Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/benbulpett",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Nate Barad",
+        "title": "Vice President Product Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/natebarad",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Apply Digital",
@@ -51,7 +93,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Erin Dean",
+        "title": "Director of Marketing Services",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/erin-b-dean",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Shelly Alvarez",
+        "title": "Vice President of Marketing Services",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/shelly-alvarez",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Atwix",
@@ -68,7 +131,19 @@
     "search_query": "B2B commerce API first platform startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Eda Gumusay",
+        "title": "Marketing Director",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/eda-gumusay",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Balance",
@@ -85,7 +160,29 @@
     "search_query": "B2B payments platform startups digital commerce",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Colleen Haraden",
+        "title": "Vice President of Operations and Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/colleen-haraden-5b3067a",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Katie Princehouse",
+        "title": "Senior Director of Marketing and Enrollment",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/katieprincehouse",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "BetterCommerce",
@@ -120,7 +217,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Veronica Servantez",
+        "title": "Senior Vice President, Marketing, Interim CMO",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/veronica-servantez-04a7549",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Lisa Eggerton",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/lisapearson",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Bloomreach",
@@ -137,7 +255,29 @@
     "search_query": "conversational commerce B2B industrial sellers",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Amanda Cole",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/amandajoycole",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Candace Gregg",
+        "title": "VP, Global Field Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/candacegregg",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Brij",
@@ -155,7 +295,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Felmont Eaves",
+        "title": "Founder and CMO",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/felmont-monte-eaves-6b7492a3",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Alexa Kilroy",
+        "title": "Head of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alexakilroy",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Cart.com",
@@ -172,7 +333,29 @@
     "search_query": "omnichannel B2B distribution platform founders",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Jack Ulrich",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/jack-ulrich",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "William Schaffer",
+        "title": "Director Of Sales & Marketing - FaaS",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/william-schaffer-73b5161ba",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Commercetools",
@@ -190,7 +373,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Theresa Somerville",
+        "title": "Head of Marketing (Field Marketing, Partner Marketing, Account Based Marketing)",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/thsomerville",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Angie Mistretta",
+        "title": "Vice President, Global Demand Generation",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/angiemistretta",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Constructor",
@@ -207,7 +411,29 @@
     "search_query": "catalog management AI B2B distributors",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Julie Powers",
+        "title": "Executive Director of Marketing and Communications",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/julie-a-powers",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Nabeel Ahmed",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/nabeelahmed",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Contentful",
@@ -225,7 +451,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Michael Berean",
+        "title": "Director of Marketing Operations",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/michaelberean",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Kelly Hall",
+        "title": "Director of Marketing Operations",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kellyrhall",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Contentstack",
@@ -243,7 +490,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Ande Kempf",
+        "title": "Director of Marketing Operations",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/ande-kempf-44172266",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Matthew Baier",
+        "title": "Co-Founder and former COO & CMO",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/matthewbaier",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Coveo",
@@ -261,7 +529,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Jason Love",
+        "title": "Director of Marketing Operations",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/jason-love-1329a8",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Mike Raley",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/mraley",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Creatuity",
@@ -278,7 +567,19 @@
     "search_query": "B2B commerce API first platform startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Gosia Jarka",
+        "title": "Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/gosia-jarka-531965b1",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "dataX.ai",
@@ -313,7 +614,19 @@
     "search_query": "catalog management AI B2B distributors",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Traci Vrana",
+        "title": "Vice President of Sales",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/traci-vrana-7584572",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Deloitte Digital",
@@ -331,7 +644,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Elisa Andreatta",
+        "title": "Partner - Marketing & Analytics Lead ; CMO Program Italy Leader",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/elisaandreatta",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Megan Devlin",
+        "title": "Senior Marketing Communications Strategy Lead",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/meganrdevlin",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "DemandScience",
@@ -348,7 +682,29 @@
     "search_query": "B2B content syndication product data startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Jenna Chambers",
+        "title": "Vice President Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/jennalorainechambers",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Francisco Fronda",
+        "title": "Senior Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kfronda",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Distributor Data Solutions",
@@ -365,7 +721,29 @@
     "search_query": "catalog management AI B2B distributors",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Colleen Ehrhardt",
+        "title": "Vice President of Global Sales",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/colleen-ehrhardt-19127822",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Kelsey Laush",
+        "title": "Marketing Director",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kelsey-laush-458b3195",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Elogic",
@@ -450,7 +828,29 @@
     "search_query": "manufacturing digital commerce platform startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Shirley Bachar",
+        "title": "VP Marketing & Business Development",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/shirley-bachar",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Alex Fusman",
+        "title": "Director of Marketing, CRM & Retention",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alexfusman",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Feedonomics",
@@ -467,7 +867,29 @@
     "search_query": "data syndication product catalog B2B startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Colin Madden",
+        "title": "VP of Sales",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/colin-madden-58a74739",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Terrence Chineworth",
+        "title": "Team Lead - Sales Development - Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/terrencechineworth",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Fulcrum digital",
@@ -485,7 +907,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Anisha Sen",
+        "title": "Marketing Communications Lead",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/anisha-sen-a6379132",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Nishu Agarwal",
+        "title": "Marketing Communications Lead",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/nishuagarwal",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Grid Dynamics",
@@ -502,7 +945,29 @@
     "search_query": "B2B Online Chicago 2024 exhibitor list sponsors",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Rahul Bindlish",
+        "title": "Senior Vice President, Global Partnership & Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/rahulbindlish",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Richard Herrington",
+        "title": "Vice President Customer Success & Sales",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/rtherrington2",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Helixia",
@@ -520,7 +985,18 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Bill Dzadon",
+        "title": "Director Of Strategic Partnerships",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/bill-d-b2132092",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Hygraph",
@@ -555,7 +1031,29 @@
     "search_query": "order management system OMS B2B wholesale emerging",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Michael Pule",
+        "title": "Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/michaelpule",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Meg Murphy",
+        "title": "Chief Marketing Officer, IBM Systems & Partner Ecosystem",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/megmurphy",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "IM Digital",
@@ -573,7 +1071,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Jessica Campos Attorney-Turned-Wellness-Marketer",
+        "title": "Chief Marketing Officer | Growth Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/jessicamcampos",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Tony Ciarelli",
+        "title": "Vice President of Sales",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/tony-ciarelli",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "InData Labs",
@@ -590,7 +1109,19 @@
     "search_query": "digital transformation manufacturers eCommerce startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Brian Suffredini",
+        "title": "VP of Sales",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/briansuffredini",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Intershop",
@@ -607,7 +1138,29 @@
     "search_query": "order management system OMS B2B wholesale emerging",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Sarah Thayer",
+        "title": "Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/sarah-thayer-4a960774",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Patrick Mikolai",
+        "title": "Head of Marketing & Demand Gen., Americas",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/patrick-mikolai",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Jakala",
@@ -625,7 +1178,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Ryan Pirkle",
+        "title": "Senior Director of Marketing & Communication (Americas)",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/ryanpirkle",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Ray Saltini",
+        "title": "Senior Director, CX Solutions and Partnerships",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/raysaltini",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Knowde",
@@ -642,7 +1216,29 @@
     "search_query": "B2B marketplace technology vendors niche",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Matthew Gietzel",
+        "title": "Head of Marketing & Creative",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/matthew-gietzel",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Griffin Haas",
+        "title": "Partnerships Lead",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/griffin-haas",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Logik.ai, from ServiceNow",
@@ -660,7 +1256,18 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "John Wright",
+        "title": "Vice President of Sales",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/gjohnwright",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Lucidworks",
@@ -678,7 +1285,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Chris Cottle",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/cbcottle",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Anil Uberoi",
+        "title": "CMO",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/anil-uberoi-0737a112",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Mirakl",
@@ -696,7 +1324,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Kristina Miller",
+        "title": "Director of Marketing, Mirakl Ads",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kmmiller29",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Lauren Smith",
+        "title": "Director Of Marketing Operations",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/lauren-smith-402a18245",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Navu",
@@ -714,7 +1363,18 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "John Greely",
+        "title": "Head of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/greely",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Ntara",
@@ -732,7 +1392,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Samara Bolling",
+        "title": "Senior Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/samarabolling",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Jenna Royal",
+        "title": "Director of Partnerships",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/jenna-royal",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "OmniReach",
@@ -750,7 +1431,18 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Nicole Koch-Conley",
+        "title": "Head of Events",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/nicole-koch-conley-63348764",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Omnivativ",
@@ -802,7 +1494,29 @@
     "search_query": "order management system OMS B2B wholesale emerging",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Nicole Hamm",
+        "title": "Head of Partnerships, NA",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/nicolehamm",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Phil Holden",
+        "title": "Head of Digital Marketing and Operations",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/philholden",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Orium",
@@ -837,7 +1551,29 @@
     "search_query": "omnichannel B2B distribution platform founders",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Emily Rakowski",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/emily-rakowski",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Matt Fine",
+        "title": "CMO",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/matt-fine-47277b63",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "OroCommerce",
@@ -855,7 +1591,18 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Aaron Sheehan",
+        "title": "VP, Strategy & Partnerships",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/aaronsheehan",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "OvationCXM",
@@ -872,7 +1619,29 @@
     "search_query": "B2B commerce experience management CXM platforms",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Sherri Schwartz",
+        "title": "Head Of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/sherri-schwartz",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Michele Dasek",
+        "title": "Director of Content Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/micheledasek",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "PayPal",
@@ -890,7 +1659,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Antonio Lucio",
+        "title": "EVP Global Chief Marketing and Corp Affairs Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/antonio-lucio-72b6bb13",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "David Carter",
+        "title": "Head of Marketing - Paypal Business Debit Card",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/david-carter-1b903955",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Pepperi",
@@ -907,7 +1697,29 @@
     "search_query": "omnichannel B2B distribution platform founders",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Justin Matijcio",
+        "title": "Director Marketing Innovation",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/justin-matijcio-92691528",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Evelyn O'Sullivan",
+        "title": "Senior Director Of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/evelynosullivan",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Perfaware",
@@ -925,7 +1737,18 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Jose A",
+        "title": "Head of Partnerships",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/jose-a-1764821b8",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Pimberly",
@@ -976,7 +1799,19 @@
     "search_query": "site:capterra.com PIM alternatives niche",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Carl DeSalvo",
+        "title": "VP Business Development and Sales",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/carldesalvo",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Pimly",
@@ -994,7 +1829,18 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "David Ehredt",
+        "title": "Head of Operations, Finance and Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/dave-ehredt-0a51492",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Pivotree",
@@ -1012,7 +1858,18 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "David Harrelson",
+        "title": "Vice President, Sales & Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/david-harrelson-1673342",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Platoyo",
@@ -1064,7 +1921,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Daniel Allocca",
+        "title": "Partner, Head of Digital, Paid & Analytics Practice | CMO Advisory",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/danielallocca",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Wilkes Tuohy",
+        "title": "VP, Secondary Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/wilkes-tuohy-1a221aa0",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Rastro AI",
@@ -1134,7 +2012,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Michele Fisher",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/michelekfisher",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Kelly Dalton",
+        "title": "VP Strategic Partnerships, Hyperscalers",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kelly-dalton-6a56339",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Sales Layer",
@@ -1168,7 +2067,29 @@
     "search_query": "data syndication product catalog B2B startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Katie Hussain",
+        "title": "Director of Sales and Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/katie-hussain-376185219",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Peter Crosby",
+        "title": "VP of Corporate Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/peterjcrosby",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Sana Commerce",
@@ -1204,7 +2125,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Juliet Randall",
+        "title": "Chief Marketing Officer, Americas",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/julietrandall",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "David Hamilton",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/davidhamiltonseattle",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "ServiceNow",
@@ -1222,7 +2164,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Vanessa Maunder",
+        "title": "Director, Office of the CMO",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/vanessa-maunder-7a70912",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Colin Fleming",
+        "title": "EVP, Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/colinfleming",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Shopify",
@@ -1240,7 +2203,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Kim Wike",
+        "title": "Vice President, Growth Marketing & Paid Acquisition",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kayres",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Samir Pradhan",
+        "title": "VP Product, Merchant Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/samir-pradhan-71978120",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Shopware",
@@ -1257,7 +2241,29 @@
     "search_query": "B2B commerce API first platform startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Don Forshay",
+        "title": "Vice President Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/don-forshay-1238b910",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Guy Shinnar",
+        "title": "VP Sales America",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/guy-shinnar-96144",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "SimpliSales",
@@ -1309,7 +2315,29 @@
     "search_query": "data syndication product catalog B2B startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Matt Cassie",
+        "title": "Senior Vice President Sales | North America | Stibo Systems",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/matt-cassie",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Candace Cavan",
+        "title": "Senior Vice President of Sales, North America",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/candace-cavan",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Tacton",
@@ -1326,7 +2354,29 @@
     "search_query": "manufacturing digital commerce platform startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Daniel Hellquist",
+        "title": "Director of Marketing Operations",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/danielhellquist",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Kim Nauer",
+        "title": "Senior Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kim-nauer-364a18330",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Thomasnet (Thomas)",
@@ -1343,7 +2393,29 @@
     "search_query": "industrial manufacturer digital selling platform",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Nicholas Perez",
+        "title": "Director of Marketing Services",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/nickrez94",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Anne Anderson",
+        "title": "CMO",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/anne-anderson-11b665108",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "THRON",
@@ -1360,7 +2432,29 @@
     "search_query": "data syndication product catalog B2B startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Kate Sanders",
+        "title": "Chief Marketing Officer/ Co-Owner",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/katedsanders",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Julia Perez",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/juliaperezzz",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "TradeCentric",
@@ -1378,7 +2472,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Katie Meeker",
+        "title": "Vice President Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/katiemeeker",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Amanda Cooper",
+        "title": "Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/amandapcooper",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "TreviPay",
@@ -1396,7 +2511,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Tara DePaepe",
+        "title": "Senior Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/tara-depaepe-81b6935",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Allen Bonde",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/allenbonde",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Valtech",
@@ -1414,7 +2550,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Thaddeus P",
+        "title": "Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/thaddeus-p-72790010",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Nicole Wieberneit",
+        "title": "VP / Global Head of Microsoft Partnerships",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/nwieberneit",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Virto Commerce",
@@ -1431,7 +2588,29 @@
     "search_query": "supply chain visibility B2B digital commerce",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Maria A",
+        "title": "Head of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/maria-a-270794310",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Anna Shubina",
+        "title": "Director of Product Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/anna-shubina-373601102",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "VTEX",
@@ -1449,7 +2628,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Margie Dikit",
+        "title": "Chief Marketing Officer",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/margie-dikit-a2425811",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Andrew Brownell",
+        "title": "Vice President Channel Sales & Demand Generation, North America",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/andrewjbrownell",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "WizCommerce",
@@ -1466,7 +2666,29 @@
     "search_query": "order management system OMS B2B wholesale emerging",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Shefali Chandolia",
+        "title": "Director of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/shefali-chandolia-663a6429",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Cheryl Dobbins Hege",
+        "title": "Senior Director of Marketing and Engagement",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/cherylddobbinshege",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Worldpay",
@@ -1484,7 +2706,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Dini Malhi",
+        "title": "Head of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/dinimalhi",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Katherine Senseney",
+        "title": "Director Strategic Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/katherinesenseney",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "WrangleWorks",
@@ -1520,7 +2763,18 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Eugene Sefanov",
+        "title": "Vice President of Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/eugenesefanov",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Xentral Software",
@@ -1555,7 +2809,28 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Mark White",
+        "title": "VP of Sales & Alliances",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/mark-white-01577333",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Kris Clason",
+        "title": "Director, Client Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/krisclason",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   },
   {
     "company": "Zoovu",
@@ -1572,6 +2847,28 @@
     "search_query": "data syndication product catalog B2B startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Chad Troutman",
+        "title": "Vice President of Growth Marketing",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/chad-troutman-90a04617",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      },
+      {
+        "name": "Thomas Shields",
+        "title": "Marketing Director",
+        "email": "",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/tlshields",
+        "source": "seamless",
+        "notes": "",
+        "activity_log": []
+      }
+    ]
   }
 ]
