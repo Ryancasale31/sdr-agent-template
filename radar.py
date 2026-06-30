@@ -42,10 +42,14 @@ def build_queries_from_event(event_cfg: dict, agenda_sessions: list = None, clie
 
     if client and (session_titles or event_focus):
         import random as _random
+        from datetime import datetime as _dt
+        _now = _dt.now()
+        _yr = _now.strftime('%Y')
+        _mo = _now.strftime('%B %Y')
         # Rotate query angles each run so results stay fresh
         all_angles = [
             f"site:linkedin.com/company B2B eCommerce platform software hiring",
-            f"site:crunchbase.com {search_keywords} Series A B C funding 2024 2025",
+            f"site:crunchbase.com {search_keywords} Series A B C funding {_yr}",
             f"B2B Online Chicago 2024 exhibitors sponsors list",
             f"B2B Online Europe 2024 exhibitors sponsors list",
             f"CommerceNext 2024 2025 sponsors exhibitors",
@@ -54,16 +58,16 @@ def build_queries_from_event(event_cfg: dict, agenda_sessions: list = None, clie
             f"site:g2.com {event_cfg.get('search_keywords','B2B eCommerce')} software category",
             f"site:capterra.com {event_cfg.get('search_keywords','B2B eCommerce')} software alternatives",
             f"'{event_name}' OR 'B2B Online' 2025 sponsor partner exhibitor",
-            f"VP eCommerce Partnerships B2B SaaS hiring 2024 2025",
-            f"Director of Sales B2B digital commerce manufacturer distributor hiring",
-            f"PIM software vendors alternatives niche specialists 2024",
+            f"VP eCommerce Partnerships B2B SaaS hiring {_mo}",
+            f"Director of Sales B2B digital commerce hiring {_mo}",
+            f"PIM software vendors alternatives niche {_yr}",
             f"B2B marketplace platform technology startups funded",
             f"guided selling CPQ B2B eCommerce manufacturers",
             f"catalog AI product data enrichment B2B distributors",
             f"B2B payments fintech net terms manufacturers distributors",
             f"omnichannel order management OMS B2B wholesale",
             f"ERP integration B2B eCommerce middleware API",
-            f"agentic AI commerce B2B conversational shopping 2025",
+            f"agentic AI commerce B2B conversational shopping {_yr}",
             f"D2C to B2B platform conversion startups funded",
             f"distributor enablement platform software vendors",
             f"supplier portal software B2B self-service",
@@ -72,7 +76,7 @@ def build_queries_from_event(event_cfg: dict, agenda_sessions: list = None, clie
             f"electrical distributor B2B eCommerce software",
             f"chemical wholesale B2B platform modernization",
             f"food distributor B2B digital transformation software",
-            f"B2B personalization engine CDP startups 2024 2025",
+            f"B2B personalization engine startups funded {_yr}",
             f"data syndication product feeds B2B commerce startups",
             f"headless commerce B2B manufacturers alternatives",
             f"composable commerce MACH B2B platform vendors",
@@ -80,6 +84,12 @@ def build_queries_from_event(event_cfg: dict, agenda_sessions: list = None, clie
             f"wholesale distribution software digital transformation vendors",
             f"B2B commerce implementation partner proprietary technology",
             f"manufacturer digital commerce platform SaaS startups",
+            f"B2B eCommerce investment funding news {_mo}",
+            f"B2B commerce software company acquisition {_yr}",
+            f"new B2B eCommerce platform launch {_mo}",
+            f"B2B digital commerce startup raised funding {_mo}",
+            f"site:linkedin.com/posts B2B eCommerce manufacturer distributor platform",
+            f"B2B commerce conference {_yr} new sponsor exhibitor",
         ]
         _random.shuffle(all_angles)
         angle_sample = all_angles[:15]
