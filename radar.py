@@ -465,7 +465,7 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     tavily_key = os.getenv("TAVILY_API_KEY")
     if not tavily_key:
         print("[!] TAVILY_API_KEY not set in .env")
-        sys.exit(1)
+        raise RuntimeError("TAVILY_API_KEY is not set in Streamlit secrets")
 
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
