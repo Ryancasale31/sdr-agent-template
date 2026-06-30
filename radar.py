@@ -41,27 +41,68 @@ def build_queries_from_event(event_cfg: dict, agenda_sessions: list = None, clie
         session_titles = "\n".join(f"- {t}" for t in titles)
 
     if client and (session_titles or event_focus):
-        # Build known-company exclusion hint
-        known_big = event_cfg.get("_known_sponsors_hint", "")
+        import random as _random
+        # Rotate query angles each run so results stay fresh
+        all_angles = [
+            f"site:linkedin.com/company B2B eCommerce platform software hiring",
+            f"site:crunchbase.com {search_keywords} Series A B C funding 2024 2025",
+            f"B2B Online Chicago 2024 exhibitors sponsors list",
+            f"B2B Online Europe 2024 exhibitors sponsors list",
+            f"CommerceNext 2024 2025 sponsors exhibitors",
+            f"Shoptalk 2024 2025 B2B commerce exhibitors",
+            f"IRCE 2024 exhibitors digital commerce vendors",
+            f"site:g2.com {event_cfg.get('search_keywords','B2B eCommerce')} software category",
+            f"site:capterra.com {event_cfg.get('search_keywords','B2B eCommerce')} software alternatives",
+            f"'{event_name}' OR 'B2B Online' 2025 sponsor partner exhibitor",
+            f"VP eCommerce Partnerships B2B SaaS hiring 2024 2025",
+            f"Director of Sales B2B digital commerce manufacturer distributor hiring",
+            f"PIM software vendors alternatives niche specialists 2024",
+            f"B2B marketplace platform technology startups funded",
+            f"guided selling CPQ B2B eCommerce manufacturers",
+            f"catalog AI product data enrichment B2B distributors",
+            f"B2B payments fintech net terms manufacturers distributors",
+            f"omnichannel order management OMS B2B wholesale",
+            f"ERP integration B2B eCommerce middleware API",
+            f"agentic AI commerce B2B conversational shopping 2025",
+            f"D2C to B2B platform conversion startups funded",
+            f"distributor enablement platform software vendors",
+            f"supplier portal software B2B self-service",
+            f"industrial eCommerce platform manufacturers software",
+            f"building materials B2B digital commerce platform",
+            f"electrical distributor B2B eCommerce software",
+            f"chemical wholesale B2B platform modernization",
+            f"food distributor B2B digital transformation software",
+            f"B2B personalization engine CDP startups 2024 2025",
+            f"data syndication product feeds B2B commerce startups",
+            f"headless commerce B2B manufacturers alternatives",
+            f"composable commerce MACH B2B platform vendors",
+            f"B2B search discovery platform AI recommendations",
+            f"wholesale distribution software digital transformation vendors",
+            f"B2B commerce implementation partner proprietary technology",
+            f"manufacturer digital commerce platform SaaS startups",
+        ]
+        _random.shuffle(all_angles)
+        angle_sample = all_angles[:15]
+        angle_str = chr(10).join(f"- {a}" for a in angle_sample)
 
-        prompt = f"""You are a B2B sponsorship sales researcher. Generate 30 targeted web search queries to find EMERGING and NICHE companies that would want to sponsor {event_name}.
+        prompt = f"""You are a B2B sponsorship sales researcher. Generate 30 targeted web search queries to find companies that would sponsor {event_name}.
 
 EVENT FOCUS: {event_focus}
 SEARCH KEYWORDS: {search_keywords}
 
-AGENDA SESSIONS (sample):
+AGENDA SESSIONS:
 {session_titles or "(no agenda uploaded yet)"}
 
-IMPORTANT: Skip the obvious household names (Shopify, SAP, Salesforce, Adobe, BigCommerce, Akeneo, Algolia, Coveo, Commercetools, PayPal, ServiceNow etc.) — focus on finding vendors that are less well-known but highly relevant.
+Use these SEARCH ANGLES as inspiration — pick the most promising and expand on them:
+{angle_str}
 
-Generate queries that specifically surface:
-1. Funded STARTUPS and newer vendors (Series A/B/C) in B2B eCommerce, PIM, CPQ, AI commerce, payments, OMS
-2. Niche specialists: B2B marketplace tech, guided selling, catalog AI, B2B personalization engines, D2C-to-B2B platforms
-3. Emerging vendors at similar events: B2B Online Chicago, B2B Online Europe, CommerceNext, Shoptalk, IRCE exhibitors
-4. Vendors hiring "Director of Sales - B2B" or "VP eCommerce Partnerships" — signals they sell to this audience
-5. Competitors and alternatives to the big names above
-6. Implementation partners and SIs with their own tech IP
-7. G2, Capterra, and analyst lists for lesser-known B2B commerce sub-categories
+Rules:
+- Focus on NICHE and EMERGING vendors, not household names
+- Include LinkedIn hiring searches (signals they sell to this audience)
+- Include conference exhibitor list searches
+- Include G2/Capterra category searches for lesser-known tools
+- Mix broad category searches with specific niche searches
+- Each query should be different from the others
 
 Return ONLY a JSON array of 30 search query strings. No explanation.
 ["query 1", "query 2", ...]"""
