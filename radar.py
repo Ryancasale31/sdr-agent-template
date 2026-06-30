@@ -41,7 +41,10 @@ def build_queries_from_event(event_cfg: dict, agenda_sessions: list = None, clie
         session_titles = "\n".join(f"- {t}" for t in titles)
 
     if client and (session_titles or event_focus):
-        prompt = f"""You are a B2B sponsorship sales researcher. Generate 25 targeted web search queries to find companies that would want to sponsor {event_name}.
+        # Build known-company exclusion hint
+        known_big = event_cfg.get("_known_sponsors_hint", "")
+
+        prompt = f"""You are a B2B sponsorship sales researcher. Generate 30 targeted web search queries to find EMERGING and NICHE companies that would want to sponsor {event_name}.
 
 EVENT FOCUS: {event_focus}
 SEARCH KEYWORDS: {search_keywords}
@@ -49,14 +52,18 @@ SEARCH KEYWORDS: {search_keywords}
 AGENDA SESSIONS (sample):
 {session_titles or "(no agenda uploaded yet)"}
 
-Generate queries that find:
-1. Companies selling software/tech/services to the people who attend this event
-2. Companies sponsoring similar events in this space
-3. Funded startups or growing vendors in this category
-4. Competitors of known sponsors
-5. Companies hiring in roles that signal they sell to this audience
+IMPORTANT: Skip the obvious household names (Shopify, SAP, Salesforce, Adobe, BigCommerce, Akeneo, Algolia, Coveo, Commercetools, PayPal, ServiceNow etc.) — focus on finding vendors that are less well-known but highly relevant.
 
-Return ONLY a JSON array of 25 search query strings. No explanation.
+Generate queries that specifically surface:
+1. Funded STARTUPS and newer vendors (Series A/B/C) in B2B eCommerce, PIM, CPQ, AI commerce, payments, OMS
+2. Niche specialists: B2B marketplace tech, guided selling, catalog AI, B2B personalization engines, D2C-to-B2B platforms
+3. Emerging vendors at similar events: B2B Online Chicago, B2B Online Europe, CommerceNext, Shoptalk, IRCE exhibitors
+4. Vendors hiring "Director of Sales - B2B" or "VP eCommerce Partnerships" — signals they sell to this audience
+5. Competitors and alternatives to the big names above
+6. Implementation partners and SIs with their own tech IP
+7. G2, Capterra, and analyst lists for lesser-known B2B commerce sub-categories
+
+Return ONLY a JSON array of 30 search query strings. No explanation.
 ["query 1", "query 2", ...]"""
 
         try:
