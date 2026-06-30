@@ -981,10 +981,18 @@ with tab2:
                         st.rerun()
 
                 # ── Seamless contact finder ────────────────────────────────
-                _sl_key = os.getenv("SEAMLESS_API_KEY") or st.secrets.get("SEAMLESS_API_KEY", "")
-                if _SEAMLESS_AVAILABLE and _sl_key:
-                    with st.expander("🔍 Find contacts via Seamless"):
-                        sl_state_key = f"sl_results_{idx}"
+                _sl_key = os.getenv("SEAMLESS_API_KEY", "")
+                try:
+                    _sl_key = _sl_key or st.secrets.get("SEAMLESS_API_KEY", "")
+                except Exception:
+                    pass
+                with st.expander("🔍 Find contacts via Seamless"):
+                    sl_state_key = f"sl_results_{idx}"
+                    if not _sl_key:
+                        st.warning("SEAMLESS_API_KEY not found in secrets.")
+                    elif not _SEAMLESS_AVAILABLE:
+                        st.warning("seamless_utils not available.")
+                    else:
                         if st.button("Search Seamless", key=f"sl_search_{idx}"):
                             with st.spinner(f"Searching Seamless for {company['company']}..."):
                                 results = seamless_utils.search_contacts(company["company"], _sl_key)
@@ -993,32 +1001,32 @@ with tab2:
                             else:
                                 st.session_state[sl_state_key] = results
 
-                        sl_results = st.session_state.get(sl_state_key, [])
-                        if sl_results:
-                            st.caption(f"Found {len(sl_results)} candidates — select to add:")
-                            to_add = []
-                            for ri, rc in enumerate(sl_results):
-                                label = f"**{rc['name']}** — {rc['title']}"
-                                if rc.get("linkedin"):
-                                    label += f" · [LinkedIn]({rc['linkedin']})"
-                                checked = st.checkbox(label, key=f"sl_chk_{idx}_{ri}")
-                                if checked:
-                                    to_add.append(rc)
-                            if to_add and st.button("Add selected contacts", key=f"sl_add_{idx}", type="primary"):
-                                existing_names = {c.get("name","").lower() for c in card_contacts}
-                                added = 0
-                                for ct in to_add:
-                                    if ct["name"].lower() not in existing_names:
-                                        card_contacts.append(ct)
-                                        existing_names.add(ct["name"].lower())
-                                        added += 1
-                                company["contacts"] = card_contacts
-                                if company.get("status") == "researched":
-                                    company["status"] = "contacted"
-                                pipeline = upsert_company(pipeline, company)
-                                save_pipeline(pipeline)
-                                st.session_state.pop(sl_state_key, None)
-                                st.success(f"Added {added} contact(s)!")
+                    sl_results = st.session_state.get(sl_state_key, [])
+                    if sl_results:
+                        st.caption(f"Found {len(sl_results)} candidates — select to add:")
+                        to_add = []
+                        for ri, rc in enumerate(sl_results):
+                            label = f"**{rc['name']}** — {rc['title']}"
+                            if rc.get("linkedin"):
+                                label += f" · [LinkedIn]({rc['linkedin']})"
+                            checked = st.checkbox(label, key=f"sl_chk_{idx}_{ri}")
+                            if checked:
+                                to_add.append(rc)
+                        if to_add and st.button("Add selected contacts", key=f"sl_add_{idx}", type="primary"):
+                            existing_names = {c.get("name","").lower() for c in card_contacts}
+                            added = 0
+                            for ct in to_add:
+                                if ct["name"].lower() not in existing_names:
+                                    card_contacts.append(ct)
+                                    existing_names.add(ct["name"].lower())
+                                    added += 1
+                            company["contacts"] = card_contacts
+                            if company.get("status") == "researched":
+                                company["status"] = "contacted"
+                            pipeline = upsert_company(pipeline, company)
+                            save_pipeline(pipeline)
+                            st.session_state.pop(sl_state_key, None)
+                            st.success(f"Added {added} contact(s)!")
                                 st.rerun()
 
                 st.divider()
