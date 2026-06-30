@@ -519,7 +519,9 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
                 raw = raw.split("```")[1]
                 if raw.startswith("json"):
                     raw = raw[4:]
-            found = json.loads(raw.strip())
+            import re as _re
+            _m = _re.search(r"\[.*?\]", raw, _re.DOTALL)
+            found = json.loads(_m.group(0)) if _m else []
             for company in found:
                 name = company.get("company", "").strip()
                 if not name:
@@ -576,8 +578,24 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WBR Prospecting Radar")
     parser.add_argument("--auto-add", action="store_true")
     parser.add_argument("--min-score", type=int, default=60)
+    parser.add_argument("--event-id", type=str, default=None, help="Event ID (e.g. b2b-online-atlanta)")
     args = parser.parse_args()
-    finds = run_radar(auto_add=args.auto_add, auto_add_min_score=args.min_score)
+
+    event_cfg = None
+    if args.event_id:
+        from events_registry import EVENTS
+        event_cfg = EVENTS.get(args.event_id)
+        if not event_cfg:
+            print(f"[!] Unknown event: {args.event_id}")
+            sys.exit(1)
+        print(f"[Event] {event_cfg['name']}")
+
+    finds = run_radar(
+        auto_add=args.auto_add,
+        auto_add_min_score=args.min_score,
+        event_cfg=event_cfg,
+        event_id=args.event_id,
+    )
     if not finds:
         print("\nNo new companies found this run.")
     else:
