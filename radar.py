@@ -487,7 +487,7 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
         queries    = SEARCH_QUERIES
         score_tmpl = SCORE_PROMPT
 
-    print(f"  {len(queries)} queries | search_depth=advanced | max_results=8 per query")
+    print(f"  {len(queries)} queries | search_depth=basic | max_results=8 per query")
     if auto_add:
         print(f"  Auto-add ON — score >= {auto_add_min_score} goes straight to pipeline")
 
@@ -503,7 +503,7 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     for i, query in enumerate(queries, 1):
         try:
             print(f"  [{i}/{len(queries)}] {query[:70]}...")
-            results = tavily.search(query=query, max_results=8, search_depth="advanced")
+            results = tavily.search(query=query, max_results=8, search_depth="basic")
             web_text = "\n\n".join([f"URL: {r.get('url','')}\n{r.get('content','')}" for r in results.get("results", [])])
             if not web_text.strip():
                 continue
