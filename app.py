@@ -1027,7 +1027,7 @@ with tab2:
                             save_pipeline(pipeline)
                             st.session_state.pop(sl_state_key, None)
                             st.success(f"Added {added} contact(s)!")
-                                st.rerun()
+                            st.rerun()
 
                 st.divider()
 
