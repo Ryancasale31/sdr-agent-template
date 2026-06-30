@@ -499,6 +499,8 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     existing_finds = load_json(radar_file, [])
     new_finds = []
     total_searched = 0
+    total_extracted = 0
+    total_dupes = 0
 
     for i, query in enumerate(queries, 1):
         try:
@@ -526,8 +528,10 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
                 name = company.get("company", "").strip()
                 if not name:
                     continue
+                total_extracted += 1
                 if is_duplicate(name, all_known):
                     print(f"    ~ Duplicate: {name}")
+                    total_dupes += 1
                     continue
                 company["found_date"] = datetime.now().strftime("%Y-%m-%d")
                 company["search_query"] = query
@@ -571,6 +575,13 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     print(f"[OK] {len(unreviewed)} unreviewed finds in radar_finds.json")
     if auto_add:
         print(f"[OK] {len([f for f in new_finds if f.get('auto_added')])} auto-added to pipeline")
+    # Attach stats so app.py can show useful feedback
+    for f in new_finds:
+        pass  # already populated
+    _run_stats = {"total_extracted": total_extracted, "total_dupes": total_dupes, "new": len(new_finds)}
+    # Store on module for app.py to read
+    import sys as _sys
+    _sys.modules[__name__].__dict__["_last_run_stats"] = _run_stats
     return new_finds
 
 
