@@ -501,7 +501,7 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
             if not web_text.strip():
                 continue
             total_searched += 1
-            prompt = score_tmpl.format(search_results=web_text[:4000])
+            prompt = score_tmpl.replace("{search_results}", web_text[:4000]).replace("{{", "{").replace("}}", "}")
             message = client.messages.create(
                 model="claude-opus-4-8",
                 max_tokens=2000,
