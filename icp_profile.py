@@ -1,6 +1,6 @@
 """
 Builds the Ideal Customer Profile from the attendee list.
-Run once to generate icp_summary.json which feeds all other commands.
+Supports multiple events via optional industry_map, seniority_keywords, and event_meta.
 """
 import pandas as pd
 from collections import Counter
@@ -8,7 +8,8 @@ import json
 
 ATTENDEE_CSV = r"C:\Users\Ryan.Casale\Downloads\current_registrations (20).csv"
 
-INDUSTRY_MAP = {
+# FSE defaults
+FSE_INDUSTRY_MAP = {
     "Medical / Life Sciences": [
         "siemens healthineers", "johnson & johnson", "j&j", "roche", "fresenius",
         "zimmer", "nihon kohden", "carestream", "cytiva", "laerdal", "b braun",
@@ -33,58 +34,87 @@ INDUSTRY_MAP = {
     ],
 }
 
-SENIORITY_KEYWORDS = [
+FSE_SENIORITY_KEYWORDS = [
     "vp", "vice president", "svp", "senior vice president", "director",
     "head of", "chief", "ceo", "coo", "cro", "president", "general manager",
 ]
 
+# Backwards compat
+INDUSTRY_MAP = FSE_INDUSTRY_MAP
+SENIORITY_KEYWORDS = FSE_SENIORITY_KEYWORDS
 
-def classify_industry(company: str) -> str:
+
+def classify_industry(company: str, industry_map: dict = None) -> str:
+    if industry_map is None:
+        industry_map = FSE_INDUSTRY_MAP
     co = company.lower()
-    for industry, keywords in INDUSTRY_MAP.items():
+    for industry, keywords in industry_map.items():
         if any(k in co for k in keywords):
             return industry
     return "Other"
 
 
-def is_senior(title: str) -> bool:
+def is_senior(title: str, seniority_keywords: list = None) -> bool:
     if not isinstance(title, str):
         return False
+    if seniority_keywords is None:
+        seniority_keywords = FSE_SENIORITY_KEYWORDS
     t = title.lower()
-    return any(k in t for k in SENIORITY_KEYWORDS)
+    return any(k in t for k in seniority_keywords)
 
 
-def build_icp(csv_path: str = ATTENDEE_CSV) -> dict:
+def build_icp(
+    csv_path: str = ATTENDEE_CSV,
+    industry_map: dict = None,
+    seniority_keywords: list = None,
+    event_meta: dict = None,
+) -> dict:
+    """
+    Build ICP from a WBR attendee CSV.
+
+    Args:
+        csv_path:           Path to registrations CSV.
+        industry_map:       {industry: [keyword,...]} for classification. Defaults to FSE map.
+        seniority_keywords: Title keywords that count as senior. Defaults to FSE keywords.
+        event_meta:         Dict with name/dates/location/buyer_summary from events_registry.
+    """
+    _industry_map = industry_map or FSE_INDUSTRY_MAP
+    _seniority    = seniority_keywords or FSE_SENIORITY_KEYWORDS
+
     df = pd.read_csv(csv_path, encoding="latin1")
     df.columns = df.columns.str.strip()
 
     buyers = df[df["Price List Type"] == "Primary"].copy()
 
-    buyers["Industry"] = buyers["Account"].fillna("").apply(classify_industry)
-    buyers["Is Senior"] = buyers["Job Title"].apply(is_senior)
+    buyers["Industry"] = buyers["Account"].fillna("").apply(
+        lambda co: classify_industry(co, _industry_map)
+    )
+    buyers["Is Senior"] = buyers["Job Title"].apply(
+        lambda t: is_senior(t, _seniority)
+    )
 
-    title_counts = Counter(buyers["Job Title"].dropna().tolist())
-    top_titles = [t for t, _ in title_counts.most_common(20)]
-
+    title_counts   = Counter(buyers["Job Title"].dropna().tolist())
+    top_titles     = [t for t, _ in title_counts.most_common(20)]
     company_counts = Counter(buyers["Account"].dropna().tolist())
-    top_companies = [c for c, _ in company_counts.most_common(20)]
-
+    top_companies  = [c for c, _ in company_counts.most_common(20)]
     industry_counts = dict(Counter(buyers["Industry"].tolist()))
-    senior_pct = round(buyers["Is Senior"].mean() * 100, 1)
-    vendors = df[df["Price List Type"] == "Vendor"]["Account"].dropna().tolist()
+    senior_pct     = round(buyers["Is Senior"].mean() * 100, 1)
+    vendors        = df[df["Price List Type"] == "Vendor"]["Account"].dropna().tolist()
 
+    meta = event_meta or {}
     icp = {
-        "event": "Field Service East",
-        "dates": "August 10-12, 2025",
-        "location": "Orlando, FL",
-        "total_registrants": len(df),
-        "buyer_count": len(buyers),
-        "senior_buyer_pct": senior_pct,
-        "top_titles": top_titles,
-        "top_companies": top_companies,
+        "event":              meta.get("name",     "Field Service East"),
+        "dates":              meta.get("dates",    "August 10-12, 2026"),
+        "location":           meta.get("location", "Orlando, FL"),
+        "total_registrants":  len(df),
+        "buyer_count":        len(buyers),
+        "senior_buyer_pct":   senior_pct,
+        "top_titles":         top_titles,
+        "top_companies":      top_companies,
         "industry_breakdown": industry_counts,
-        "existing_sponsors": vendors,
-        "buyer_summary": (
+        "existing_sponsors":  vendors,
+        "buyer_summary": meta.get(
+            "buyer_summary",
             "Primarily VP/Director/SVP-level leaders in field service operations "
             "across medical devices, industrial equipment, technology, and utilities. "
             "Decision-makers responsible for service strategy, workforce, parts, "
