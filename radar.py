@@ -41,22 +41,80 @@ def build_queries_from_event(event_cfg: dict, agenda_sessions: list = None, clie
         session_titles = "\n".join(f"- {t}" for t in titles)
 
     if client and (session_titles or event_focus):
-        prompt = f"""You are a B2B sponsorship sales researcher. Generate 25 targeted web search queries to find companies that would want to sponsor {event_name}.
+        import random as _random
+        from datetime import datetime as _dt
+        _now = _dt.now()
+        _yr = _now.strftime('%Y')
+        _mo = _now.strftime('%B %Y')
+        # Rotate query angles each run so results stay fresh
+        all_angles = [
+            f"site:linkedin.com/company B2B eCommerce platform software hiring",
+            f"site:crunchbase.com {search_keywords} Series A B C funding {_yr}",
+            f"B2B Online Chicago 2024 exhibitors sponsors list",
+            f"B2B Online Europe 2024 exhibitors sponsors list",
+            f"CommerceNext 2024 2025 sponsors exhibitors",
+            f"Shoptalk 2024 2025 B2B commerce exhibitors",
+            f"IRCE 2024 exhibitors digital commerce vendors",
+            f"site:g2.com {event_cfg.get('search_keywords','B2B eCommerce')} software category",
+            f"site:capterra.com {event_cfg.get('search_keywords','B2B eCommerce')} software alternatives",
+            f"'{event_name}' OR 'B2B Online' 2025 sponsor partner exhibitor",
+            f"VP eCommerce Partnerships B2B SaaS hiring {_mo}",
+            f"Director of Sales B2B digital commerce hiring {_mo}",
+            f"PIM software vendors alternatives niche {_yr}",
+            f"B2B marketplace platform technology startups funded",
+            f"guided selling CPQ B2B eCommerce manufacturers",
+            f"catalog AI product data enrichment B2B distributors",
+            f"B2B payments fintech net terms manufacturers distributors",
+            f"omnichannel order management OMS B2B wholesale",
+            f"ERP integration B2B eCommerce middleware API",
+            f"agentic AI commerce B2B conversational shopping {_yr}",
+            f"D2C to B2B platform conversion startups funded",
+            f"distributor enablement platform software vendors",
+            f"supplier portal software B2B self-service",
+            f"industrial eCommerce platform manufacturers software",
+            f"building materials B2B digital commerce platform",
+            f"electrical distributor B2B eCommerce software",
+            f"chemical wholesale B2B platform modernization",
+            f"food distributor B2B digital transformation software",
+            f"B2B personalization engine startups funded {_yr}",
+            f"data syndication product feeds B2B commerce startups",
+            f"headless commerce B2B manufacturers alternatives",
+            f"composable commerce MACH B2B platform vendors",
+            f"B2B search discovery platform AI recommendations",
+            f"wholesale distribution software digital transformation vendors",
+            f"B2B commerce implementation partner proprietary technology",
+            f"manufacturer digital commerce platform SaaS startups",
+            f"B2B eCommerce investment funding news {_mo}",
+            f"B2B commerce software company acquisition {_yr}",
+            f"new B2B eCommerce platform launch {_mo}",
+            f"B2B digital commerce startup raised funding {_mo}",
+            f"site:linkedin.com/posts B2B eCommerce manufacturer distributor platform",
+            f"B2B commerce conference {_yr} new sponsor exhibitor",
+        ]
+        _random.shuffle(all_angles)
+        angle_sample = all_angles[:15]
+        angle_str = chr(10).join(f"- {a}" for a in angle_sample)
+
+        prompt = f"""You are a B2B sponsorship sales researcher. Generate 30 targeted web search queries to find companies that would sponsor {event_name}.
 
 EVENT FOCUS: {event_focus}
 SEARCH KEYWORDS: {search_keywords}
 
-AGENDA SESSIONS (sample):
+AGENDA SESSIONS:
 {session_titles or "(no agenda uploaded yet)"}
 
-Generate queries that find:
-1. Companies selling software/tech/services to the people who attend this event
-2. Companies sponsoring similar events in this space
-3. Funded startups or growing vendors in this category
-4. Competitors of known sponsors
-5. Companies hiring in roles that signal they sell to this audience
+Use these SEARCH ANGLES as inspiration — pick the most promising and expand on them:
+{angle_str}
 
-Return ONLY a JSON array of 25 search query strings. No explanation.
+Rules:
+- Focus on NICHE and EMERGING vendors, not household names
+- Include LinkedIn hiring searches (signals they sell to this audience)
+- Include conference exhibitor list searches
+- Include G2/Capterra category searches for lesser-known tools
+- Mix broad category searches with specific niche searches
+- Each query should be different from the others
+
+Return ONLY a JSON array of 30 search query strings. No explanation.
 ["query 1", "query 2", ...]"""
 
         try:
@@ -267,21 +325,37 @@ def load_json(path, default):
 
 
 def save_json(path, data):
-    with open(path, "w") as f:
+    # Atomic write: dump to a temp file, then replace, so a crash mid-write
+    # can never leave a truncated/empty JSON file.
+    path = Path(path)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(tmp, "w") as f:
         json.dump(data, f, indent=2)
+    os.replace(tmp, path)
 
 
-def get_all_known_companies() -> set:
+def get_all_known_companies(event_id: str = None) -> set:
     known = set()
-    for entry in load_json(PIPELINE_FILE, []):
+    # Load event-specific pipeline from GitHub if event_id provided
+    if event_id and event_id != "field-service-east":
+        gh_pipeline = _github_load(f"events/{event_id}/pipeline.json")
+        source = gh_pipeline if gh_pipeline is not None else []
+    else:
+        gh_pipeline = _github_load("pipeline.json")
+        source = gh_pipeline if gh_pipeline is not None else load_json(PIPELINE_FILE, [])
+    for entry in source:
         name = entry.get("company", "").strip()
         if name:
             known.add(name.lower())
-    for entry in load_json(SCORED_FILE, []):
-        name = entry.get("company", "").strip()
-        if name:
-            known.add(name.lower())
-    for entry in load_json(RADAR_FILE, []):
+    # Only include the *active event's* scored list — folding FSE's scored
+    # companies into other events silently dropped valid prospects as "dupes".
+    if not event_id or event_id == "field-service-east":
+        for entry in load_json(SCORED_FILE, []):
+            name = entry.get("company", "").strip()
+            if name:
+                known.add(name.lower())
+    radar_file = f"{event_id}_radar_finds.json" if event_id else RADAR_FILE
+    for entry in load_json(radar_file, []):
         name = entry.get("company", "").strip()
         if name:
             known.add(name.lower())
@@ -412,8 +486,15 @@ def radar_find_to_pipeline_entry(find: dict) -> dict:
     }
 
 
-def add_to_pipeline(finds: list, min_score: int = 60) -> int:
-    pipeline = _github_load("pipeline.json") or load_json(PIPELINE_FILE, [])
+def add_to_pipeline(finds: list, min_score: int = 60, event_id: str = None) -> int:
+    if event_id and event_id != "field-service-east":
+        gh_path = f"events/{event_id}/pipeline.json"
+        local_path = Path("events") / event_id / "pipeline.json"
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        gh_path = "pipeline.json"
+        local_path = PIPELINE_FILE
+    pipeline = _github_load(gh_path) or load_json(local_path, [])
     existing = {e["company"].lower() for e in pipeline}
     added = 0
     for find in finds:
@@ -429,9 +510,9 @@ def add_to_pipeline(finds: list, min_score: int = 60) -> int:
 
     if added:
         pipeline.sort(key=lambda x: x.get("company", "").lower())
-        save_json(PIPELINE_FILE, pipeline)
+        save_json(local_path, pipeline)
         if GITHUB_TOKEN:
-            ok = _github_save("pipeline.json", pipeline)
+            ok = _github_save(gh_path, pipeline)
             print(f"  -> GitHub sync: {'OK' if ok else 'failed (saved locally)'}")
     return added
 
@@ -454,7 +535,7 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     tavily_key = os.getenv("TAVILY_API_KEY")
     if not tavily_key:
         print("[!] TAVILY_API_KEY not set in .env")
-        sys.exit(1)
+        raise RuntimeError("TAVILY_API_KEY is not set in Streamlit secrets")
 
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
@@ -469,28 +550,30 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
         queries    = SEARCH_QUERIES
         score_tmpl = SCORE_PROMPT
 
-    print(f"  {len(queries)} queries | search_depth=advanced | max_results=8 per query")
+    print(f"  {len(queries)} queries | search_depth=basic | max_results=8 per query")
     if auto_add:
         print(f"  Auto-add ON — score >= {auto_add_min_score} goes straight to pipeline")
 
     tavily = TavilyClient(api_key=tavily_key)
-    all_known = get_all_known_companies()
+    all_known = get_all_known_companies(event_id=event_id)
     print(f"  {len(all_known)} known companies loaded\n")
 
     radar_file = f"{event_id}_radar_finds.json" if event_id else RADAR_FILE
     existing_finds = load_json(radar_file, [])
     new_finds = []
     total_searched = 0
+    total_extracted = 0
+    total_dupes = 0
 
     for i, query in enumerate(queries, 1):
         try:
             print(f"  [{i}/{len(queries)}] {query[:70]}...")
-            results = tavily.search(query=query, max_results=8, search_depth="advanced")
+            results = tavily.search(query=query, max_results=8, search_depth="basic")
             web_text = "\n\n".join([f"URL: {r.get('url','')}\n{r.get('content','')}" for r in results.get("results", [])])
             if not web_text.strip():
                 continue
             total_searched += 1
-            prompt = score_tmpl.format(search_results=web_text[:4000])
+            prompt = score_tmpl.replace("{search_results}", web_text[:4000]).replace("{{", "{").replace("}}", "}")
             message = client.messages.create(
                 model="claude-opus-4-8",
                 max_tokens=2000,
@@ -501,13 +584,17 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
                 raw = raw.split("```")[1]
                 if raw.startswith("json"):
                     raw = raw[4:]
-            found = json.loads(raw.strip())
+            import re as _re
+            _m = _re.search(r"\[.*?\]", raw, _re.DOTALL)
+            found = json.loads(_m.group(0)) if _m else []
             for company in found:
                 name = company.get("company", "").strip()
                 if not name:
                     continue
+                total_extracted += 1
                 if is_duplicate(name, all_known):
                     print(f"    ~ Duplicate: {name}")
+                    total_dupes += 1
                     continue
                 company["found_date"] = datetime.now().strftime("%Y-%m-%d")
                 company["search_query"] = query
@@ -525,7 +612,7 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
         to_add = [f for f in new_finds if f.get("score", 0) >= auto_add_min_score]
         if to_add:
             print(f"\n  Adding {len(to_add)} finds to pipeline...")
-            n = add_to_pipeline(to_add, min_score=auto_add_min_score)
+            n = add_to_pipeline(to_add, min_score=auto_add_min_score, event_id=event_id)
             for f in new_finds:
                 if f.get("score", 0) >= auto_add_min_score:
                     f["reviewed"] = True
@@ -551,6 +638,13 @@ def run_radar(auto_add: bool = False, auto_add_min_score: int = 60,
     print(f"[OK] {len(unreviewed)} unreviewed finds in radar_finds.json")
     if auto_add:
         print(f"[OK] {len([f for f in new_finds if f.get('auto_added')])} auto-added to pipeline")
+    # Attach stats so app.py can show useful feedback
+    for f in new_finds:
+        pass  # already populated
+    _run_stats = {"total_extracted": total_extracted, "total_dupes": total_dupes, "new": len(new_finds)}
+    # Store on module for app.py to read
+    import sys as _sys
+    _sys.modules[__name__].__dict__["_last_run_stats"] = _run_stats
     return new_finds
 
 
@@ -558,8 +652,24 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WBR Prospecting Radar")
     parser.add_argument("--auto-add", action="store_true")
     parser.add_argument("--min-score", type=int, default=60)
+    parser.add_argument("--event-id", type=str, default=None, help="Event ID (e.g. b2b-online-atlanta)")
     args = parser.parse_args()
-    finds = run_radar(auto_add=args.auto_add, auto_add_min_score=args.min_score)
+
+    event_cfg = None
+    if args.event_id:
+        from events_registry import EVENTS
+        event_cfg = EVENTS.get(args.event_id)
+        if not event_cfg:
+            print(f"[!] Unknown event: {args.event_id}")
+            sys.exit(1)
+        print(f"[Event] {event_cfg['name']}")
+
+    finds = run_radar(
+        auto_add=args.auto_add,
+        auto_add_min_score=args.min_score,
+        event_cfg=event_cfg,
+        event_id=args.event_id,
+    )
     if not finds:
         print("\nNo new companies found this run.")
     else:

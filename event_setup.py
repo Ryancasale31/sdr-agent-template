@@ -13,14 +13,29 @@ import os
 from pathlib import Path
 
 # ── ICP builder ───────────────────────────────────────────────────────────────
-def build_icp_from_csv(csv_path: str) -> dict:
+def build_icp_from_csv(csv_path: str, event_id: str = None) -> dict:
     """
     Build an ICP summary from a WBR attendee registration CSV.
     Uses the same column format as Field Service East:
       Account, Job Title, Price List Type  (Primary = buyer, Vendor = sponsor)
+
+    If event_id is provided, event-specific industry_map and seniority_keywords
+    from the events registry are used for classification.
     """
     from icp_profile import build_icp
-    return build_icp(csv_path)
+    from events_registry import EVENTS
+
+    event_cfg = EVENTS.get(event_id, {}) if event_id else {}
+    return build_icp(
+        csv_path,
+        industry_map=event_cfg.get("industry_map"),
+        seniority_keywords=event_cfg.get("seniority_keywords"),
+        event_meta={
+            "name":     event_cfg.get("name"),
+            "dates":    event_cfg.get("dates"),
+            "location": event_cfg.get("location"),
+        } if event_cfg else None,
+    )
 
 
 # ── Website research ──────────────────────────────────────────────────────────

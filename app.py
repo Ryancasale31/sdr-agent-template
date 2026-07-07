@@ -14,6 +14,11 @@ from tavily import TavilyClient
 import outlook_integration as outlook
 import storage
 from events_registry import EVENTS
+try:
+    import seamless_utils
+    _SEAMLESS_AVAILABLE = True
+except ImportError:
+    _SEAMLESS_AVAILABLE = False
 
 load_dotenv()
 
@@ -165,6 +170,31 @@ def upsert_company(pipeline, company_data):
     return pipeline
 
 # ── AI helpers ────────────────────────────────────────────────────────────────
+AI_MODEL = "claude-opus-4-5"  # single source of truth for the app's AI calls
+
+def _audience_block(icp: dict) -> str:
+    """Build the EVENT AUDIENCE prompt section from the *active event's* ICP.
+    Never hardcode audience numbers here — that's how B2B companies ended up
+    scored against FSE's field-service buyers. Safe against a missing ICP."""
+    icp = icp or {}
+    lines = []
+    buyer_count = icp.get("buyer_count", "several hundred")
+    senior_pct = icp.get("senior_buyer_pct")
+    seniority = f", {senior_pct}% VP/Director/SVP level" if senior_pct else ""
+    lines.append(f"- {buyer_count} registered buyers{seniority}")
+    industries = icp.get("industry_breakdown") or icp.get("industries")
+    if isinstance(industries, dict) and industries:
+        top = sorted(industries.items(), key=lambda kv: -kv[1])[:6]
+        lines.append("- Industries: " + ", ".join(f"{k} ({v})" for k, v in top))
+    if icp.get("top_companies"):
+        lines.append("- Top companies attending: " + ", ".join(icp["top_companies"][:10]))
+    if icp.get("top_titles"):
+        lines.append("- Top titles: " + ", ".join(icp["top_titles"][:8]))
+    if icp.get("existing_sponsors"):
+        lines.append("- Existing sponsors: " + ", ".join(set(icp["existing_sponsors"])))
+    return "\n".join(lines)
+
+
 def research_company(company_name: str, icp: dict) -> dict:
     tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
@@ -186,11 +216,7 @@ def research_company(company_name: str, icp: dict) -> dict:
     prompt = f"""You are a sponsorship sales analyst for {event_label}.
 
 EVENT BUYER PROFILE:
-- {icp['buyer_count']} registered buyers, {icp['senior_buyer_pct']}% VP/Director/SVP level
-- Industries: Industrial/Manufacturing Equipment (41), Medical/Life Sciences (30), Tech/IT (17), Utilities (13)
-- Top companies attending: {', '.join(icp['top_companies'][:10])}
-- Top titles: {', '.join(icp['top_titles'][:8])}
-- Existing sponsors: {', '.join(set(icp['existing_sponsors']))}
+{_audience_block(icp)}
 
 WEB RESEARCH ON {company_name}:
 {web_context}
@@ -212,7 +238,7 @@ Return ONLY valid JSON:
 """
 
     message = client.messages.create(
-        model="claude-opus-4-5",
+        model=AI_MODEL,
         max_tokens=800,
         messages=[{"role": "user", "content": prompt}],
     )
@@ -239,10 +265,7 @@ def generate_meeting_email(company_data: dict, contact_name: str, contact_title:
     prompt = f"""You are {sender}, a sponsorship sales rep for {event_label}.
 
 EVENT AUDIENCE:
-- {icp['buyer_count']} registered buyers, {icp['senior_buyer_pct']}% VP/Director/SVP level
-- Top attending companies: {', '.join(icp['top_companies'][:10])}
-- Top titles: {', '.join(icp['top_titles'][:8])}
-- Already sponsoring: {', '.join(set(icp['existing_sponsors']))}
+{_audience_block(icp)}
 
 TARGET:
 - Company: {company_data['company']}
@@ -266,7 +289,7 @@ Return ONLY valid JSON:
 """
 
     message = client.messages.create(
-        model="claude-opus-4-5",
+        model=AI_MODEL,
         max_tokens=600,
         messages=[{"role": "user", "content": prompt}],
     )
@@ -302,10 +325,7 @@ def generate_emails(company_data: dict, contact_name: str, contact_title: str, i
     prompt = f"""You are a senior sponsorship sales rep for {event_label}.
 
 EVENT AUDIENCE:
-- {icp['buyer_count']} registered buyers, {icp['senior_buyer_pct']}% VP/Director/SVP level
-- Top attending companies: {', '.join(icp['top_companies'][:12])}
-- Top titles: {', '.join(icp['top_titles'][:10])}
-- Already sponsoring: {', '.join(set(icp['existing_sponsors']))}
+{_audience_block(icp)}
 
 TARGET COMPANY INTEL:
 - Name: {company_data['company']}
@@ -337,7 +357,7 @@ Return ONLY valid JSON:
 """
 
     message = client.messages.create(
-        model="claude-opus-4-5",
+        model=AI_MODEL,
         max_tokens=1500,
         messages=[{"role": "user", "content": prompt}],
     )
@@ -407,12 +427,12 @@ with st.sidebar:
         icp_csv = st.file_uploader("Attendee CSV", type="csv", key="icp_csv")
         if icp_csv and st.button("Rebuild ICP from CSV"):
             import tempfile, os
-            from icp_profile import build_icp
+            import event_setup as _es_quick
             with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode="wb") as tmp:
                 tmp.write(icp_csv.read())
                 tmp_path = tmp.name
             try:
-                new_icp = build_icp(tmp_path)
+                new_icp = _es_quick.build_icp_from_csv(tmp_path, event_id=_event_id)
                 storage.save_icp(new_icp, event_id=_event_id)
                 st.success(f"ICP rebuilt -- {new_icp['buyer_count']} buyers.")
                 st.rerun()
@@ -941,34 +961,104 @@ with tab2:
                     st.rerun()
 
                 st.divider()
-                # Contact info
-                st.write("**Contact Details**")
-                c1, c2, c3 = st.columns(3)
-                contact_name = c1.text_input("Contact name", value=company.get("contact_name",""), key=f"cn_{idx}")
-                contact_title = c2.text_input("Title", value=company.get("contact_title",""), key=f"ct_{idx}")
-                contact_email = c3.text_input("Email", value=company.get("contact_email",""), key=f"ce_{idx}")
 
-                col_a, col_b, col_c = st.columns(3)
-                if col_a.button("Save Contact", key=f"save_{idx}"):
-                    company["contact_name"] = contact_name
-                    company["contact_title"] = contact_title
-                    company["contact_email"] = contact_email
-                    if company.get("status") == "researched":
-                        company["status"] = "contacted"
-                    pipeline = upsert_company(pipeline, company)
-                    save_pipeline(pipeline)
-                    st.success("Contact saved!")
-                    st.rerun()
+                # ── Contacts ──────────────────────────────────────────────
+                st.write("**Contacts**")
+                card_contacts = get_contacts(company)
+                if card_contacts:
+                    for ci, ct in enumerate(card_contacts):
+                        ct_cols = st.columns([3, 1])
+                        parts = " · ".join(filter(None, [ct.get("name",""), ct.get("title",""), ct.get("email","")]))
+                        ct_cols[0].write(parts or "(unnamed)")
+                        if ct_cols[1].button("Delete", key=f"del_ct_{idx}_{ci}"):
+                            card_contacts.pop(ci)
+                            company["contacts"] = card_contacts
+                            pipeline = upsert_company(pipeline, company)
+                            save_pipeline(pipeline)
+                            st.rerun()
+                else:
+                    st.caption("No contacts yet.")
 
+                with st.expander("+ Add contact"):
+                    ac1, ac2 = st.columns(2)
+                    new_ct_name  = ac1.text_input("Name",  key=f"nct_name_{idx}")
+                    new_ct_title = ac2.text_input("Title", key=f"nct_title_{idx}")
+                    new_ct_email = ac1.text_input("Email", key=f"nct_email_{idx}")
+                    new_ct_phone = ac2.text_input("Phone", key=f"nct_phone_{idx}")
+                    if st.button("Add contact", key=f"add_ct_{idx}", type="primary") and (new_ct_name or new_ct_email):
+                        card_contacts.append({"name": new_ct_name, "title": new_ct_title, "email": new_ct_email, "phone": new_ct_phone, "notes": "", "activity_log": []})
+                        company["contacts"] = card_contacts
+                        if company.get("status") == "researched":
+                            company["status"] = "contacted"
+                        pipeline = upsert_company(pipeline, company)
+                        save_pipeline(pipeline)
+                        st.success("Contact added!")
+                        st.rerun()
+
+                # ── Seamless contact finder ────────────────────────────────
+                _sl_key = os.getenv("SEAMLESS_API_KEY", "")
+                try:
+                    _sl_key = _sl_key or st.secrets.get("SEAMLESS_API_KEY", "")
+                except Exception:
+                    pass
+                with st.expander("🔍 Find contacts via Seamless"):
+                    sl_state_key = f"sl_results_{idx}"
+                    if not _sl_key:
+                        st.warning("SEAMLESS_API_KEY not found in secrets.")
+                    elif not _SEAMLESS_AVAILABLE:
+                        st.warning("seamless_utils not available.")
+                    else:
+                        if st.button("Search Seamless", key=f"sl_search_{idx}"):
+                            with st.spinner(f"Searching Seamless for {company['company']}..."):
+                                results = seamless_utils.search_contacts(company["company"], _sl_key)
+                            if results and "error" in results[0]:
+                                st.error(results[0]["error"])
+                            else:
+                                st.session_state[sl_state_key] = results
+
+                    sl_results = st.session_state.get(sl_state_key, [])
+                    if sl_results:
+                        st.caption(f"Found {len(sl_results)} candidates — select to add:")
+                        to_add = []
+                        for ri, rc in enumerate(sl_results):
+                            label = f"**{rc['name']}** — {rc['title']}"
+                            if rc.get("linkedin"):
+                                label += f" · [LinkedIn]({rc['linkedin']})"
+                            checked = st.checkbox(label, key=f"sl_chk_{idx}_{ri}")
+                            if checked:
+                                to_add.append(rc)
+                        if to_add and st.button("Add selected contacts", key=f"sl_add_{idx}", type="primary"):
+                            existing_names = {c.get("name","").lower() for c in card_contacts}
+                            added = 0
+                            for ct in to_add:
+                                if ct["name"].lower() not in existing_names:
+                                    card_contacts.append(ct)
+                                    existing_names.add(ct["name"].lower())
+                                    added += 1
+                            company["contacts"] = card_contacts
+                            if company.get("status") == "researched":
+                                company["status"] = "contacted"
+                            pipeline = upsert_company(pipeline, company)
+                            save_pipeline(pipeline)
+                            st.session_state.pop(sl_state_key, None)
+                            st.success(f"Added {added} contact(s)!")
+                            st.rerun()
+
+                st.divider()
+
+                # ── Email + Remove ─────────────────────────────────────────
+                col_b, col_c = st.columns([3, 1])
                 if col_b.button("Draft Meeting Email", key=f"gen_{idx}"):
+                    first_ct = card_contacts[0] if card_contacts else {}
+                    contact_name  = first_ct.get("name", "")
+                    contact_title = first_ct.get("title", "")
                     if not contact_name:
-                        st.warning("Add a contact name first")
+                        st.warning("Add a contact first")
                     else:
                         with st.spinner("Writing personalized email..."):
                             try:
                                 email = generate_meeting_email(company, contact_name, contact_title, icp)
                                 st.session_state[f"meeting_email_{company['company']}"] = email
-                                # Also store a full 3-touch sequence for Outreach Queue
                                 emails = generate_emails(company, contact_name, contact_title, icp)
                                 company["emails"] = emails
                                 if company.get("status") == "researched":
@@ -978,7 +1068,12 @@ with tab2:
                             except Exception as e:
                                 st.error(f"Error generating email: {e}")
 
-                # Show generated meeting email inline (persists across reruns via session state)
+                if col_c.button("🗑 Remove Company", key=f"del_{idx}"):
+                    pipeline = [c for c in pipeline if c["company"] != company["company"]]
+                    save_pipeline(pipeline)
+                    st.rerun()
+
+                # Show generated meeting email inline
                 draft = st.session_state.get(f"meeting_email_{company['company']}")
                 if draft:
                     st.markdown("**Meeting Email Draft**")
@@ -991,11 +1086,6 @@ with tab2:
                     if dcol2.button("Regenerate", key=f"draft_regen_{idx}"):
                         st.session_state.pop(f"meeting_email_{company['company']}", None)
                         st.rerun()
-
-                if col_c.button("Remove", key=f"del_{idx}"):
-                    pipeline = [c for c in pipeline if c["company"] != company["company"]]
-                    save_pipeline(pipeline)
-                    st.rerun()
 
                 st.divider()
                 render_activity_log(company, key_prefix=f"pl_{idx}")
@@ -1161,9 +1251,17 @@ with tab4:
                 )
                 added = len([f for f in finds if f.get("auto_added")])
                 queued = len([f for f in finds if not f.get("auto_added")])
-                msg = f"Found {len(finds)} new companies!"
-                if auto_add_toggle and added:
-                    msg += f" {added} added to pipeline, {queued} queued for review."
+                stats = getattr(radar_module, "_last_run_stats", {})
+                total_ex = stats.get("total_extracted", 0)
+                total_dup = stats.get("total_dupes", 0)
+                if len(finds) == 0 and total_ex > 0:
+                    msg = f"Radar complete — found {total_ex} companies but all {total_dup} were already in your pipeline. Run again later or use the bat file to find more."
+                elif len(finds) == 0:
+                    msg = "Radar complete — no qualifying companies found this run. Try again later."
+                else:
+                    msg = f"Found {len(finds)} new companies!"
+                    if auto_add_toggle and added:
+                        msg += f" {added} added to pipeline, {queued} queued for review."
                 st.success(msg)
                 st.rerun()
             except Exception as e:
@@ -1915,7 +2013,7 @@ with tab10:
                         with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode="wb") as tmp:
                             tmp.write(raw_bytes)
                             tmp_path = tmp.name
-                        icp_built = event_setup.build_icp_from_csv(tmp_path)
+                        icp_built = event_setup.build_icp_from_csv(tmp_path, event_id=_event_id)
                         storage.save_icp(icp_built, event_id=_event_id)
                         _os.unlink(tmp_path)
                         st.success(
@@ -2237,7 +2335,7 @@ with tab11:
                         with _tmp_ei.NamedTemporaryFile(delete=False, suffix=".csv", mode="wb") as _tmpf:
                             _tmpf.write(raw_att)
                             _tmp_path = _tmpf.name
-                        new_icp = _es.build_icp_from_csv(_tmp_path)
+                        new_icp = _es.build_icp_from_csv(_tmp_path, event_id=_event_id)
                         storage.save_icp(new_icp, event_id=_event_id)
                         _os_ei.unlink(_tmp_path)
                         st.success(f"Buyer profile updated: **{new_icp['buyer_count']} buyers** · **{new_icp['senior_buyer_pct']}% VP/Director+**")

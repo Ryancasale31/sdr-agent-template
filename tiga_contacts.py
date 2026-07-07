@@ -65,11 +65,16 @@ def run_find_people_agent(company_name: str) -> int:
         f"Head of Events, Director Product Marketing, or VP Demand Generation "
         f"at {company_name}, based in the United States"
     )
-    resp = requests.post(
-        f"{BASE_URL}/api/v1/agent/find-people",
-        headers=HEADERS,
-        json={"contact_description": description, "model": "gpt-5.4-2026-03-05"},
-    )
+    try:
+        resp = requests.post(
+            f"{BASE_URL}/api/v1/agent/find-people",
+            headers=HEADERS,
+            json={"contact_description": description, "model": "gpt-5.4-2026-03-05"},
+            timeout=(5, 60),
+        )
+    except requests.RequestException as e:
+        console.print(f"  [yellow]Find People Agent request failed: {e}[/yellow]")
+        return 0
     if not resp.ok:
         console.print(f"  [yellow]Find People Agent error {resp.status_code}: {resp.text[:200]}[/yellow]")
         return 0
@@ -119,13 +124,18 @@ def search_people_at_company(company_name: str) -> list:
 
     all_people = []
     for term in search_terms:
-        resp = requests.get(
-            f"{BASE_URL}/api/v1/people",
-            headers={**HEADERS, "Tiga-Filter": json.dumps({
-                "search_term": term,
-                "person_location_country": "United States",
-            })},
-        )
+        try:
+            resp = requests.get(
+                f"{BASE_URL}/api/v1/people",
+                headers={**HEADERS, "Tiga-Filter": json.dumps({
+                    "search_term": term,
+                    "person_location_country": "United States",
+                })},
+                timeout=(5, 30),
+            )
+        except requests.RequestException as e:
+            console.print(f"  [yellow]Tiga search failed for '{term}': {e}[/yellow]")
+            continue
         if not resp.ok:
             continue
         data = resp.json()
@@ -193,17 +203,22 @@ def search_people_at_company(company_name: str) -> list:
 
 def enrich_person(person: dict) -> dict:
     """Waterfall enrich a contact to get verified email + phone."""
-    resp = requests.post(
-        f"{BASE_URL}/api/v1/people/enrich-person",
-        headers=HEADERS,
-        json={
-            "first_name": person.get("first_name", ""),
-            "last_name": person.get("last_name", ""),
-            "company_name": person.get("account_name", ""),
-            "person_linkedin_url": person.get("linkedin_url") or person.get("person_linkedin", ""),
-            "title": person.get("title", ""),
-        },
-    )
+    try:
+        resp = requests.post(
+            f"{BASE_URL}/api/v1/people/enrich-person",
+            headers=HEADERS,
+            json={
+                "first_name": person.get("first_name", ""),
+                "last_name": person.get("last_name", ""),
+                "company_name": person.get("account_name", ""),
+                "person_linkedin_url": person.get("linkedin_url") or person.get("person_linkedin", ""),
+                "title": person.get("title", ""),
+            },
+            timeout=(5, 30),
+        )
+    except requests.RequestException as e:
+        console.print(f"  [yellow]Enrich request failed: {e}[/yellow]")
+        return person
     if not resp.ok:
         return person
 
@@ -211,9 +226,15 @@ def enrich_person(person: dict) -> dict:
     if not enrich_id:
         return person
 
+    deadline = time.time() + 180  # hard wall-clock cap on polling
     for _ in range(30):
+        if time.time() > deadline:
+            break
         time.sleep(5)
-        poll = requests.get(f"{BASE_URL}/api/v1/enrich/{enrich_id}", headers=HEADERS)
+        try:
+            poll = requests.get(f"{BASE_URL}/api/v1/enrich/{enrich_id}", headers=HEADERS, timeout=(5, 30))
+        except requests.RequestException:
+            continue
         if not poll.ok:
             continue
         data = poll.json()
@@ -249,11 +270,26 @@ def find_people(company_name: str, use_agent: bool = True) -> list:
     return people
 
 
-PIPELINE_FILE = Path(__file__).parent / "pipeline.json"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_REPO = os.getenv("GITHUB_REPO", "Ryancasale31/sdr-agent-template")
 GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", "data")
 GITHUB_API = "https://api.github.com"
+
+# Active event — contacts must land in the *active event's* pipeline, never
+# blindly in the root FSE file. Set via --event or the EVENT_ID env var.
+EVENT_ID = os.getenv("EVENT_ID", "field-service-east")
+
+
+def _gh_pipeline_path() -> str:
+    if EVENT_ID and EVENT_ID != "field-service-east":
+        return f"events/{EVENT_ID}/pipeline.json"
+    return "pipeline.json"
+
+
+def _local_pipeline_path() -> Path:
+    if EVENT_ID and EVENT_ID != "field-service-east":
+        return Path(__file__).parent / "events" / EVENT_ID / "pipeline.json"
+    return Path(__file__).parent / "pipeline.json"
 
 
 def _gh_headers():
@@ -263,33 +299,52 @@ def _gh_headers():
 def _load_pipeline_from_github():
     import base64
     resp = requests.get(
-        f"{GITHUB_API}/repos/{GITHUB_REPO}/contents/pipeline.json",
+        f"{GITHUB_API}/repos/{GITHUB_REPO}/contents/{_gh_pipeline_path()}",
         params={"ref": GITHUB_BRANCH},
         headers=_gh_headers(),
+        timeout=15,
     )
     if resp.ok:
-        return json.loads(__import__('base64').b64decode(resp.json()["content"]).decode("utf-8"))
+        return json.loads(base64.b64decode(resp.json()["content"]).decode("utf-8"))
     return None
 
 
 def _save_pipeline_to_github(pipeline):
     import base64
-    resp = requests.get(
-        f"{GITHUB_API}/repos/{GITHUB_REPO}/contents/pipeline.json",
-        params={"ref": GITHUB_BRANCH},
-        headers=_gh_headers(),
-    )
-    sha = resp.json().get("sha") if resp.ok else None
     content = base64.b64encode(json.dumps(pipeline, indent=2, ensure_ascii=False).encode()).decode()
-    payload = {"message": "Update pipeline contacts via tiga_contacts.py", "content": content, "branch": GITHUB_BRANCH}
-    if sha:
-        payload["sha"] = sha
-    put = requests.put(
-        f"{GITHUB_API}/repos/{GITHUB_REPO}/contents/pipeline.json",
-        headers=_gh_headers(),
-        json=payload,
-    )
-    return put.ok
+    # Retry on 409 sha conflict so a concurrent radar/app write doesn't kill ours
+    for _ in range(3):
+        resp = requests.get(
+            f"{GITHUB_API}/repos/{GITHUB_REPO}/contents/{_gh_pipeline_path()}",
+            params={"ref": GITHUB_BRANCH},
+            headers=_gh_headers(),
+            timeout=15,
+        )
+        sha = resp.json().get("sha") if resp.ok else None
+        payload = {"message": f"Update pipeline contacts via tiga_contacts.py [{EVENT_ID}]",
+                   "content": content, "branch": GITHUB_BRANCH}
+        if sha:
+            payload["sha"] = sha
+        put = requests.put(
+            f"{GITHUB_API}/repos/{GITHUB_REPO}/contents/{_gh_pipeline_path()}",
+            headers=_gh_headers(),
+            json=payload,
+            timeout=15,
+        )
+        if put.ok:
+            return True
+        if put.status_code != 409:
+            return False
+    return False
+
+
+def _save_pipeline_local(pipeline):
+    path = _local_pipeline_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".json.tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(pipeline, f, indent=2, ensure_ascii=False)
+    os.replace(tmp, path)
 
 
 def save_contacts_to_pipeline(company_name: str, contacts: list):
@@ -302,9 +357,10 @@ def save_contacts_to_pipeline(company_name: str, contacts: list):
     if use_github:
         pipeline = _load_pipeline_from_github()
     if pipeline is None:
-        if not PIPELINE_FILE.exists():
+        local = _local_pipeline_path()
+        if not local.exists():
             return
-        with open(PIPELINE_FILE, encoding="utf-8") as f:
+        with open(local, encoding="utf-8") as f:
             pipeline = json.load(f)
         use_github = False
 
@@ -342,14 +398,12 @@ def save_contacts_to_pipeline(company_name: str, contacts: list):
             if use_github:
                 ok = _save_pipeline_to_github(pipeline)
                 if ok:
-                    console.print(f"  [blue]Synced to GitHub[/blue]")
+                    console.print(f"  [blue]Synced to GitHub ({_gh_pipeline_path()})[/blue]")
                 else:
                     console.print(f"  [yellow]GitHub sync failed — saving locally[/yellow]")
-                    with open(PIPELINE_FILE, "w", encoding="utf-8") as f:
-                        json.dump(pipeline, f, indent=2, ensure_ascii=False)
+                    _save_pipeline_local(pipeline)
             else:
-                with open(PIPELINE_FILE, "w", encoding="utf-8") as f:
-                    json.dump(pipeline, f, indent=2, ensure_ascii=False)
+                _save_pipeline_local(pipeline)
         except Exception as e:
             console.print(f"  [yellow]Could not save pipeline: {e}[/yellow]")
 
@@ -467,7 +521,14 @@ def main():
     parser.add_argument("--output", default="tiga_contacts.csv", help="Output CSV filename")
     parser.add_argument("--skip-existing", action="store_true", help="Skip companies that already have contacts in pipeline")
     parser.add_argument("--no-agent", action="store_true", help="Skip Find People Agent (faster, search only)")
+    parser.add_argument("--event", default=None,
+                        help="Event ID (e.g. b2b-online-atlanta). Defaults to EVENT_ID env var or field-service-east.")
     args = parser.parse_args()
+
+    if args.event:
+        global EVENT_ID
+        EVENT_ID = args.event
+    console.print(f"[dim]Active event: {EVENT_ID} -> {_gh_pipeline_path()}[/dim]")
 
     if not TIGA_API_KEY:
         console.print("[red]TIGA_API_KEY not set in .env[/red]")

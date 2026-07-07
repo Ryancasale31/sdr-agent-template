@@ -24,8 +24,19 @@ per session (not on every rerun), and write-through keeps the cache fresh.
     pipeline_url = "https://docs.google.com/spreadsheets/d/.../edit"
 """
 import json
+import os
 import base64
 from pathlib import Path
+
+
+def _atomic_write_json(path: Path, data):
+    """Write JSON atomically (temp file + rename) so a crash mid-write can
+    never leave a truncated/empty file — this file is the app's whole state."""
+    path = Path(path)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+    os.replace(tmp, path)
 
 PIPELINE_FILE = Path(__file__).parent / "pipeline.json"
 ICP_FILE = Path(__file__).parent / "icp_summary.json"
@@ -107,21 +118,26 @@ def _gh_get(path):
 def _gh_put(path, content, message):
     import requests
     token, repo, branch = _gh_cfg()
-    _, sha = _gh_get(path)
-    body = {
-        "message": message,
-        "content": base64.b64encode(content.encode("utf-8")).decode("ascii"),
-        "branch": branch,
-    }
-    if sha:
-        body["sha"] = sha
-    r = requests.put(
-        f"{GITHUB_API}/repos/{repo}/contents/{path}",
-        json=body,
-        headers=_gh_headers(token),
-        timeout=15,
-    )
-    return r.status_code in (200, 201)
+    encoded = base64.b64encode(content.encode("utf-8")).decode("ascii")
+    # Retry on 409 (sha conflict): another writer (e.g. the scheduled radar)
+    # updated the file between our GET and PUT. Re-fetch the sha and retry
+    # so we don't silently lose the write.
+    for attempt in range(3):
+        _, sha = _gh_get(path)
+        body = {"message": message, "content": encoded, "branch": branch}
+        if sha:
+            body["sha"] = sha
+        r = requests.put(
+            f"{GITHUB_API}/repos/{repo}/contents/{path}",
+            json=body,
+            headers=_gh_headers(token),
+            timeout=15,
+        )
+        if r.status_code in (200, 201):
+            return True
+        if r.status_code != 409:
+            return False
+    return False
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -164,28 +180,59 @@ def _decode(value):
 # ══════════════════════════════════════════════════════════════════════════════
 # Local file backend
 # ══════════════════════════════════════════════════════════════════════════════
-def _load_local_pipeline() -> list:
-    if not PIPELINE_FILE.exists():
+def _local_event_file(event_id: str, filename: str) -> Path:
+    """Returns path to events/{event_id}/{filename} sibling of this module."""
+    return Path(__file__).parent / "events" / event_id / filename
+
+
+def _load_local_pipeline(event_id: str = "field-service-east") -> list:
+    # Check event-specific local file first. Only FSE may fall back to the
+    # root pipeline.json — other events must NOT bleed into FSE's data.
+    event_file = _local_event_file(event_id, "pipeline.json")
+    if event_file.exists():
+        target = event_file
+    elif event_id == "field-service-east":
+        target = PIPELINE_FILE
+    else:
         return []
-    with open(PIPELINE_FILE, encoding="utf-8") as f:
+    if not target.exists():
+        return []
+    with open(target, encoding="utf-8") as f:
         return json.load(f)
 
 
-def _save_local_pipeline(pipeline: list):
-    with open(PIPELINE_FILE, "w", encoding="utf-8") as f:
-        json.dump(pipeline, f, indent=2, ensure_ascii=False)
+def _save_local_pipeline(pipeline: list, event_id: str = "field-service-east"):
+    event_file = _local_event_file(event_id, "pipeline.json")
+    event_file.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_write_json(event_file, pipeline)
+    # Also keep root pipeline.json in sync for FSE (backwards compat)
+    if event_id == "field-service-east":
+        _atomic_write_json(PIPELINE_FILE, pipeline)
 
 
-def _load_local_icp():
-    if ICP_FILE.exists():
-        with open(ICP_FILE, encoding="utf-8") as f:
-            return json.load(f)
-    return None
+def _load_local_icp(event_id: str = "field-service-east"):
+    # Only FSE may fall back to the root icp_summary.json — other events
+    # must NOT inherit FSE's audience profile (it skews their scoring).
+    event_file = _local_event_file(event_id, "icp_summary.json")
+    if event_file.exists():
+        target = event_file
+    elif event_id == "field-service-east":
+        target = ICP_FILE
+    else:
+        return None
+    if not target.exists():
+        return None
+    with open(target, encoding="utf-8") as f:
+        return json.load(f)
 
 
-def _save_local_icp(icp: dict):
-    with open(ICP_FILE, "w", encoding="utf-8") as f:
-        json.dump(icp, f, indent=2, ensure_ascii=False)
+def _save_local_icp(icp: dict, event_id: str = "field-service-east"):
+    event_file = _local_event_file(event_id, "icp_summary.json")
+    event_file.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_write_json(event_file, icp)
+    # Also keep root icp_summary.json in sync for FSE (backwards compat)
+    if event_id == "field-service-east":
+        _atomic_write_json(ICP_FILE, icp)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -220,7 +267,7 @@ def _warn(msg):
 # ══════════════════════════════════════════════════════════════════════════════
 def load_pipeline(event_id: str = "field-service-east") -> list:
     if not _network_active():
-        return _load_local_pipeline()
+        return _load_local_pipeline(event_id)
 
     cache_key = f"pipeline_cache_{event_id}"
     cached = _cache_get(cache_key)
@@ -233,7 +280,7 @@ def load_pipeline(event_id: str = "field-service-east") -> list:
 
 
 def save_pipeline(pipeline: list, event_id: str = "field-service-east"):
-    _save_local_pipeline(pipeline)  # always keep a local copy
+    _save_local_pipeline(pipeline, event_id=event_id)  # always keep a local copy
     if not _network_active():
         return
     _cache_set(f"pipeline_cache_{event_id}", pipeline)
@@ -262,10 +309,10 @@ def _load_pipeline_remote(event_id: str = "field-service-east") -> list:
             content, _ = _gh_get(_gh_pipeline_path(event_id))
             if content:
                 return json.loads(content)
-            return _load_local_pipeline()
+            return _load_local_pipeline(event_id)
         except Exception as e:
             _warn(f"Could not load pipeline from GitHub ({e}). Showing local baseline.")
-            return _load_local_pipeline()
+            return _load_local_pipeline(event_id)
     if gsheets_configured():
         try:
             records = _get_worksheet().get_all_records()
@@ -277,7 +324,7 @@ def _load_pipeline_remote(event_id: str = "field-service-east") -> list:
             return pipeline
         except Exception as e:
             _warn(f"Could not load from Google Sheets ({e}). Showing local data.")
-    return _load_local_pipeline()
+    return _load_local_pipeline(event_id)
 
 
 def _save_pipeline_remote(pipeline: list, event_id: str = "field-service-east"):
@@ -313,7 +360,7 @@ def _save_pipeline_remote(pipeline: list, event_id: str = "field-service-east"):
 # ══════════════════════════════════════════════════════════════════════════════
 def load_icp(event_id: str = "field-service-east"):
     if not _network_active():
-        return _load_local_icp()
+        return _load_local_icp(event_id)
 
     cache_key = f"icp_cache_{event_id}"
     cached = _cache_get(cache_key)
@@ -327,7 +374,7 @@ def load_icp(event_id: str = "field-service-east"):
 
 
 def save_icp(icp: dict, event_id: str = "field-service-east"):
-    _save_local_icp(icp)
+    _save_local_icp(icp, event_id=event_id)
     if not _network_active():
         return
     _cache_set(f"icp_cache_{event_id}", icp)
@@ -340,10 +387,10 @@ def _load_icp_remote(event_id: str = "field-service-east"):
             content, _ = _gh_get(_gh_icp_path(event_id))
             if content:
                 return json.loads(content)
-            return _load_local_icp()
+            return _load_local_icp(event_id)
         except Exception as e:
             _warn(f"Could not load ICP from GitHub ({e}). Using local baseline.")
-            return _load_local_icp()
+            return _load_local_icp(event_id)
     if gsheets_configured():
         try:
             raw = _get_icp_worksheet().acell("A1").value
@@ -351,7 +398,7 @@ def _load_icp_remote(event_id: str = "field-service-east"):
                 return json.loads(raw)
         except Exception as e:
             _warn(f"Could not load ICP from Google Sheets ({e}). Using local.")
-    return _load_local_icp()
+    return _load_local_icp(event_id)
 
 
 def _save_icp_remote(icp: dict, event_id: str = "field-service-east"):
