@@ -2843,7 +2843,16 @@
     "source_url": "https://www.g2.com/categories/product-information-management-pim",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "John Matson",
+        "title": "Chief Revenue Officer",
+        "email": "john.matson@propellic.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/john-matson-a072b229",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "PROS",
