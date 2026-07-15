@@ -1282,7 +1282,24 @@
     "source_url": "https://machalliance.org/members",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Jessica Batty",
+        "title": "Senior Vice President Marketing",
+        "email": "jbatty@fluentco.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/jessica-batty-marketing",
+        "source": "tiga"
+      },
+      {
+        "name": "Keith Belton",
+        "title": "VP Business Development",
+        "email": "kbelton@fluent.dental",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/keithbelton",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Flxpoint",
