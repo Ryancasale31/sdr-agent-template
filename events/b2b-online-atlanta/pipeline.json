@@ -2384,7 +2384,24 @@
     "source_url": "https://machalliance.org/members",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Dave Wileman",
+        "title": "Chief Revenue Officer",
+        "email": "dave@patchworks.co.uk",
+        "phone": "1157270404",
+        "linkedin": "https://www.linkedin.com/in/dave-wileman-069485103",
+        "source": "tiga"
+      },
+      {
+        "name": "Delfina De Moura",
+        "title": "Head of Marketing",
+        "email": "delfina.de-moura@wearepatchworks.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/delfina-de-moura-5264a055",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Pattern PXM",
