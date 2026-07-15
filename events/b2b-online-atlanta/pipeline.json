@@ -1491,7 +1491,24 @@
     "source_url": "https://www.g2.com/categories/customer-data-platform-cdp",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Brian Kotlyar",
+        "title": "Chief Marketing Officer",
+        "email": "brian@hightouch.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/briankotlyar",
+        "source": "tiga"
+      },
+      {
+        "name": "Josh Kanagy",
+        "title": "Chief Revenue Officer",
+        "email": "josh@hightouch.io",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/joshkanagy",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Hive CPQ",
