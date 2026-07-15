@@ -1693,7 +1693,16 @@
     "source_url": "https://www.g2.com/categories/product-information-management-pim",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Warren Daniels",
+        "title": "VP Global Demand Generation",
+        "email": "warren.daniels@inriver.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/warrendaniels1",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Intershop",
