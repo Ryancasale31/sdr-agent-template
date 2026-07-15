@@ -2610,7 +2610,17 @@
     "search_query": "site:capterra.com PIM alternatives niche",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Bruce Wright",
+        "title": "VP Sales",
+        "email": "bruce.wright@pimberly.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/bruce-wright-3b4a1a10",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Pimcore",
