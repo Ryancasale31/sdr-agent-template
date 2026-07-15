@@ -2792,7 +2792,24 @@
     "source_url": "https://www.g2.com/categories/catalog-management",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Christian Broscheit",
+        "title": "Chief Revenue Officer (CRO)",
+        "email": "christian.broscheit@productsup.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/christian-broscheit-159a19b3",
+        "source": "tiga"
+      },
+      {
+        "name": "Kai Elsermann",
+        "title": "Vice President Sales EMEA",
+        "email": "kai.elsermann@productsup.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kai-elsermann-844a5482",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Prometora",
