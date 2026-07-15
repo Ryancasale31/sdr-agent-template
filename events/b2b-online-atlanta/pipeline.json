@@ -1814,7 +1814,24 @@
     "source_url": "https://www.capterra.com/headless-ecommerce-platform-software/",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Eric Lessard",
+        "title": "VP of Partnerships & Alliances",
+        "email": "eric.lessard@kibocommerce.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/ericrlessard",
+        "source": "tiga"
+      },
+      {
+        "name": "Lindsey",
+        "title": "Senior Demand Generation Manager",
+        "email": "lindsey.kuwatani@kibocommerce.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/lindsey-kuwatani",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Knowde",
