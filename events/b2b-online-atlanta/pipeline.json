@@ -3033,7 +3033,25 @@
     "search_query": "catalog management AI B2B distributors",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Abby Todd",
+        "title": "Director Product Marketing, Salesforce Voice",
+        "email": "abby.todd@salesforce.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/abby-klare-todd",
+        "source": "tiga"
+      },
+      {
+        "name": "Adriana Amer",
+        "title": "Director, Field Marketing - Retail & Consumer Goods",
+        "email": "a.amer@salesforce.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/adriana-amer-bb416640",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Salsify",
