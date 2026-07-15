@@ -1560,7 +1560,16 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Enxhi Hamzallari",
+        "title": "Senior Field Marketing Manager",
+        "email": "enxhi.hamzallari@hygraph.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/enxhihamzallari",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "IBM (Sterling Order Management)",
