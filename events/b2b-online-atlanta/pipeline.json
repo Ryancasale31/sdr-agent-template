@@ -165,7 +165,24 @@
     "source_url": "https://www.g2.com/categories/e-commerce-search",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Isabella Newman",
+        "title": "Chief Marketing Officer",
+        "email": "isabella@athostx.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/isabella-newman-320207237",
+        "source": "tiga"
+      },
+      {
+        "name": "Will Donaghy",
+        "title": "VP Sales - EMEA",
+        "email": "will.donaghy@athoscommerce.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/will-donaghy-826b03a9",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Atwix",
