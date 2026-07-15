@@ -3415,7 +3415,24 @@
     "source_url": "https://www.g2.com/categories/product-information-management-pim",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Doug Inda",
+        "title": "Chief Revenue Officer (CRO) - Americas",
+        "email": "doug.inda@syndigo.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/douginda",
+        "source": "tiga"
+      },
+      {
+        "name": "Greg Hunter",
+        "title": "VP Business Development CPG/Retail - PXM",
+        "email": "greg.hunter@syndigo.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/huntergreg",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Tacton",
