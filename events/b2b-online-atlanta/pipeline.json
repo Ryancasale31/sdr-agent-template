@@ -551,7 +551,24 @@
     "source_url": "https://machalliance.org/members",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Amelia Smith",
+        "title": "Senior Demand Generation Marketing Manager",
+        "email": "amy.smith@bigcommerce.com",
+        "phone": "706.676.1331",
+        "linkedin": "https://www.linkedin.com/in/ameliakarrsmith",
+        "source": "tiga"
+      },
+      {
+        "name": "Angie Mistretta",
+        "title": "Vice President, Global Demand Generation",
+        "email": "angie.mistretta@commercetools.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/angiemistretta",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Commercetools",
