@@ -878,7 +878,16 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Amit Nagpal",
+        "title": "Chief Executive Officer",
+        "email": "amitn@datax.ai",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/amit-nagpal-a814ab",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "DCatalog",
