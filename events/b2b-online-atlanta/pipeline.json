@@ -444,7 +444,24 @@
     "source_url": "https://www.g2.com/categories/product-information-management-pim",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Andrew Hall",
+        "title": "VP Global Demand Generation",
+        "email": "ahall@canto.com",
+        "phone": "+44 980526399",
+        "linkedin": "https://www.linkedin.com/in/andrewhall1979",
+        "source": "tiga"
+      },
+      {
+        "name": "Emily Byrne",
+        "title": "Webinar & Events Manager",
+        "email": "ebyrne@canto.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/emilyrbyrne",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Cart.com",
