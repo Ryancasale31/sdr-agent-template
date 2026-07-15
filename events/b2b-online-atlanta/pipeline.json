@@ -3108,7 +3108,24 @@
     "source_url": "",
     "found_date": "2026-06-30",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Allison Hadidian",
+        "title": "head of amer field marketing",
+        "email": "allisonhadidian@asana.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/allison-hadidian",
+        "source": "tiga"
+      },
+      {
+        "name": "Caley Dunn",
+        "title": "Field Marketing Manager",
+        "email": "caleydunn@asana.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/caley-dunn-6a0061a2",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "SAP",
