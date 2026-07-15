@@ -2418,7 +2418,24 @@
     "source_url": "https://www.g2.com/categories/product-information-management-pim",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Carolyn Sarnoff",
+        "title": "Chief Marketing Officer",
+        "email": "carolyn.sarnoff@pattern.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/carolyn-sarnoff-a844991",
+        "source": "tiga"
+      },
+      {
+        "name": "Chris Baird",
+        "title": "Chief Marketing Officer",
+        "email": "chris.baird@pattern.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/cbbaird",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "PayPal",
