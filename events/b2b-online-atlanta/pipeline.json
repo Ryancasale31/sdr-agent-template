@@ -3181,7 +3181,16 @@
     "source_url": "https://www.g2.com/categories/product-information-management-pim",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Jeff Koterba",
+        "title": "VP Sales, Americas",
+        "email": "jeff.koterba@scayle.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/jeffkoterba",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "ServiceNow",
