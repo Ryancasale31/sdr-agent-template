@@ -1525,7 +1525,24 @@
     "source_url": "https://www.capterra.com/cpq-software/",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Alifa Jamal",
+        "title": "Demand Generation Manager",
+        "email": "alifa.jamal@hivemq.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/alifajamal",
+        "source": "tiga"
+      },
+      {
+        "name": "Allison Yrungaray",
+        "title": "Chief Marketing Officer",
+        "email": "allison.yrungaray@hivemq.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/allison-yrungaray-434147",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Hygraph",
