@@ -3644,7 +3644,24 @@
     "source_url": "https://www.capterra.com/b2b-ecommerce-platform-software/",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Billy Burnet",
+        "title": "VP, Demand Generation",
+        "email": "billy.burnet@truecommerce.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/billyburnet",
+        "source": "tiga"
+      },
+      {
+        "name": "Brian Lindner",
+        "title": "Director, Field Marketing",
+        "email": "brian.lindner@truecommerce.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/brian-lindner-67439b2",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Valtech",
