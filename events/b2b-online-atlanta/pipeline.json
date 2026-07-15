@@ -1181,7 +1181,16 @@
     "source_url": "https://www.g2.com/categories/e-commerce-search",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Pratyaksh Salvi",
+        "title": "Head of Sales",
+        "email": "pratyaksh@experro.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/pratyaksh-salvi",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Fabric",
