@@ -2142,7 +2142,16 @@
     "source_url": "https://machalliance.org/members",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Tonje Larsen",
+        "title": "Head of Marketing",
+        "email": "tonje@omnium.no",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/tonjelarsen",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Omnivativ",
