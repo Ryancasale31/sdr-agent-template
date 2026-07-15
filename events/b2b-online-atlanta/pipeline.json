@@ -362,7 +362,16 @@
     "source_url": "https://www.capterra.com/personalization-software/",
     "found_date": "2026-07-14",
     "outreach_note": "",
-    "contacts": []
+    "contacts": [
+      {
+        "name": "Grace Bacon",
+        "title": "Chief Marketing Officer",
+        "email": "grace.bacon@blueconic.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/grace-bacon-3a680a25",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "BlueSnap",
