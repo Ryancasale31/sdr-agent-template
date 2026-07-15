@@ -1137,7 +1137,17 @@
     "search_query": "manufacturing digital commerce platform startups",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Eberhardt Weber",
+        "title": "Founder",
+        "email": "e.weber@emporix.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/eberhardt-weber-318994150",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Ergonode",
