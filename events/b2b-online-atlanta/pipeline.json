@@ -1075,7 +1075,17 @@
     "search_query": "supply chain visibility B2B digital commerce",
     "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "contacts": [
+      {
+        "name": "Arielle Recine",
+        "title": "Vice President, Demand Generation Marketing",
+        "email": "arielle.recine@sciencelogic.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/ariellerecine",
+        "source": "tiga"
+      }
+    ]
   },
   {
     "company": "Embitel",
