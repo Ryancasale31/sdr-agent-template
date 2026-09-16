@@ -430,6 +430,24 @@
     ]
   },
   {
+    "company": "Cadent Commerce",
+    "category": "Confirmed Sponsor",
+    "what_they_do": "",
+    "tier": 1,
+    "score": 100,
+    "priority": "hot",
+    "status": "closed_won",
+    "source": "confirmed_sponsor",
+    "fit_reason": "Signed sponsor for B2B Online Atlanta 2026.",
+    "pitch_angle": "",
+    "signal": "",
+    "source_url": "",
+    "found_date": "2026-09-16",
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "sponsor_confirmed": true,
+    "contacts": []
+  },
+  {
     "company": "Canto",
     "category": "DAM",
     "what_they_do": "Digital asset management platform with PIM and portal distribution features for marketing and product teams.",
@@ -576,8 +594,8 @@
     "what_they_do": "Headless, composable B2B commerce platform built for manufacturers and distributors running complex catalog and pricing models.",
     "tier": 2,
     "score": 75,
-    "priority": "medium",
-    "status": "researched",
+    "priority": "hot",
+    "status": "closed_won",
     "source": "lapsed_sponsor",
     "stage": "Lapsed Sponsor",
     "fit_reason": "Premier composable commerce vendor — exactly what senior digital leaders at B2B Online are evaluating.",
@@ -585,29 +603,9 @@
     "signal": "Sponsored B2B Online Atlanta 2025 — not yet registered for 2026",
     "source_url": "",
     "found_date": "2026-06-30",
-    "outreach_note": "",
-    "contacts": [
-      {
-        "name": "Theresa Somerville",
-        "title": "Head of Marketing (Field Marketing, Partner Marketing, Account Based Marketing)",
-        "email": "",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/thsomerville",
-        "source": "seamless",
-        "notes": "",
-        "activity_log": []
-      },
-      {
-        "name": "Angie Mistretta",
-        "title": "Vice President, Global Demand Generation",
-        "email": "",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/angiemistretta",
-        "source": "seamless",
-        "notes": "",
-        "activity_log": []
-      }
-    ]
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "contacts": [],
+    "sponsor_confirmed": true
   },
   {
     "company": "Components Engine",
@@ -766,8 +764,8 @@
     "what_they_do": "AI-powered relevance platform providing intelligent search, recommendations, and personalization for B2B commerce and self-service.",
     "tier": 2,
     "score": 75,
-    "priority": "medium",
-    "status": "researched",
+    "priority": "hot",
+    "status": "closed_won",
     "source": "lapsed_sponsor",
     "stage": "Lapsed Sponsor",
     "fit_reason": "Coveo's B2B commerce search is a direct fit for distributors and manufacturers modernizing their digital buyer experience.",
@@ -775,29 +773,9 @@
     "signal": "Sponsored B2B Online Atlanta 2025 — not yet registered for 2026",
     "source_url": "",
     "found_date": "2026-06-30",
-    "outreach_note": "",
-    "contacts": [
-      {
-        "name": "Jason Love",
-        "title": "Director of Marketing Operations",
-        "email": "",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/jason-love-1329a8",
-        "source": "seamless",
-        "notes": "",
-        "activity_log": []
-      },
-      {
-        "name": "Mike Raley",
-        "title": "Chief Marketing Officer",
-        "email": "",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/mraley",
-        "source": "seamless",
-        "notes": "",
-        "activity_log": []
-      }
-    ]
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "contacts": [],
+    "sponsor_confirmed": true
   },
   {
     "company": "Creatuity",
@@ -1485,6 +1463,24 @@
     "contacts": []
   },
   {
+    "company": "HawkSearch",
+    "category": "Confirmed Sponsor",
+    "what_they_do": "",
+    "tier": 1,
+    "score": 100,
+    "priority": "hot",
+    "status": "closed_won",
+    "source": "confirmed_sponsor",
+    "fit_reason": "Signed sponsor for B2B Online Atlanta 2026.",
+    "pitch_angle": "",
+    "signal": "",
+    "source_url": "",
+    "found_date": "2026-09-16",
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "sponsor_confirmed": true,
+    "contacts": []
+  },
+  {
     "company": "Helixia",
     "category": "B2B Commerce / CPQ",
     "what_they_do": "B2B commerce and CPQ (configure, price, quote) platform helping manufacturers streamline complex ordering workflows.",
@@ -1722,24 +1718,16 @@
     "tier": 1,
     "score": 87,
     "priority": "hot",
-    "status": "researched",
+    "status": "closed_won",
     "source": "radar",
     "fit_reason": "Manufacturer-focused PIM — squarely in the event's #1 sponsor category; attendee titles like 'E-commerce and Product Data Manager' are their exact buyer.",
     "pitch_angle": "Every PIM evaluation in this room starts with a shortlist — be on it before they build it.",
     "signal": "Top-10 in G2 PIM category (4.2/5, 152 reviews)",
     "source_url": "https://www.g2.com/categories/product-information-management-pim",
     "found_date": "2026-07-14",
-    "outreach_note": "",
-    "contacts": [
-      {
-        "name": "Warren Daniels",
-        "title": "VP Global Demand Generation",
-        "email": "warren.daniels@inriver.com",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/warrendaniels1",
-        "source": "tiga"
-      }
-    ]
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "contacts": [],
+    "sponsor_confirmed": true
   },
   {
     "company": "Intershop",
@@ -2012,6 +2000,24 @@
     "contacts": []
   },
   {
+    "company": "Luminos Labs",
+    "category": "Confirmed Sponsor",
+    "what_they_do": "",
+    "tier": 1,
+    "score": 100,
+    "priority": "hot",
+    "status": "closed_won",
+    "source": "confirmed_sponsor",
+    "fit_reason": "Signed sponsor for B2B Online Atlanta 2026.",
+    "pitch_angle": "",
+    "signal": "",
+    "source_url": "",
+    "found_date": "2026-09-16",
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "sponsor_confirmed": true,
+    "contacts": []
+  },
+  {
     "company": "Marketplacer",
     "category": "B2B Marketplace",
     "what_they_do": "Marketplace technology platform that lets businesses launch and scale third-party seller marketplaces.",
@@ -2073,8 +2079,8 @@
     "what_they_do": "Post-purchase and commerce experience platform helping B2B brands improve buyer retention and digital engagement.",
     "tier": 2,
     "score": 75,
-    "priority": "medium",
-    "status": "researched",
+    "priority": "hot",
+    "status": "closed_won",
     "source": "lapsed_sponsor",
     "stage": "Lapsed Sponsor",
     "fit_reason": "B2B buyer retention through digital experience is an emerging focus area for the attendee base.",
@@ -2082,19 +2088,9 @@
     "signal": "Sponsored B2B Online Atlanta 2025 — not yet registered for 2026",
     "source_url": "",
     "found_date": "2026-06-30",
-    "outreach_note": "",
-    "contacts": [
-      {
-        "name": "John Greely",
-        "title": "Head of Marketing",
-        "email": "",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/greely",
-        "source": "seamless",
-        "notes": "",
-        "activity_log": []
-      }
-    ]
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "contacts": [],
+    "sponsor_confirmed": true
   },
   {
     "company": "Ntara",
@@ -2134,6 +2130,24 @@
         "activity_log": []
       }
     ]
+  },
+  {
+    "company": "Nuvo",
+    "category": "Confirmed Sponsor",
+    "what_they_do": "",
+    "tier": 1,
+    "score": 100,
+    "priority": "hot",
+    "status": "closed_won",
+    "source": "confirmed_sponsor",
+    "fit_reason": "Signed sponsor for B2B Online Atlanta 2026.",
+    "pitch_angle": "",
+    "signal": "",
+    "source_url": "",
+    "found_date": "2026-09-16",
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "sponsor_confirmed": true,
+    "contacts": []
   },
   {
     "company": "OmniReach",
@@ -2265,6 +2279,42 @@
     ]
   },
   {
+    "company": "Op5 Solutions",
+    "category": "Confirmed Sponsor",
+    "what_they_do": "",
+    "tier": 1,
+    "score": 100,
+    "priority": "hot",
+    "status": "closed_won",
+    "source": "confirmed_sponsor",
+    "fit_reason": "Signed sponsor for B2B Online Atlanta 2026.",
+    "pitch_angle": "",
+    "signal": "",
+    "source_url": "",
+    "found_date": "2026-09-16",
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "sponsor_confirmed": true,
+    "contacts": []
+  },
+  {
+    "company": "Optimizely",
+    "category": "Confirmed Sponsor",
+    "what_they_do": "",
+    "tier": 1,
+    "score": 100,
+    "priority": "hot",
+    "status": "closed_won",
+    "source": "confirmed_sponsor",
+    "fit_reason": "Signed sponsor for B2B Online Atlanta 2026.",
+    "pitch_angle": "",
+    "signal": "",
+    "source_url": "",
+    "found_date": "2026-09-16",
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "sponsor_confirmed": true,
+    "contacts": []
+  },
+  {
     "company": "Orderwerks",
     "category": "B2B Commerce Platform",
     "what_they_do": "B2B eCommerce platform with private ordering portals, inventory management, and real-time analytics for manufacturers and distributors.",
@@ -2287,8 +2337,8 @@
     "what_they_do": "Composable commerce consultancy specializing in headless and MACH architecture for B2B manufacturers and retailers.",
     "tier": 2,
     "score": 75,
-    "priority": "medium",
-    "status": "researched",
+    "priority": "hot",
+    "status": "closed_won",
     "source": "lapsed_sponsor",
     "stage": "Lapsed Sponsor",
     "fit_reason": "Composable/MACH architecture is a top conversation at B2B Online — Orium is a recognized leader.",
@@ -2296,8 +2346,9 @@
     "signal": "Sponsored B2B Online Atlanta 2025 — not yet registered for 2026",
     "source_url": "",
     "found_date": "2026-06-30",
-    "outreach_note": "",
-    "contacts": []
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "contacts": [],
+    "sponsor_confirmed": true
   },
   {
     "company": "Oro (OroCommerce)",
@@ -2642,22 +2693,15 @@
     "pitch_angle": "Meet the distribution and manufacturing leaders solving product data hygiene before their next commerce launch.",
     "signal": "Cloud-based PIM platform centralizing product data management, matching core PIM/data syndication sponsor category.",
     "source_url": "https://www.capterra.com/p/164149/Pimberly-PIM",
-    "status": "radar_find",
+    "status": "closed_won",
     "found_date": "2026-06-30",
     "search_query": "site:capterra.com PIM alternatives niche",
-    "reviewed": true,
     "auto_added": true,
     "source": "radar",
-    "contacts": [
-      {
-        "name": "Bruce Wright",
-        "title": "VP Sales",
-        "email": "bruce.wright@pimberly.com",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/bruce-wright-3b4a1a10",
-        "source": "tiga"
-      }
-    ]
+    "contacts": [],
+    "priority": "hot",
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "sponsor_confirmed": true
   },
   {
     "company": "Pimcore",
@@ -2992,12 +3036,15 @@
     "pitch_angle": "Connect with distribution leaders tackling the omnichannel imperative head-on.",
     "signal": "DigitalCommerce360 article quoting Revalgo's CEO on distributor omnichannel challenges.",
     "source_url": "https://www.digitalcommerce360.com/2024/06/13/distributors-omnichannel-digitally-driven-b2b-buyers",
-    "status": "radar_find",
+    "status": "closed_won",
     "found_date": "2026-06-30",
     "search_query": "omnichannel B2B distribution platform founders",
-    "reviewed": true,
     "auto_added": true,
-    "source": "radar"
+    "source": "radar",
+    "priority": "hot",
+    "contacts": [],
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "sponsor_confirmed": true
   },
   {
     "company": "Reveation Labs",
@@ -3170,8 +3217,8 @@
     "what_they_do": "Enterprise ERP and B2B commerce suite (SAP Commerce Cloud) used by large manufacturers and distributors globally.",
     "tier": 2,
     "score": 75,
-    "priority": "medium",
-    "status": "researched",
+    "priority": "hot",
+    "status": "closed_won",
     "source": "lapsed_sponsor",
     "stage": "Lapsed Sponsor",
     "fit_reason": "SAP is the ERP backbone for many attending enterprise manufacturers — a natural sponsor for an audience running SAP infrastructure.",
@@ -3179,29 +3226,9 @@
     "signal": "Sponsored B2B Online Atlanta 2025 — not yet registered for 2026",
     "source_url": "",
     "found_date": "2026-06-30",
-    "outreach_note": "",
-    "contacts": [
-      {
-        "name": "Juliet Randall",
-        "title": "Chief Marketing Officer, Americas",
-        "email": "",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/julietrandall",
-        "source": "seamless",
-        "notes": "",
-        "activity_log": []
-      },
-      {
-        "name": "David Hamilton",
-        "title": "Chief Marketing Officer",
-        "email": "",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/davidhamiltonseattle",
-        "source": "seamless",
-        "notes": "",
-        "activity_log": []
-      }
-    ]
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "contacts": [],
+    "sponsor_confirmed": true
   },
   {
     "company": "SCAYLE",
@@ -3421,6 +3448,24 @@
     ]
   },
   {
+    "company": "Supplier Solutions",
+    "category": "Confirmed Sponsor",
+    "what_they_do": "",
+    "tier": 1,
+    "score": 100,
+    "priority": "hot",
+    "status": "closed_won",
+    "source": "confirmed_sponsor",
+    "fit_reason": "Signed sponsor for B2B Online Atlanta 2026.",
+    "pitch_angle": "",
+    "signal": "",
+    "source_url": "",
+    "found_date": "2026-09-16",
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "sponsor_confirmed": true,
+    "contacts": []
+  },
+  {
     "company": "Surefront",
     "category": "PIM / PLM",
     "what_they_do": "Cloud-based 3-in-1 PLM, PIM, and wholesale CRM platform streamlining product development and merchandising.",
@@ -3548,6 +3593,24 @@
         "activity_log": []
       }
     ]
+  },
+  {
+    "company": "Threekit",
+    "category": "Confirmed Sponsor",
+    "what_they_do": "",
+    "tier": 1,
+    "score": 100,
+    "priority": "hot",
+    "status": "closed_won",
+    "source": "confirmed_sponsor",
+    "fit_reason": "Signed sponsor for B2B Online Atlanta 2026.",
+    "pitch_angle": "",
+    "signal": "",
+    "source_url": "",
+    "found_date": "2026-09-16",
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "sponsor_confirmed": true,
+    "contacts": []
   },
   {
     "company": "THRON",
@@ -3706,8 +3769,8 @@
     "what_they_do": "Global digital transformation consultancy specializing in B2B commerce strategy, experience design, and platform implementation.",
     "tier": 2,
     "score": 75,
-    "priority": "medium",
-    "status": "researched",
+    "priority": "hot",
+    "status": "closed_won",
     "source": "lapsed_sponsor",
     "stage": "Lapsed Sponsor",
     "fit_reason": "Valtech works with enterprise manufacturers and distributors on large-scale commerce transformation — directly relevant audience.",
@@ -3715,29 +3778,9 @@
     "signal": "Sponsored B2B Online Atlanta 2025 — not yet registered for 2026",
     "source_url": "",
     "found_date": "2026-06-30",
-    "outreach_note": "",
-    "contacts": [
-      {
-        "name": "Thaddeus P",
-        "title": "Director of Marketing",
-        "email": "",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/thaddeus-p-72790010",
-        "source": "seamless",
-        "notes": "",
-        "activity_log": []
-      },
-      {
-        "name": "Nicole Wieberneit",
-        "title": "VP / Global Head of Microsoft Partnerships",
-        "email": "",
-        "phone": "",
-        "linkedin": "https://www.linkedin.com/in/nwieberneit",
-        "source": "seamless",
-        "notes": "",
-        "activity_log": []
-      }
-    ]
+    "outreach_note": "Confirmed sponsor for B2B Online Atlanta 2026 - do not prospect.",
+    "contacts": [],
+    "sponsor_confirmed": true
   },
   {
     "company": "viax.io",
