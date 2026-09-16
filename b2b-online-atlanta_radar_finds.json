@@ -673,10 +673,11 @@
     "pitch_angle": "Every PIM evaluation in this room starts with a shortlist — be on it before they build it.",
     "signal": "Top-10 in G2 PIM category (4.2/5, 152 reviews)",
     "source_url": "https://www.g2.com/categories/product-information-management-pim",
-    "status": "radar_find",
+    "status": "closed_won",
     "found_date": "2026-07-14",
     "reviewed": true,
-    "auto_added": true
+    "auto_added": true,
+    "dismissed": true
   },
   {
     "company": "Intershop",
@@ -980,11 +981,12 @@
     "pitch_angle": "Meet the distribution and manufacturing leaders solving product data hygiene before their next commerce launch.",
     "signal": "Cloud-based PIM platform centralizing product data management, matching core PIM/data syndication sponsor category.",
     "source_url": "https://www.capterra.com/p/164149/Pimberly-PIM",
-    "status": "radar_find",
+    "status": "closed_won",
     "found_date": "2026-06-30",
     "search_query": "site:capterra.com PIM alternatives niche",
     "reviewed": true,
-    "auto_added": true
+    "auto_added": true,
+    "dismissed": true
   },
   {
     "company": "Pimcore",
@@ -1150,11 +1152,12 @@
     "pitch_angle": "Connect with distribution leaders tackling the omnichannel imperative head-on.",
     "signal": "DigitalCommerce360 article quoting Revalgo's CEO on distributor omnichannel challenges.",
     "source_url": "https://www.digitalcommerce360.com/2024/06/13/distributors-omnichannel-digitally-driven-b2b-buyers",
-    "status": "radar_find",
+    "status": "closed_won",
     "found_date": "2026-06-30",
     "search_query": "omnichannel B2B distribution platform founders",
     "reviewed": true,
-    "auto_added": true
+    "auto_added": true,
+    "dismissed": true
   },
   {
     "company": "Reveation Labs",
