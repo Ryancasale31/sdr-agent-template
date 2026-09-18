@@ -47,6 +47,12 @@ TARGET_TITLE_KEYWORDS = [
     # Product Marketing
     "vp product marketing", "director product marketing",
     "head of product marketing",
+    # Executives (small vendors are founder-led — they make sponsorship calls)
+    "ceo", "chief executive", "founder", "co-founder",
+    "coo", "chief operating", "chief commercial", "chief strategy",
+    "chief growth", "head of growth", "vp growth", "vp of growth",
+    "general manager", "vp revenue", "head of sales",
+    "sales director", "director of sales",
 ]
 
 console = Console()
@@ -62,7 +68,8 @@ def run_find_people_agent(company_name: str) -> int:
     description = (
         f"VP Marketing, Director of Marketing, VP Partnerships, Head of Marketing, "
         f"CMO, CRO, VP Sales, VP Business Development, Director of Partnerships, "
-        f"Head of Events, Director Product Marketing, or VP Demand Generation "
+        f"Head of Events, Director Product Marketing, VP Demand Generation, "
+        f"CEO, Founder, Co-Founder, COO, Head of Growth, or General Manager "
         f"at {company_name}, based in the United States"
     )
     try:
@@ -423,7 +430,7 @@ def process_companies(companies: list, use_agent: bool = True) -> list:
             continue
 
         enriched_batch = []
-        for person in people[:2]:
+        for person in people[:4]:
             console.print(f"  Enriching {person.get('first_name','')} {person.get('last_name','')} ({person.get('title','')})")
             enriched = enrich_person(person)
             enriched["source_company_score"] = score
@@ -544,18 +551,34 @@ def main():
         save_contacts_to_pipeline(args.company, contacts)
         save_contacts_csv(contacts, args.output)
     else:
-        scored_file = Path("scored_companies.json")
-        if not scored_file.exists():
-            console.print("[red]scored_companies.json not found. Run score_company.py --batch first.[/red]")
-            return
+        # Event-aware target list:
+        #  - FSE uses scored_companies.json (original behaviour)
+        #  - any other event pulls targets from that event's own pipeline,
+        #    so --event b2b-online-atlanta targets B2B companies, not FSE ones.
+        pipeline = _load_pipeline_from_github()
+        if pipeline is None:
+            local = _local_pipeline_path()
+            if local.exists():
+                with open(local, encoding="utf-8") as f:
+                    pipeline = json.load(f)
+                console.print("[yellow]GitHub unavailable — using local pipeline copy[/yellow]")
+            else:
+                pipeline = []
 
-        with open(scored_file) as f:
-            scored = json.load(f)
+        if EVENT_ID and EVENT_ID != "field-service-east":
+            scored = pipeline
+            console.print(f"[dim]Targets from event pipeline ({len(scored)} companies)[/dim]")
+        else:
+            scored_file = Path("scored_companies.json")
+            if not scored_file.exists():
+                console.print("[red]scored_companies.json not found. Run score_company.py --batch first.[/red]")
+                return
+            with open(scored_file) as f:
+                scored = json.load(f)
 
         targets = [c for c in scored if c.get("score", 0) >= args.min_score]
 
         if args.skip_existing:
-            pipeline = _load_pipeline_from_github() or []
             has_contacts = {e["company"].lower() for e in pipeline if e.get("contacts")}
             before = len(targets)
             targets = [c for c in targets if c["company"].lower() not in has_contacts]

@@ -14,3 +14,10 @@ sequences.json
 hubspot_import.csv
 tiga_import.csv
 pipeline_export.csv
+
+# Screenshots and scratch output from Claude sessions
+Claude outputs/
+# Superseded entry point, kept locally only (see app.py)
+app_v2.py
+# Attendee / contact exports — PII, never in a public repo
+*.csv
