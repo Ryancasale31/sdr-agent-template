@@ -75,14 +75,22 @@ def _search(queries: list, per_query: int = 5, depth: str = "advanced") -> str:
     """Run several Tavily queries and concatenate the readable results."""
     client = ai.tavily()
     chunks = []
+    failures = []
     for q in queries:
         try:
             res = client.search(query=q, max_results=per_query, search_depth=depth)
         except Exception as e:
+            failures.append(e)
             chunks.append(f"[search failed for '{q}': {e}]")
             continue
         for r in res.get("results", []):
             chunks.append(f"Source: {r.get('url', '')}\n{r.get('content', '')[:1500]}")
+    # Every query failing is a broken search, not an empty one. Returning the
+    # failure notes would let the model answer "no candidates found", which reads
+    # as a real result and hides the outage.
+    if queries and len(failures) == len(queries):
+        raise ai.AIError("Web search is not working, so there is nothing to score. "
+                         + ai.explain(failures[0]))
     return "\n\n".join(chunks)
 
 

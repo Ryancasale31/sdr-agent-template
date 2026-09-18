@@ -39,6 +39,48 @@ def search_available() -> bool:
     return bool(_secret("TAVILY_API_KEY"))
 
 
+# ── Errors ─────────────────────────────────────────────────────────────
+class AIError(RuntimeError):
+    """A Claude or Tavily failure, phrased for the person selling rather than
+    the person who wrote the code."""
+
+
+# Matched against the lower-cased exception text, first hit wins.
+_ERROR_HINTS = (
+    ("credit balance is too low",
+     "The Anthropic account is out of credit, so every AI feature is off. "
+     "Add credit at console.anthropic.com → Plans & Billing."),
+    ("invalid x-api-key",
+     "Anthropic rejected the API key. Replace ANTHROPIC_API_KEY in the app's secrets."),
+    ("authentication_error",
+     "Anthropic rejected the API key. Replace ANTHROPIC_API_KEY in the app's secrets."),
+    ("permission_error",
+     "This Anthropic key is not allowed to use that model."),
+    ("not_found_error",
+     "Anthropic does not recognise the model name in AI_MODEL (core/ai.py)."),
+    ("rate_limit",
+     "Anthropic is rate-limiting this key. Give it a minute and try again."),
+    ("overloaded",
+     "Anthropic is overloaded. Try again in a moment."),
+    ("unauthorized",
+     "Tavily rejected the API key. Replace TAVILY_API_KEY in the app's secrets."),
+    ("usage limit",
+     "The Tavily plan is out of search credits."),
+    ("timed out",
+     "The request timed out before anything came back. Try again."),
+)
+
+
+def explain(e: Exception) -> str:
+    """Plain English where we recognise the failure, the raw text where we don't."""
+    text = str(e)
+    low = text.lower()
+    for needle, message in _ERROR_HINTS:
+        if needle in low:
+            return message
+    return text
+
+
 # ── Response parsing ──────────────────────────────────────────────────────────
 def _parse_json(raw: str):
     """Claude occasionally wraps JSON in a fence or adds a sentence either side.
@@ -64,12 +106,46 @@ def _parse_json(raw: str):
 
 
 def ask(prompt: str, max_tokens: int = 1200):
-    msg = claude().messages.create(
-        model=AI_MODEL,
-        max_tokens=max_tokens,
-        messages=[{"role": "user", "content": prompt}],
-    )
+    if not ai_available():
+        raise AIError("No Anthropic API key is set, so the AI features are off. "
+                      "Add ANTHROPIC_API_KEY to the app's secrets.")
+    try:
+        msg = claude().messages.create(
+            model=AI_MODEL,
+            max_tokens=max_tokens,
+            messages=[{"role": "user", "content": prompt}],
+        )
+    except Exception as e:
+        raise AIError(explain(e)) from e
     return _parse_json(msg.content[0].text)
+
+
+# ── Connection checks ─────────────────────────────────────────────────────────
+# Setup shows these. A dead key used to look exactly like "nothing found", which
+# is how a hunt can return an empty screen for weeks without anyone noticing.
+def check_anthropic() -> tuple:
+    """(ok, detail). Costs one negligible API call."""
+    if not ai_available():
+        return False, "No API key set."
+    try:
+        claude().messages.create(
+            model=AI_MODEL, max_tokens=1,
+            messages=[{"role": "user", "content": "ping"}],
+        )
+        return True, f"Answering on {AI_MODEL}."
+    except Exception as e:
+        return False, explain(e)
+
+
+def check_tavily() -> tuple:
+    """(ok, detail). Costs one search credit."""
+    if not search_available():
+        return False, "No API key set."
+    try:
+        res = tavily().search(query="field service management software", max_results=1)
+        return True, f"Returning results ({len(res.get('results', []))} for a test query)."
+    except Exception as e:
+        return False, explain(e)
 
 
 # ── Shared prompt fragments ───────────────────────────────────────────────────

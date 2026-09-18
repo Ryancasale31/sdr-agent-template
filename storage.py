@@ -78,6 +78,33 @@ def _network_active() -> bool:
     return github_configured() or gsheets_configured()
 
 
+def check_github() -> tuple:
+    """(ok, detail) — is the stored token still good for the data branch?
+
+    Worth surfacing: when this token expires the app keeps running and keeps
+    accepting edits, it just quietly stops persisting them.
+    """
+    if not github_configured():
+        return False, ("No GitHub token in the app's secrets, so edits live only "
+                       "until the next reboot.")
+    import requests
+    try:
+        token, repo, branch = _gh_cfg()
+        r = requests.get(f"{GITHUB_API}/repos/{repo}/branches/{branch}",
+                         headers=_gh_headers(token), timeout=15)
+    except Exception as e:
+        return False, str(e)
+    if r.status_code == 200:
+        return True, f"Saving to {repo}, {branch} branch."
+    if r.status_code in (401, 403):
+        return False, ("The token was rejected — expired, revoked or missing access. "
+                       "Make a new one at github.com/settings/tokens with 'repo' scope "
+                       "and paste it into the app's secrets.")
+    if r.status_code == 404:
+        return False, f"{repo} or its {branch} branch is not visible to this token."
+    return False, f"GitHub returned {r.status_code}."
+
+
 def backend_name() -> str:
     if github_configured():
         return "GitHub"

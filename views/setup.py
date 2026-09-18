@@ -15,6 +15,7 @@ import storage
 from core import ai
 from core import data as D
 from ui import components as C
+from ui import theme as T
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -336,14 +337,67 @@ def _radar(icp, cfg):
                 st.error(f"Radar error: {e}")
 
 
+# ── Connections ─────────────────────────────────────────────────────
+_SERVICES = (
+    ("Anthropic", "Company research, outreach drafting, and three of the four hunts.",
+     lambda: ai.ai_available(), ai.check_anthropic),
+    ("Tavily", "The web search behind every live hunt.",
+     lambda: ai.search_available(), ai.check_tavily),
+    ("GitHub", "Saves your edits so they survive a reboot.",
+     lambda: storage.github_configured(), storage.check_github),
+)
+
+
+def _connections():
+    C.section("Connections",
+              "What the app can actually reach. A dead key looks exactly like an "
+              "empty result, so check here first when a screen comes back blank.")
+
+    if st.button("Test all three", type="primary"):
+        results = {}
+        with st.spinner("Calling each service..."):
+            for name, _, _, check in _SERVICES:
+                try:
+                    results[name] = check()
+                except Exception as e:
+                    results[name] = (False, str(e))
+        st.session_state["conn_results"] = results
+
+    results = st.session_state.get("conn_results", {})
+
+    for name, purpose, configured, _ in _SERVICES:
+        with st.container(border=True):
+            tested = results.get(name)
+            if tested is None:
+                label, colour = ("Key present", T.COOL) if configured() else ("No key", T.HOT)
+                detail = "Not tested yet." if configured() else "Nothing configured."
+            else:
+                ok, detail = tested
+                label, colour = ("Working", T.GOOD) if ok else ("Not working", T.HOT)
+            st.markdown(
+                f"<div style='display:flex;align-items:center;gap:10px;'>"
+                f"<span style='font-weight:650;'>{name}</span>"
+                f"{C.badge_html(label, colour)}</div>"
+                f"<div style='color:{T.INK_MUTED};font-size:.85rem;margin-top:2px;'>"
+                f"{purpose}</div>"
+                f"<div style='font-size:.85rem;margin-top:6px;'>{detail}</div>",
+                unsafe_allow_html=True,
+            )
+
+    st.caption("Keys are read from the environment first, then the app's secrets. "
+               "On Streamlit Cloud that is Settings → Secrets: ANTHROPIC_API_KEY and "
+               "TAVILY_API_KEY sit at the top level, GitHub goes in a [github] section "
+               "with token, repo and branch.")
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 def render():
     cfg, icp = D.event_cfg(), D.load_icp()
     C.page_head("Setup", f"{cfg.get('name', '')} · {cfg.get('location', '')} · "
                          f"{cfg.get('dates', '')}", eyebrow="Event configuration")
 
-    t_att, t_spon, t_imp, t_ag, t_rad = st.tabs(
-        ["Attendees", "Confirmed sponsors", "Import", "Agenda", "Radar"])
+    t_att, t_spon, t_imp, t_ag, t_rad, t_conn = st.tabs(
+        ["Attendees", "Confirmed sponsors", "Import", "Agenda", "Radar", "Connections"])
     with t_att:
         _attendees(icp, cfg)
     with t_spon:
@@ -354,3 +408,5 @@ def render():
         _agenda(cfg)
     with t_rad:
         _radar(icp, cfg)
+    with t_conn:
+        _connections()
