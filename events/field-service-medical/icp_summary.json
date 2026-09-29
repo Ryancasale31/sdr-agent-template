@@ -1,0 +1,21 @@
+{
+  "event": "Field Service Medical",
+  "dates": "TBC",
+  "location": "TBC",
+  "provisional": true,
+  "provisional_note": "No attendee list imported yet, so there is no real ICP. Everything here is placeholder except existing_sponsors. Import the registration CSV in Setup -> Attendees to replace it.",
+  "buyer_count": null,
+  "senior_buyer_pct": null,
+  "total_registrants": null,
+  "buyer_summary": "Service and support leaders at medical device and diagnostic equipment manufacturers — the people responsible for uptime, field engineers, depot repair and regulated service documentation.",
+  "industry_breakdown": {},
+  "top_titles": [],
+  "top_companies": [],
+  "existing_sponsors": [],
+  "fse_reference": {
+    "note": "For context while the real list is missing: Field Service East's own attendee base is 30 Medical / Life Sciences buyers out of 133 — the second largest industry there. That is the audience proof for this event.",
+    "fse_medical_attendees": 30,
+    "fse_buyer_count": 133
+  },
+  "seeded_on": "2026-09-29"
+}

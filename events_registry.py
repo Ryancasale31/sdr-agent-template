@@ -102,6 +102,54 @@ EVENTS = {
             "executive vice president", "senior manager",
         ],
     },
+    "field-service-medical": {
+        "name":            "Field Service Medical",
+        "short_name":      "FSM",
+        "dates":           "TBC",
+        "location":        "TBC",
+        "focus": (
+            "Field service and aftermarket support for medical device, diagnostic and "
+            "laboratory equipment manufacturers. Service, support and technical operations "
+            "leaders responsible for equipment uptime in hospitals and clinics, field "
+            "engineer productivity, depot and repair operations, service contract revenue, "
+            "and service documentation that has to survive an FDA or ISO 13485 audit. "
+            "Core sponsor categories: field service management platforms, service parts "
+            "planning, AI-assisted resolution, remote/AR support, technician training and "
+            "certification, connected-device monitoring, and regulated service reporting."
+        ),
+        "search_keywords": (
+            "medical device field service management software service parts planning "
+            "remote assistance AR technician clinical engineering biomedical equipment "
+            "hospital equipment uptime depot repair service contract FDA 21 CFR part 820 "
+            "ISO 13485 service documentation connected medical device remote monitoring"
+        ),
+        "sender_name":     "Ryan Casale",
+        "sender_title":    "Sponsorship Sales",
+        "event_brand":     "Field Service Medical",
+        "website":         "",
+
+        "core_sponsor_categories": [
+            "Field service management (FSM) platforms",
+            "Service parts planning and inventory optimisation",
+            "AI-assisted service resolution and knowledge",
+            "Remote assistance / AR for field and clinical engineers",
+            "Technician training, certification and competency tracking",
+        ],
+        "secondary_sponsor_categories": [
+            "Connected device monitoring and predictive maintenance",
+            "Service contract pricing and revenue management",
+            "Mobile forms and regulated service documentation",
+            "Scheduling and dispatch optimisation",
+            "Service analytics and decision intelligence",
+        ],
+        "out_of_scope_categories": [
+            "Drone and aerial inspection",
+            "Utilities and energy field service",
+            "Telecom network service management",
+            "Fleet telematics",
+            "Gig / contractor networks",
+        ],
+    },
     # Add new events below
     # "new-event-slug": {
     #     "name":            "My New Event",
