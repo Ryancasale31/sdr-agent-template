@@ -373,7 +373,7 @@ _SERVICES = (
 )
 
 
-def _connections():
+def _connections(icp, cfg):
     C.section("Connections",
               "What the app can actually reach. A dead key looks exactly like an "
               "empty result, so check here first when a screen comes back blank.")
@@ -409,6 +409,58 @@ def _connections():
                 unsafe_allow_html=True,
             )
 
+
+    # ── Try it for real ───────────────────────────────────────────────────────
+    # Connecting is not the same as working. This runs the actual research path
+    # end to end on one company and shows exactly what came back, so a signal
+    # that answers in prose instead of JSON is visible immediately.
+    st.divider()
+    C.section("Try a research call",
+              "Runs the real research on one company and shows the raw result. "
+              "Costs one Tiga credit, or one Claude call if Claude is working.")
+
+    col_a, col_b = st.columns([2, 1])
+    name = col_a.text_input("Company", placeholder="ServiceMax", key="probe_co")
+    domain = col_b.text_input("Website (optional)", placeholder="servicemax.com",
+                              key="probe_dom",
+                              help="Give this when the company name alone would not "
+                                   "produce the right website.")
+
+    # Not disabled on an empty box: a Streamlit text_input only commits its value
+    # on Enter or blur, so a disabled= gate leaves the button dead while the name
+    # is plainly sitting there, which reads as broken.
+    if st.button("Research it", key="probe_go"):
+        if not name.strip():
+            st.warning("Type a company name first.")
+            st.stop()
+        record = {"domain": domain.strip()} if domain.strip() else None
+        import time as _t
+        t0 = _t.time()
+        with st.spinner(f"Researching {name}... this can take up to a minute."):
+            try:
+                out = ai.research_company(name.strip(), icp, cfg,
+                                          event_id=D.event_id(), record=record)
+                st.session_state["probe_result"] = (out, round(_t.time() - t0, 1), None)
+            except Exception as e:
+                st.session_state["probe_result"] = (None, round(_t.time() - t0, 1), str(e))
+
+    got = st.session_state.get("probe_result")
+    if got:
+        out, secs, err = got
+        if err:
+            st.error(err)
+        else:
+            engine = out.get("research_engine", "?")
+            st.success(f"Answered by **{engine}** in {secs}s.")
+            if out.get("needs_review"):
+                st.warning(out["needs_review"])
+            if out.get("score") is not None:
+                a, b, c = st.columns(3)
+                a.metric("Score", out.get("score"))
+                b.metric("Tier", out.get("tier") or "-")
+                c.metric("Domain used", out.get("domain") or "-")
+            st.json(out)
+
     st.caption("Keys are read from the environment first, then the app's secrets. "
                "On Streamlit Cloud that is Settings → Secrets: ANTHROPIC_API_KEY and "
                "TAVILY_API_KEY sit at the top level, GitHub goes in a [github] section "
@@ -434,4 +486,4 @@ def render():
     with t_rad:
         _radar(icp, cfg)
     with t_conn:
-        _connections()
+        _connections(icp, cfg)
