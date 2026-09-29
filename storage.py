@@ -94,15 +94,66 @@ def check_github() -> tuple:
                          headers=_gh_headers(token), timeout=15)
     except Exception as e:
         return False, str(e)
-    if r.status_code == 200:
-        return True, f"Saving to {repo}, {branch} branch."
     if r.status_code in (401, 403):
         return False, ("The token was rejected — expired, revoked or missing access. "
-                       "Make a new one at github.com/settings/tokens with 'repo' scope "
+                       "Make a new one at github.com/settings/personal-access-tokens "
                        "and paste it into the app's secrets.")
     if r.status_code == 404:
         return False, f"{repo} or its {branch} branch is not visible to this token."
-    return False, f"GitHub returned {r.status_code}."
+    if r.status_code != 200:
+        return False, f"GitHub returned {r.status_code}."
+
+    # Reading proves nothing. A token with Contents:Read passes every check above
+    # and then silently drops every save — the app looks healthy while nothing
+    # persists. So ask the question that actually matters: can it write?
+    ok, detail = _can_write(token, repo, branch)
+    if ok is None:
+        return True, f"Reading {repo} ({branch}). Could not confirm write access: {detail}"
+    if not ok:
+        return False, detail
+    return True, f"Saving to {repo}, {branch} branch."
+
+
+def _can_write(token, repo, branch) -> tuple:
+    """(True|False|None, detail) — is this token allowed to commit?
+
+    Probes with a PUT carrying an impossible blob sha. GitHub checks permission
+    before it checks the sha, so a token that may write gets 409 (sha conflict)
+    and one that may not gets 403. Nothing is ever committed either way.
+    """
+    import requests
+    try:
+        r = requests.get(f"{GITHUB_API}/repos/{repo}/contents", params={"ref": branch},
+                         headers=_gh_headers(token), timeout=15)
+        if not r.ok:
+            return None, f"could not list the repo root ({r.status_code})"
+        entries = r.json()
+        path = next((e["path"] for e in entries
+                     if isinstance(e, dict) and e.get("type") == "file"), None)
+        if not path:
+            return None, "no file in the repo root to test against"
+
+        r = requests.put(
+            f"{GITHUB_API}/repos/{repo}/contents/{path}",
+            headers=_gh_headers(token), timeout=15,
+            json={"message": "permission probe (never committed)",
+                  "content": "cHJvYmU=",
+                  "sha": "0" * 40,
+                  "branch": branch},
+        )
+    except Exception as e:
+        return None, str(e)
+
+    if r.status_code == 409:
+        return True, "write allowed"
+    if r.status_code in (403, 401):
+        return False, ("The token can read but NOT write, so your edits would be lost "
+                       "without warning. At github.com/settings/personal-access-tokens, "
+                       "set Repository access to 'Only select repositories' and "
+                       "Contents to 'Read and write'.")
+    if r.status_code in (200, 201):
+        return None, "the probe unexpectedly committed — check the repo history"
+    return None, f"probe returned {r.status_code}"
 
 
 def backend_name() -> str:
