@@ -219,7 +219,54 @@ def run_on_account(signal_id: str, domain: str) -> str:
     status = col.get("status")
     if status == 1:
         return col.get("value") or ""
-    raise TigaError(_STATUS.get(status, f"Tiga returned status {status!r} for this account."))
+
+    # Tiga's own explanation matters more than our label for it. Without this,
+    # "ran the signal and it failed" is a dead end — you cannot tell a bad prompt
+    # from a bad account from a rejected config.
+    detail = ""
+    for k in ("error", "error_message", "message", "reason", "value"):
+        v = col.get(k)
+        if v:
+            detail = f" Tiga said: {str(v)[:400]}"
+            break
+    if not detail and col:
+        detail = f" Response fields: {sorted(col.keys())}"
+    if not col:
+        detail = (f" No column came back for this signal at all. Top-level keys: "
+                  f"{sorted(data.keys())}")
+
+    raise TigaError(
+        (_STATUS.get(status) or f"Tiga returned status {status!r}.") + detail
+        + f" [signal {signal_id}]"
+    )
+
+
+def list_gpt_signals(limit: int = 5) -> list:
+    """Existing gpt signals and their configs — the reference for what Tiga accepts.
+
+    Comparing a signal Tiga runs happily against one it rejects is the fastest way
+    to find the field that is wrong.
+    """
+    r = _request("GET", "/signals?is_computed_column=true")
+    try:
+        rows = r.json()
+    except Exception:
+        return []
+    out = []
+    for sig in rows if isinstance(rows, list) else []:
+        cfg = (sig.get("computed_config") or {}) if isinstance(sig, dict) else {}
+        if cfg.get("type") != "gpt":
+            continue
+        out.append({
+            "label": sig.get("label"),
+            "id": sig.get("id"),
+            "type": sig.get("type"),
+            "config": {k: (v if k != "prompt" else str(v)[:300])
+                       for k, v in cfg.items()},
+        })
+        if len(out) >= limit:
+            break
+    return out
 
 
 # ── The job ───────────────────────────────────────────────────────────────────

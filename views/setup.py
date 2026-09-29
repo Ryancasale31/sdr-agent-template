@@ -449,6 +449,20 @@ def _connections(icp, cfg):
         out, secs, err = got
         if err:
             st.error(err)
+            with st.expander("Compare against a signal Tiga already runs"):
+                st.caption("If ours fails and these work, the difference is in the "
+                           "config below.")
+                try:
+                    from core import tiga as _tg
+                    rows = _tg.list_gpt_signals(5)
+                    if rows:
+                        for row in rows:
+                            st.markdown(f"**{row['label']}**")
+                            st.json(row["config"])
+                    else:
+                        st.caption("No gpt signals came back.")
+                except Exception as e2:
+                    st.caption(f"Could not list signals: {e2}")
         else:
             engine = out.get("research_engine", "?")
             st.success(f"Answered by **{engine}** in {secs}s.")
@@ -462,9 +476,10 @@ def _connections(icp, cfg):
             st.json(out)
 
     st.caption("Keys are read from the environment first, then the app's secrets. "
-               "On Streamlit Cloud that is Settings → Secrets: ANTHROPIC_API_KEY and "
-               "TAVILY_API_KEY sit at the top level, GitHub goes in a [github] section "
-               "with token, repo and branch.")
+               "On Streamlit Cloud that is Settings \u2192 Secrets: ANTHROPIC_API_KEY, "
+               "TAVILY_API_KEY and TIGA_API_KEY sit at the top level; GitHub goes in a "
+               "[github] section with token, repo and branch. Plain keys must come "
+               "BEFORE any [section] \u2014 anything after a section header belongs to it.")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
