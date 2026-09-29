@@ -155,20 +155,30 @@ def _import(icp, cfg):
                                    min(100, len(entries)))
             if st.button("Add to pipeline", type="primary", key="sn_acc"):
                 to_add = entries[:limit]
-                if score_them and ai.ai_available():
+                if score_them and ai.research_available():
                     prog, stat = st.progress(0.0), st.empty()
+                    failures = []
                     for i, entry in enumerate(to_add):
                         stat.caption(f"Scoring {entry['company']} ({i + 1}/{len(to_add)})")
                         try:
-                            scored = ai.research_company(entry["company"], icp, cfg)
+                            scored = ai.research_company(entry["company"], icp, cfg,
+                                                         record=entry)
                             entry.update({k: v for k, v in scored.items()
                                           if k != "company"})
                             entry["source"] = "salesnav_import"
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            # Silently skipping used to make a dead API key look like
+                            # a clean import of unscored companies.
+                            failures.append((entry["company"], str(e)))
                         prog.progress((i + 1) / len(to_add))
                     prog.empty()
                     stat.empty()
+                    if failures:
+                        st.warning(f"{len(failures)} of {len(to_add)} could not be scored. "
+                                   "They are still imported, just unscored.")
+                        with st.expander("What went wrong"):
+                            for name, msg in failures[:25]:
+                                st.caption(f"**{name}** — {msg}")
                 n = sni.add_accounts_to_pipeline(to_add)
                 st.success(f"Added {n} companies.")
                 st.rerun()
@@ -338,6 +348,19 @@ def _radar(icp, cfg):
 
 
 # ── Connections ─────────────────────────────────────────────────────
+def _tiga_available():
+    try:
+        from core import tiga
+        return tiga.available()
+    except Exception:
+        return False
+
+
+def _tiga_check():
+    from core import tiga
+    return tiga.check_tiga()
+
+
 _SERVICES = (
     ("Anthropic", "Company research, outreach drafting, and three of the four hunts.",
      lambda: ai.ai_available(), ai.check_anthropic),
@@ -345,6 +368,8 @@ _SERVICES = (
      lambda: ai.search_available(), ai.check_tavily),
     ("GitHub", "Saves your edits so they survive a reboot.",
      lambda: storage.github_configured(), storage.check_github),
+    ("Tiga", "Backup research engine — scores companies when Anthropic is down.",
+     lambda: _tiga_available(), _tiga_check),
 )
 
 
@@ -353,7 +378,7 @@ def _connections():
               "What the app can actually reach. A dead key looks exactly like an "
               "empty result, so check here first when a screen comes back blank.")
 
-    if st.button("Test all three", type="primary"):
+    if st.button("Test all four", type="primary"):
         results = {}
         with st.spinner("Calling each service..."):
             for name, _, _, check in _SERVICES:

@@ -181,7 +181,7 @@ def event_label(cfg: dict) -> str:
 
 
 # ── Company research ──────────────────────────────────────────────────────────
-def research_company(company_name: str, icp: dict, cfg: dict) -> dict:
+def _research_company_claude(company_name: str, icp: dict, cfg: dict) -> dict:
     search_kw = cfg.get("search_keywords", "software products customers target market")
     results = tavily().search(
         query=f"{company_name} {search_kw}",
@@ -216,6 +216,63 @@ Return ONLY valid JSON:
 }}
 """
     return ask(prompt, max_tokens=900)
+
+
+def research_available() -> bool:
+    """Either engine can answer. Claude needs Tavily too — it reads the web itself,
+    where a Tiga gpt signal does its own searching."""
+    if ai_available() and search_available():
+        return True
+    try:
+        from core import tiga
+        return tiga.available()
+    except Exception:
+        return False
+
+
+def research_company(company_name: str, icp: dict, cfg: dict,
+                     event_id: str = None, record: dict = None) -> dict:
+    """Research a company with whichever engine is actually working.
+
+    Claude first when it has a key and Tavily to read with, then Tiga. The result
+    carries research_engine so a number's provenance is never a guess — the two
+    engines do not score identically and pretending otherwise would quietly mix
+    two scales in one pipeline.
+    """
+    claude_error = None
+    if ai_available() and search_available():
+        try:
+            out = _research_company_claude(company_name, icp, cfg)
+            if isinstance(out, dict):
+                out.setdefault("research_engine", "claude")
+            return out
+        except Exception as e:
+            claude_error = explain(e)
+
+    try:
+        from core import tiga
+    except Exception:
+        tiga = None
+
+    if tiga is not None and tiga.available():
+        if event_id is None:
+            try:
+                from core import data as _d
+                event_id = _d.event_id()
+            except Exception:
+                event_id = "default"
+        try:
+            return tiga.research_company(company_name, icp, cfg,
+                                         event_id=event_id, record=record)
+        except Exception as e:
+            if claude_error:
+                raise AIError(f"Claude: {claude_error} | Tiga: {explain(e)}") from e
+            raise
+
+    if claude_error:
+        raise AIError(claude_error)
+    raise AIError("Nothing can research a company right now: no working Anthropic key "
+                  "(with Tavily) and no Tiga key.")
 
 
 # ── Outreach ──────────────────────────────────────────────────────────────────
