@@ -11,6 +11,7 @@ import io
 import streamlit as st
 
 from core import ai
+from core import contacts as CT
 from core import data as D
 from ui import components as C
 from ui import theme as T
@@ -92,6 +93,32 @@ def _contacts_block(company, pipeline, icp, cfg):
     if not contacts:
         st.caption("No contacts yet.")
 
+    # ── Automatic pull ────────────────────────────────────────────────────────
+    sources = CT.sources_available()
+    pull = company.get("contact_pull") or {}
+    a, b, c = st.columns([2, 1, 3])
+    reveal = b.number_input("Emails", 0, 6, 2, key="acc_reveal",
+                            help="Seamless charges one credit per revealed email.")
+    agent = c.checkbox("Deep search if nothing found (Tiga agent, slow)", key="acc_agent")
+    if a.button("Find contacts" + (f" · {' + '.join(sources)}" if sources else ""),
+                type="primary", disabled=not sources, key="acc_pull",
+                use_container_width=True):
+        with st.status(f"Finding contacts at {company['company']}...", expanded=True) as box:
+            try:
+                CT.pull_for_company(company, reveal_n=int(reveal), use_agent=agent,
+                                    log=box.write)
+                D.persist(company)
+                cp = company["contact_pull"]
+                box.update(label=f"Added {cp['added']} · {cp['with_email']} with email",
+                           state="complete")
+            except Exception as e:
+                box.update(label=f"Failed: {e}", state="error")
+        st.rerun()
+    if pull:
+        st.caption(f"Last pulled {pull.get('date', '?')}: {pull.get('notes', '')}")
+    if not sources:
+        st.caption("Add SEAMLESS_API_KEY or TIGA_API_KEY in secrets to pull contacts.")
+
     def _save_field(ci):
         c = contacts[ci]
         for f in ("name", "title", "email", "phone", "notes"):
@@ -160,7 +187,9 @@ def _contacts_block(company, pipeline, icp, cfg):
         st.write("")
         if st.button("Draft outreach for this account", type="primary", key="acc_draft"):
             if not ai.ai_available():
-                st.warning("Needs ANTHROPIC_API_KEY in secrets.")
+                st.warning("Drafting needs Claude, and the Anthropic key is out of credit. "
+                           "Meanwhile ask Claude in Cowork to write the sequence — it has "
+                           "your FSE outreach skill.")
             else:
                 ct = contacts[0]
                 with st.spinner("Writing..."):
@@ -351,7 +380,47 @@ def _board(pipeline):
 # ══════════════════════════════════════════════════════════════════════════════
 # Contacts
 # ══════════════════════════════════════════════════════════════════════════════
+def _bulk_pull(pipeline):
+    """Fill contacts for every active account that has no email yet, a batch at a
+    time so one click never runs longer than a Streamlit session tolerates."""
+    sources = CT.sources_available()
+    todo = [c for c in pipeline if CT.needs_contacts(c)
+            and not (c.get("contact_pull") or {}).get("date")]
+    tried = [c for c in pipeline if CT.needs_contacts(c)
+             and (c.get("contact_pull") or {}).get("date")]
+    with st.container(border=True):
+        st.markdown(f"**Auto-fill contacts** · {len(todo)} accounts with no email and "
+                    f"never pulled" + (f" · {len(tried)} pulled before without an email"
+                                       if tried else ""))
+        if not sources:
+            st.caption("Add SEAMLESS_API_KEY or TIGA_API_KEY in secrets to turn this on.")
+            return
+        a, b, c = st.columns([1, 1, 2])
+        n = a.number_input("Batch", 1, 25, 10, key="bulk_n")
+        reveal = b.number_input("Emails / company", 0, 6, 2, key="bulk_reveal")
+        retry = c.checkbox("Include ones tried before", key="bulk_retry")
+        queue = sorted(todo + (tried if retry else []),
+                       key=lambda x: -(x.get("score") or 0))[:int(n)]
+        st.caption(f"Highest scores first. Uses {' + '.join(sources)}. "
+                   f"Up to {int(n) * int(reveal)} Seamless credits.")
+        if st.button(f"Pull contacts for {len(queue)} accounts", type="primary",
+                     disabled=not queue, key="bulk_go"):
+            bar = st.progress(0.0)
+            with st.status("Pulling contacts...", expanded=True) as box:
+                for i, rec in enumerate(queue):
+                    try:
+                        CT.pull_for_company(rec, reveal_n=int(reveal), log=box.write)
+                    except Exception as e:
+                        rec["contact_pull"] = {"date": "", "notes": f"failed: {e}"}
+                        box.write(f"{rec.get('company')}: failed — {e}")
+                    D.persist(rec)      # save as we go; a timeout loses nothing
+                    bar.progress((i + 1) / len(queue))
+                box.update(label="Done", state="complete")
+            st.rerun()
+
+
 def _contacts_table(pipeline):
+    _bulk_pull(pipeline)
     import pandas as pd
 
     rows = []

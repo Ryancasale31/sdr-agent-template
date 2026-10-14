@@ -28,7 +28,8 @@ import re
 
 from core import ai
 
-BASE = "https://app.tigalabs.com/api/v1"
+ROOT = "https://app.tigalabs.com"
+BASE = ROOT + "/api/v1"
 SIGNAL_VERSION = "v1"          # bump to force every event's signal prompt to be rewritten
 RUN_TIMEOUT = 180              # a gpt signal with web search is not fast
 WORD_LIMIT = 250
@@ -71,12 +72,12 @@ def _headers(extra: dict = None) -> dict:
     return h
 
 
-def _request(method: str, path: str, *, timeout: int = 45, **kw):
+def _request(method: str, path: str, *, timeout: int = 45, root: bool = False, **kw):
     import requests
     if not available():
         raise TigaError("No Tiga API key is set, so Tiga research is off.")
     try:
-        r = requests.request(method, f"{BASE}{path}", headers=_headers(kw.pop("extra_headers", None)),
+        r = requests.request(method, f"{ROOT if root else BASE}{path}", headers=_headers(kw.pop("extra_headers", None)),
                              timeout=timeout, **kw)
     except Exception as e:
         raise TigaError(f"Could not reach Tiga: {e}") from e
@@ -325,3 +326,187 @@ def check_tiga() -> tuple:
         return False, str(e)
     except Exception as e:
         return False, str(e)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Contacts and discovery — no Claude needed
+# ══════════════════════════════════════════════════════════════════════════════
+# Shapes below come from tiga_contacts.py, which ran in production in July and
+# produced real contacts (tiga_contacts.csv): people rows carry first_name,
+# last_name, title, account_name, email_address, linkedin_url / person_linkedin.
+import time as _time
+
+
+def _rows(resp) -> list:
+    try:
+        d = resp.json()
+    except Exception:
+        return []
+    if isinstance(d, list):
+        return d
+    if isinstance(d, dict):
+        for k in ("rows", "data", "people", "accounts", "organizations", "results"):
+            if isinstance(d.get(k), list):
+                return d[k]
+    return []
+
+
+def person_to_contact(p: dict) -> dict:
+    name = f"{p.get('first_name', '')} {p.get('last_name', '')}".strip() or p.get("name", "")
+    return {
+        "name": name,
+        "first_name": p.get("first_name", ""),
+        "last_name": p.get("last_name", ""),
+        "title": p.get("title", ""),
+        "email": p.get("email_address") or p.get("email") or "",
+        "phone": p.get("phone") or "",
+        "linkedin": p.get("linkedin_url") or p.get("person_linkedin") or "",
+        "company_name": p.get("account_name", ""),
+        "domain": p.get("account_domain", ""),
+        "tiga_person_id": p.get("id", ""),
+        "source": "tiga",
+    }
+
+
+def search_people(company: str) -> list:
+    """People Tiga already has at a company (its own DB — instant, free)."""
+    r = _request("GET", "/people",
+                 extra_headers={"Tiga-Filter": json.dumps({"search_term": company})})
+    want = re.sub(r"[^a-z0-9]", "", company.lower())
+    out = []
+    for p in _rows(r):
+        if not isinstance(p, dict):
+            continue
+        acct = re.sub(r"[^a-z0-9]", "", (p.get("account_name") or "").lower())
+        if acct and want and (want in acct or acct in want):
+            out.append(person_to_contact(p))
+    return out
+
+
+def find_people_agent(description: str, timeout_s: int = 300, progress=None) -> int:
+    """Tiga's Find People agent — its Sales-Navigator-style search. Async: it
+    populates Tiga's people DB, so call search_people() afterwards. Returns how
+    many records it created (0 on timeout)."""
+    r = _request("POST", "/agent/find-people", timeout=60,
+                 json={"contact_description": description, "model": "gpt-5.4-2026-03-05"})
+    body = r.json() or {}
+    job = body.get("id") or body.get("status_id")
+    if not job:
+        raise TigaError(f"Find People agent returned no job id: {str(body)[:200]}")
+    t0 = _time.time()
+    while _time.time() - t0 < timeout_s:
+        _time.sleep(7)
+        if progress:
+            progress(int(_time.time() - t0))
+        try:
+            p = _request("GET", f"/api/agent/find-people/{job}/status", root=True, timeout=30)
+        except TigaError:
+            continue
+        d = p.json() or {}
+        st_ = d.get("status", "")
+        if st_ == "Complete":
+            return len(d.get("created_flux_ids") or d.get("created_ids") or [])
+        if st_.startswith("Error"):
+            raise TigaError(f"Find People agent: {st_}")
+    return 0
+
+
+def enrich(contact: dict, timeout_s: int = 120) -> dict:
+    """Waterfall enrichment for an email/phone. Mutates and returns contact."""
+    first = contact.get("first_name") or (contact.get("name") or "").split(" ")[0]
+    last = contact.get("last_name") or " ".join((contact.get("name") or "").split(" ")[1:])
+    r = _request("POST", "/people/enrich-person", timeout=60, json={
+        "first_name": first, "last_name": last,
+        "company_name": contact.get("company_name", ""),
+        "domain": contact.get("domain", ""),
+        "person_linkedin_url": contact.get("linkedin", ""),
+        "title": contact.get("title", ""),
+    })
+    eid = (r.json() or {}).get("enrich_id")
+    if not eid:
+        return contact
+    t0 = _time.time()
+    while _time.time() - t0 < timeout_s:
+        _time.sleep(5)
+        try:
+            d = _request("GET", f"/enrich/{eid}", timeout=30).json() or {}
+        except TigaError:
+            continue
+        if d.get("data_import_status", "Running") != "Running":
+            contact["email"] = contact.get("email") or d.get("email_address") or ""
+            contact["phone"] = contact.get("phone") or d.get("phone") or ""
+            break
+    return contact
+
+
+def search_companies(keywords: str, per_page: int = 25, page: int = 1) -> list:
+    """Company discovery through Tiga's Apollo search. Plain keywords in,
+    companies out — the no-Claude replacement for the Ask hunt."""
+    words = [w.strip() for w in re.split(r"[,;\n]", keywords or "") if w.strip()] or [keywords]
+    body = {
+        "q_organization_keyword_tags": words,
+        "organization_locations": ["United States"],
+        "page": page, "per_page": per_page,
+    }
+    r = _request("POST", "/apollo-organization-search", timeout=60, json=body)
+    orgs = _rows(r)
+    out = []
+    for o in orgs:
+        if not isinstance(o, dict) or not o.get("name"):
+            continue
+        dom = o.get("primary_domain") or o.get("domain") or \
+            re.sub(r"^https?://(www\.)?|/.*$", "", o.get("website_url") or "")
+        emp = o.get("estimated_num_employees")
+        kw = o.get("keywords") or []
+        out.append({
+            "company": o["name"],
+            "domain": dom,
+            "what_they_do": (o.get("short_description") or "")[:300],
+            "category": o.get("industry") or (kw[0] if kw else ""),
+            "employees": emp,
+            "signal": f"Apollo match: {', '.join(words)[:80]}"
+                      + (f" · ~{emp} staff" if emp else ""),
+            "source_url": o.get("website_url") or (f"https://{dom}" if dom else ""),
+            "score": None,
+        })
+    return out
+
+
+# ── Rival exhibitors via a signal ─────────────────────────────────────────────
+# run-signal is account-scoped, but the account can be the rival EVENT's own
+# website: the signal reads that site plus the web and lists who exhibits.
+def _rival_label() -> str:
+    return f"SDR Agent - Event Exhibitors ({SIGNAL_VERSION})"
+
+
+def ensure_rival_signal() -> str:
+    label = _rival_label()
+    prompt = (
+        "{{.AccountName}} ({{.AccountWebsite}}) runs a conference or trade show. "
+        "Search the web and this website for its most recent sponsor and exhibitor "
+        "list. Return ONLY a JSON array of company names, e.g. "
+        '["Acme Corp","Globex"]. Up to 60 names. No commentary.'
+    )
+    config = {"type": "gpt", "prompt": prompt, "is_account_insight": True,
+              "can_use_web_search": True, "expiration_in_days": 30,
+              "temperature": 0.1, "word_limit": 300}
+    r = _request("GET", "/signals?is_computed_column=true")
+    for s in _rows(r):
+        if isinstance(s, dict) and s.get("label") == label:
+            return s.get("id")
+    r = _request("POST", "/signal", json={"label": label, "is_computed_column": True,
+                                          "type": "text", "computed_config": config})
+    sid = (r.json() or {}).get("id")
+    if not sid:
+        raise TigaError("Tiga accepted the exhibitor signal but returned no id.")
+    return sid
+
+
+def rival_exhibitors(event_domain: str) -> list:
+    sid = ensure_rival_signal()
+    raw = run_on_account(sid, event_domain)
+    try:
+        names = ai._parse_json(raw)
+    except Exception:
+        names = [n.strip(" -•*\"'") for n in re.split(r"[\n,]", raw) if n.strip()]
+    return [n for n in names if isinstance(n, str) and 1 < len(n) < 80]

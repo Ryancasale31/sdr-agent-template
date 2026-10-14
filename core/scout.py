@@ -417,3 +417,86 @@ def search_pipeline(pipeline: list, query: str, limit: int = 40) -> list:
 
     scored.sort(key=lambda x: (-x[0], -(x[1].get("score") or 0)))
     return [c for _, c in scored[:limit]]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Hunting without Claude — Tiga (Apollo search + signals) and Seamless
+# ══════════════════════════════════════════════════════════════════════════════
+def claude_ready() -> bool:
+    return ai.ai_available() and ai.search_available()
+
+
+def hunt_keywords(keywords: str, pipeline: list, icp: dict, pages: int = 2,
+                  progress=None) -> list:
+    """Plain keywords → companies, via Tiga's Apollo search, Seamless as backup.
+    Unscored: score the ones worth it with score_candidates()."""
+    from core import tiga, seamless
+    found, errors = [], []
+    if tiga.available():
+        for page in range(1, pages + 1):
+            if progress:
+                progress(f"Searching Tiga (page {page})...", 0.2 + 0.3 * page / pages)
+            try:
+                rows = tiga.search_companies(keywords, per_page=25, page=page)
+            except Exception as e:
+                errors.append(f"Tiga: {e}")
+                break
+            found += rows
+            if len(rows) < 25:
+                break
+    if not found and seamless.available():
+        if progress:
+            progress("Trying Seamless...", 0.6)
+        try:
+            words = [w.strip() for w in keywords.split(",") if w.strip()]
+            found = [{**c, "what_they_do": "", "category": "", "score": None}
+                     for c in seamless.companies_by_titles(seamless.DEFAULT_TITLES[:8], words)]
+        except Exception as e:
+            errors.append(f"Seamless: {e}")
+    if not found and errors:
+        raise ai.AIError(" | ".join(errors))
+    return _finish(found, pipeline, icp, "scout:tiga-search")
+
+
+def hunt_rival_sites(domains: list, pipeline: list, icp: dict, progress=None) -> list:
+    """Rival event websites → their exhibitors, read by a Tiga signal."""
+    from core import tiga
+    out, errors = [], []
+    for i, d in enumerate(domains):
+        d = d.strip().lower()
+        d = re.sub(r"^https?://(www\.)?|/.*$", "", d)
+        if not d:
+            continue
+        if progress:
+            progress(f"Reading exhibitors for {d}...", 0.1 + 0.8 * i / max(len(domains), 1))
+        try:
+            for n in tiga.rival_exhibitors(d):
+                out.append({"company": n, "score": None, "what_they_do": "",
+                            "category": "", "signal": f"Exhibits/sponsors at {d}",
+                            "source_url": f"https://{d}"})
+        except Exception as e:
+            errors.append(f"{d}: {e}")
+    if not out and errors:
+        raise ai.AIError(" | ".join(errors))
+    return _finish(out, pipeline, icp, "scout:rivals-tiga")
+
+
+def score_candidates(cands: list, icp: dict, cfg: dict, event_id: str,
+                     progress=None) -> list:
+    """Run the research engine (Tiga when Claude is down) over candidates and
+    fold the score, fit and pitch back in. Failures are kept, marked, not dropped."""
+    for i, c in enumerate(cands):
+        if progress:
+            progress(f"Scoring {c.get('company')} ({i + 1}/{len(cands)})...",
+                     (i + 0.5) / max(len(cands), 1))
+        try:
+            r = ai.research_company(c["company"], icp, cfg, event_id=event_id,
+                                    record={"domain": c.get("domain")} if c.get("domain") else None)
+            for k in ("what_they_do", "who_they_sell_to", "score", "tier", "fit_reason",
+                      "pitch_angle", "risk", "domain", "research_engine", "needs_review"):
+                if r.get(k) not in (None, ""):
+                    c[k] = r[k]
+            c["priority"] = "hot" if (c.get("score") or 0) >= 85 else "medium"
+        except Exception as e:
+            c["score_error"] = str(e)[:200]
+    return sorted(cands, key=lambda x: -(x.get("score") or 0))

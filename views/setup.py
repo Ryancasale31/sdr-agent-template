@@ -361,6 +361,19 @@ def _tiga_check():
     return tiga.check_tiga()
 
 
+def _seamless_check():
+    from core import seamless
+    return seamless.check_seamless()
+
+
+def _seamless_available():
+    try:
+        from core import seamless
+        return seamless.available()
+    except Exception:
+        return False
+
+
 _SERVICES = (
     ("Anthropic", "Company research, outreach drafting, and three of the four hunts.",
      lambda: ai.ai_available(), ai.check_anthropic),
@@ -368,8 +381,10 @@ _SERVICES = (
      lambda: ai.search_available(), ai.check_tavily),
     ("GitHub", "Saves your edits so they survive a reboot.",
      lambda: storage.github_configured(), storage.check_github),
-    ("Tiga", "Backup research engine — scores companies when Anthropic is down.",
+    ("Tiga", "Research and company search when Claude is down; contact backup.",
      lambda: _tiga_available(), _tiga_check),
+    ("Seamless", "Pulls contacts (names free, emails 1 credit each).",
+     lambda: _seamless_available(), _seamless_check),
 )
 
 
@@ -378,7 +393,7 @@ def _connections(icp, cfg):
               "What the app can actually reach. A dead key looks exactly like an "
               "empty result, so check here first when a screen comes back blank.")
 
-    if st.button("Test all four", type="primary"):
+    if st.button("Test all", type="primary"):
         results = {}
         with st.spinner("Calling each service..."):
             for name, _, _, check in _SERVICES:
@@ -477,7 +492,7 @@ def _connections(icp, cfg):
 
     st.caption("Keys are read from the environment first, then the app's secrets. "
                "On Streamlit Cloud that is Settings \u2192 Secrets: ANTHROPIC_API_KEY, "
-               "TAVILY_API_KEY and TIGA_API_KEY sit at the top level; GitHub goes in a "
+               "TAVILY_API_KEY, TIGA_API_KEY and SEAMLESS_API_KEY sit at the top level; GitHub goes in a "
                "[github] section with token, repo and branch. Plain keys must come "
                "BEFORE any [section] \u2014 anything after a section header belongs to it.")
 

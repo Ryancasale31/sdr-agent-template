@@ -8,6 +8,7 @@ same place: a reviewed list you add to the pipeline in one click.
 import streamlit as st
 
 from core import ai
+from core import contacts as CT
 from core import data as D
 from core import scout
 from ui import components as C
@@ -33,6 +34,7 @@ def _render_candidates(cands: list, key: str, source_label: str):
     st.success(f"{len(cands)} new {'company' if len(cands) == 1 else 'companies'} "
                f"· none already in your pipeline")
 
+    opts = _pull_options(key, cands)
     pick_all, add_col, _ = st.columns([1, 1, 3])
     if pick_all.button("Select all", key=f"{key}_all"):
         for i in range(len(cands)):
@@ -42,8 +44,9 @@ def _render_candidates(cands: list, key: str, source_label: str):
     selected = []
     for i, c in enumerate(cands):
         checked = st.checkbox(
-            f"**{c.get('company', '')}** · {c.get('score', 0)}/100 · "
-            f"{c.get('category', 'Uncategorised')}",
+            f"**{c.get('company', '')}** · "
+            + (f"{c['score']}/100 · " if c.get("score") is not None else "unscored · ")
+            + f"{c.get('category') or 'Uncategorised'}",
             key=f"{key}_chk_{i}",
         )
         with st.expander("Why this one", expanded=False):
@@ -64,16 +67,69 @@ def _render_candidates(cands: list, key: str, source_label: str):
 
     if selected and add_col.button(f"Add {len(selected)} to pipeline",
                                    type="primary", key=f"{key}_add"):
-        pipeline = D.load_pipeline()
-        for c in selected:
-            entry = {k: v for k, v in c.items() if not k.startswith("_")}
-            pipeline = D.upsert_company(pipeline, entry)
-        D.save_pipeline(pipeline)
-        st.success(f"Added {len(selected)} companies from {source_label}.")
+        _add_selected(selected, source_label, opts)
         for i in range(len(cands)):
             st.session_state.pop(f"{key}_chk_{i}", None)
         st.session_state.pop(f"{key}_results", None)
         st.rerun()
+
+
+# ── Add + auto contact pull ───────────────────────────────────────────────────
+def _pull_options(key: str, cands: list) -> dict:
+    """The knobs shown above every Add button. Contacts are pulled by default —
+    a prospect with nobody to email is not a prospect yet."""
+    sources = CT.sources_available()
+    unscored = any(c.get("score") is None for c in cands)
+    with st.container(border=True):
+        a, b, c = st.columns([2, 1, 2])
+        pull = a.checkbox(
+            "Pull contacts automatically" + (f" ({' + '.join(sources)})" if sources else ""),
+            value=bool(sources), disabled=not sources, key=f"{key}_pull")
+        reveal = b.number_input("Emails / company", 0, 6, 2, key=f"{key}_reveal",
+                                help="Seamless charges one credit per revealed email. "
+                                     "Searching for names and titles is free.")
+        score = c.checkbox("Score with Tiga/Claude before adding", value=False,
+                           disabled=not unscored, key=f"{key}_score",
+                           help="Runs the research engine on each one first. "
+                                "Roughly 20-60 seconds per company.")
+        if not sources:
+            st.caption("Add SEAMLESS_API_KEY or TIGA_API_KEY to secrets to pull contacts.")
+    return {"pull": pull, "reveal": int(reveal), "score": score}
+
+
+def _add_selected(selected: list, source_label: str, opts: dict):
+    entries = [{k: v for k, v in c.items() if not k.startswith("_")
+                and k not in ("reviewed", "dismissed")} for c in selected]
+    for e in entries:
+        e["status"] = e.get("status") or "researched"
+    update, clear = _progress_box()
+    try:
+        if opts.get("score"):
+            todo = [e for e in entries if e.get("score") is None]
+            from core import scout as _sc
+            _sc.score_candidates(todo, D.load_icp(), D.event_cfg(), D.event_id(),
+                                 progress=lambda m, p: update(m, p * 0.5))
+        if opts.get("pull"):
+            msgs = []
+            for i, e in enumerate(entries):
+                update(f"Finding contacts at {e['company']} ({i + 1}/{len(entries)})...",
+                       0.5 + 0.5 * i / len(entries))
+                try:
+                    CT.pull_for_company(e, reveal_n=opts.get("reveal", 2))
+                except Exception as ex:
+                    e["contact_pull"] = {"notes": f"failed: {ex}"}
+                msgs.append(e)
+    finally:
+        clear()
+    pipeline = D.load_pipeline()
+    for e in entries:
+        pipeline = D.upsert_company(pipeline, e)
+    D.save_pipeline(pipeline)
+    n_ct = sum(len(e.get("contacts") or []) for e in entries)
+    n_em = sum(1 for e in entries for c in (e.get("contacts") or []) if c.get("email"))
+    st.session_state["find_flash"] = (
+        f"Added {len(entries)} companies from {source_label}"
+        + (f" with {n_ct} contacts ({n_em} with email)." if opts.get("pull") else "."))
 
 
 def _progress_box():
@@ -92,6 +148,7 @@ def _progress_box():
 
 
 def _requires_keys() -> bool:
+    """Claude-only features. The Tiga paths have their own checks."""
     missing = []
     if not ai.ai_available():
         missing.append("ANTHROPIC_API_KEY")
@@ -107,7 +164,44 @@ def _requires_keys() -> bool:
 
 
 # ── Mode: Ask ─────────────────────────────────────────────────────────────────
+def _mode_ask_tiga(pipeline, icp, cfg):
+    """Ask without Claude: keywords straight into Tiga's company search."""
+    from core import tiga
+    st.info("Claude is offline, so Ask searches Tiga's company database by keyword. "
+            "Separate ideas with commas — e.g. *field service management, "
+            "predictive maintenance, asset tracking*.")
+    kw = st.text_input("Keywords", key="askt_kw", label_visibility="collapsed",
+                       placeholder="field service management, service parts, IoT monitoring")
+    if kw:
+        owned = scout.search_pipeline(pipeline, kw.replace(",", " "), limit=6)
+        if owned:
+            with st.expander(f"Already in your pipeline ({len(owned)})"):
+                for c in owned:
+                    st.markdown(C.company_row_html(c), unsafe_allow_html=True)
+    pages = st.select_slider("How many", [1, 2, 4], value=2, key="askt_pages",
+                             format_func=lambda p: f"up to {p * 25}")
+    if st.button("Search", type="primary", key="askt_go"):
+        if not kw.strip():
+            st.warning("Type some keywords first.")
+        elif not tiga.available():
+            st.warning("Needs TIGA_API_KEY in secrets.")
+        else:
+            update, clear = _progress_box()
+            try:
+                st.session_state["ask_results"] = scout.hunt_keywords(
+                    kw, pipeline, icp, pages=pages, progress=update)
+            except Exception as e:
+                st.error(f"Search failed: {e}")
+            finally:
+                clear()
+    if "ask_results" in st.session_state:
+        st.divider()
+        _render_candidates(st.session_state["ask_results"], "ask", "Tiga search")
+
+
 def _mode_ask(pipeline, icp, cfg):
+    if not scout.claude_ready():
+        return _mode_ask_tiga(pipeline, icp, cfg)
     st.markdown("##### What are you looking for?")
     question = st.text_input(
         "Search", key="ask_q", label_visibility="collapsed",
@@ -172,6 +266,30 @@ def _mode_rivals(pipeline, icp, cfg):
         "decided these buyers are worth reaching. That makes rival exhibitor "
         "lists the warmest cold list available."
     )
+
+    if not scout.claude_ready():
+        st.info("Claude is offline, so name the rival events yourself: paste their "
+                "websites, one per line. Tiga reads each site and the web for its "
+                "exhibitor and sponsor list.")
+        sites = st.text_area("Event websites", key="rvt_sites", height=110,
+                             placeholder="fieldserviceusa.com\nservicecouncil.com")
+        if st.button("Pull exhibitors", type="primary", key="rvt_go"):
+            doms = [l for l in sites.splitlines() if l.strip()]
+            if not doms:
+                st.warning("Add at least one website.")
+            else:
+                update, clear = _progress_box()
+                try:
+                    st.session_state["rv_results"] = scout.hunt_rival_sites(
+                        doms, pipeline, icp, progress=update)
+                except Exception as e:
+                    st.error(f"Could not read exhibitors: {e}")
+                finally:
+                    clear()
+        if "rv_results" in st.session_state:
+            st.divider()
+            _render_candidates(st.session_state["rv_results"], "rv", "rival events")
+        return
 
     if st.button("Find competing events", type="primary", key="rv_events"):
         if _requires_keys():
@@ -271,7 +389,9 @@ def _mode_lapsed(pipeline, icp, cfg):
                 D.open_account(r["company"])
 
         with st.expander("Suggest a way back in"):
-            if st.button("Write me an angle", key=f"lp_ang_{i}"):
+            if not scout.claude_ready():
+                st.caption("Needs Claude — back when the Anthropic key has credit.")
+            elif st.button("Write me an angle", key=f"lp_ang_{i}"):
                 if _requires_keys():
                     with st.spinner("Thinking of a reason to call..."):
                         try:
@@ -292,6 +412,11 @@ def _mode_markets(pipeline, icp, cfg):
         "Looks one step sideways from what we already run: categories with "
         "enough funded vendors and no event already owning them."
     )
+
+    if not scout.claude_ready():
+        st.warning("New markets needs Claude (it reasons across many sources). "
+                   "It comes back when the Anthropic key has credit.")
+        return
 
     if st.button("Scan for market gaps", type="primary", key="mk_run"):
         if _requires_keys():
@@ -346,18 +471,12 @@ def _mode_review(pipeline, icp, cfg):
         C.empty("All caught up", "The radar adds new finds here as it runs.")
         return
 
+    opts = _pull_options("rf", [])
     if st.button(f"Add all {len(pending)} to pipeline", type="primary", key="rf_all"):
-        pl = D.load_pipeline()
+        _add_selected([dict(rc, status="researched") for rc in pending], "the radar", opts)
         for rc in finds:
-            if not rc.get("reviewed"):
-                rc["reviewed"] = True
-                entry = {k: v for k, v in rc.items()
-                         if k not in ("reviewed", "dismissed")}
-                entry["status"] = "researched"
-                pl = D.upsert_company(pl, entry)
-        D.save_pipeline(pl)
+            rc["reviewed"] = True
         D.save_radar_finds(finds)
-        st.success(f"Added {len(pending)} companies.")
         st.rerun()
 
     for i, c in enumerate(pending):
@@ -375,11 +494,7 @@ def _mode_review(pipeline, icp, cfg):
 
             keep, drop = st.columns(2)
             if keep.button("Add to pipeline", key=f"rf_add_{i}", type="primary"):
-                pl = D.load_pipeline()
-                entry = {k: v for k, v in c.items() if k not in ("reviewed", "dismissed")}
-                entry["status"] = "researched"
-                pl = D.upsert_company(pl, entry)
-                D.save_pipeline(pl)
+                _add_selected([dict(c, status="researched")], "the radar", opts)
                 for rc in finds:
                     if rc.get("company") == c.get("company"):
                         rc["reviewed"] = True
@@ -407,6 +522,10 @@ def render():
     labels = list(MODES.keys())
     if pending:
         labels[-1] = f"Review finds ({pending})"
+
+    flash = st.session_state.pop("find_flash", None)
+    if flash:
+        st.success(flash)
 
     mode = st.radio("Hunt", labels, horizontal=True, label_visibility="collapsed",
                     key="find_mode")
