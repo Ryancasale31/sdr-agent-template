@@ -36,6 +36,28 @@
         "phone": "",
         "linkedin": "https://www.linkedin.com/in/emilyswartz",
         "source": "tiga"
+      },
+      {
+        "name": "Jodi Egan",
+        "title": "Director, Global Events",
+        "email": "jodi.egan@ifs.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/jodi-egan-90778b19",
+        "source": "tiga",
+        "notes": "",
+        "activity_log": [],
+        "found_date": "2026-11-18"
+      },
+      {
+        "name": "Kaitlyn Voida",
+        "title": "Field Marketing Events Strategist",
+        "email": "kaitlyn.voida@ifs.com",
+        "phone": "",
+        "linkedin": "https://www.linkedin.com/in/kaitlyn-voida",
+        "source": "tiga",
+        "notes": "",
+        "activity_log": [],
+        "found_date": "2026-11-18"
       }
     ],
     "activity_log": [
@@ -53,7 +75,13 @@
         "touch": 1,
         "subject": "Touch 1"
       }
-    ]
+    ],
+    "contact_pull": {
+      "date": "2026-11-18",
+      "added": 2,
+      "with_email": 5,
+      "notes": "Seamless: Seamless returned 400: {\"name\":\"RestError\",\"status\":400,\"type\":\"validationError\",\"code\":\"invalidArguments\",\"msg\":\"Exceeded max number of values for: titles: > 10\",\"message\":\"Exceeded max number of values for: titles: > 10\",; Tiga: 4 found"
+    }
   },
   {
     "company": "ServiceNow Field Service Mgmt",
